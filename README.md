@@ -6,8 +6,8 @@ OS is not important, this should work on any major one.
 ### Project structure
 
 ```
+Cargo.toml
 src/                    <-- crate "tbd"
-  Cargo.toml
   lib.rs                <-- lib compilation unit "tbd"
   bin/
     hw.rs               <-- bin compilation unit "hw"
