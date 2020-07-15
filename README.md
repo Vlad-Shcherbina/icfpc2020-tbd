@@ -7,11 +7,13 @@ OS is not important, this should work on any major one.
 
 ```
 src/                    <-- crate "tbd"
+  Cargo.toml
   lib.rs                <-- lib compilation unit "tbd"
   bin/
     hw.rs               <-- bin compilation unit "hw"
 scratches/
   username/             <-- crate "username"
+    Cargo.toml
     src/
       lib.rs            <-- lib compilation unit "username"
       bin/
@@ -41,6 +43,6 @@ To update, run
 cargo test          # run all tests in crate "tbd"
 cargo test --all    # run all tests in all crates
 cargo run --bin hw  # run hw.rs in crate "tbd"
-cargo run -p username --bin my_script   # run myscript.rs in crate "username"
+cargo run -p username --bin my_script   # run my_script.rs in crate "username"
 
 ```
