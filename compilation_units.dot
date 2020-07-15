@@ -1,0 +1,40 @@
+digraph MyGraph {
+    compound = true;
+
+    subgraph cluster_crate_tbd {
+        label = "crate tbd"
+        tbd_lib[label="lib"]
+        hw[label="bin hw"]
+        tbd_bin_etc[label = "bin ..."]
+
+        hw -> tbd_lib
+        tbd_bin_etc -> tbd_lib
+    }
+
+    subgraph cluster_crate_username {
+        label = "crate username"
+        username_lib[label="lib"]
+        my_script[label="bin my_script"]
+        username_bin_etc[label = "bin ..."]
+        my_script -> username_lib
+        username_bin_etc -> username_lib
+    }
+
+    subgraph cluster_tbd_deps {
+        label = "external deps of tbd"
+        x
+        y
+    }
+
+    subgraph cluster_username_deps {
+        label = "external deps of username"
+        z
+    }
+
+    username_lib -> tbd_lib
+    my_script -> tbd_lib
+    username_lib -> z [lhead=cluster_username_deps]
+    my_script -> z [lhead=cluster_username_deps]
+    tbd_lib -> x [lhead=cluster_tbd_deps]
+    hw -> y [lhead=cluster_tbd_deps]
+}
