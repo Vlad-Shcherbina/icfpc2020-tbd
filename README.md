@@ -84,10 +84,9 @@ To update, run
 ### How to run
 
 ```
-
-cargo test          # run all tests in crate "tbd"
-cargo test --all    # run all tests in all crates
-cargo run --bin hw  # run hw.rs in crate "tbd"
+cargo test              # run all tests in crate "tbd"
+cargo test -p username  # run all tests in crate "username"
+cargo test --all        # run all tests in all our crates
+cargo run --bin hw      # run hw.rs in crate "tbd"
 cargo run -p username --bin my_script   # run my_script.rs in crate "username"
-
 ```
