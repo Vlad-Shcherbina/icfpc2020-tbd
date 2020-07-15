@@ -3,33 +3,78 @@
 Let's say relatively recent nightly toolchain.
 OS is not important, this should work on any major one.
 
+### crates != compilation units != modules != files
+
+(The following is oversimplification and lies but this shit is confusing as it is already.)
+
+Crate is a thing with `Cargo.toml`. It's a unit of dependency management.
+
+A crate contains exactly one lib compilation unit and any number of bin compilation units.
+
+Lib compilation unit is a tree of modules with the root at `src/lib.rs`.
+This tree structure could be defined either inline, or in separate files. Or any combination.
+```rust
+// src/lib.rs
+root stuff
+mod my_module {
+    my_module stuff
+    mod my_submodule {
+        my_submodule stuff
+    }
+}
+```
+This is the same module structure as
+```rust
+// src/lib.rs
+mod my_module;
+root stuff
+
+// src/my_module.rs
+mod my_submodule;
+my_module stuff
+
+// src/my_module/my_submodule.rs
+my_submodule stuff
+```
+
+Module hierarchy is important for visibility: a submodule has access to the private stuff of its parent module. Aside from that, they are like namespaces.
+
+Bin compilation unit is a single file like `src/bin/my_executable.rs`.
+
+### Dependencies
+
+Dependencies are declared at the level of crates ("crate A depends on crate B").
+
+In terms of compilation units:
+
+ * bin compilation units can use stuff from the lib compilation of their crate
+ * bin and lib compilation units in crate A can use stuff from the lib compilation unit in crate B
+ * stuff defined in bin compilation units can't be used in other compilation units
+
 ### Project structure
 
 ```
-Cargo.toml
-src/                    <-- crate "tbd"
-  lib.rs                <-- lib compilation unit "tbd"
-  bin/
+Cargo.toml              <-- crate "tbd"
+src/
+  lib.rs                <-\
+  module1.rs            <-|- lib compilation unit "tbd"
+  module2.rs            <-/
+  bin
     hw.rs               <-- bin compilation unit "hw"
 scratches/
-  username/             <-- crate "username"
-    Cargo.toml
+  username/
+    Cargo.toml          <-- crate "username"
     src/
       lib.rs            <-- lib compilation unit "username"
       bin/
         my_script.rs    <-- bin compilation unit "my_script"
 ```
 
-Crate "tbd" (whatever is in `src/`) is what we used to call "production".
-Things defined in bin compilation units can't be used elsewhere.
-So all reusable type definitions and subroutines go to lib compilation unit "tbd" (obsiously it doesn't have to be a single `lib.rs` file [link](https://doc.rust-lang.org/stable/book/ch07-05-separating-modules-into-different-files.html#separating-modules-into-different-files)).
+Crate "tbd" is what we used to call "production".
 
-Each crate has exactly one lib compilation unit and any number of bin compilation units.
+Crate "username" declares "tbd" as an external dependency.
 
-Compilation units inside crate "tbd" can use external dependencies declared in `Cargo.toml`. Bin compilation units inside crate "tbd" also can use lib compilation unit "tbd".
-
-Compilation units inside crate "username" can use external dependencies declared in `scratches/username/Cargo.toml`. Crate "username" also declares "tbd" as an external dependency. This means it can use lib compilation unit "tbd".
-
+Compilation units and what they can use:
 <!--
 To update, run
     dot compilation_untis.dot -Tpng -o compilation_units.png
