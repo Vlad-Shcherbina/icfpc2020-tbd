@@ -37,7 +37,7 @@ my_module stuff
 my_submodule stuff
 ```
 
-Module hierarchy is important for visibility: a submodule has access to the private stuff of its parent module. Aside from that, they are like namespaces.
+Module hierarchy is important for visibility: a submodule has access to the private stuff of its parent module. Aside from that, modules are kind a like namespaces.
 
 Bin compilation unit is a single file like `src/bin/my_executable.rs`.
 
@@ -47,7 +47,7 @@ Dependencies are declared at the level of crates ("crate A depends on crate B").
 
 In terms of compilation units:
 
- * bin compilation units can use stuff from the lib compilation of their crate
+ * bin compilation units can use stuff from the lib compilation unit of their crate
  * bin and lib compilation units in crate A can use stuff from the lib compilation unit in crate B
  * stuff defined in bin compilation units can't be used in other compilation units
 
