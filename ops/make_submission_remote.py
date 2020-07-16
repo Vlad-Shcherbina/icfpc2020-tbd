@@ -15,7 +15,7 @@ def main():
         sys.exit(1)
     if len(sys.argv) != 3:
         print('Usage:')
-        print('    make_submission_remote.py <branch> <binary>')
+        print('    python3 ops/make_submission_remote.py <branch> <binary>')
         print()
         print('See make_submission_local.py for details.')
         sys.exit(1)
