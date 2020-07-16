@@ -1,5 +1,6 @@
 extern crate png;
 use std::fs::File;
+use std::collections::HashMap;
 
 // optional: add number of the message to parse as a command line argument
 type ImgMatrix = Vec<Vec<bool>>;
@@ -13,7 +14,14 @@ fn main() {
 
     let v = file_to_bool_matrix(&format!("scratches/julie/data/{}", filename));
     let mut unidentified: Vec<ImgMatrix> = Vec::new();
-    println!("{}", parse_image(&v, &mut unidentified));
+    let operations: HashMap<&str, ImgMatrix> = HashMap::new();
+    println!("{}", parse_image(&v, &mut unidentified, &operations));
+
+    println!("Unidentified symbols:");
+    for (i, m) in unidentified.iter().enumerate() {
+        println!("\n?{}", i);
+        show_image(m);
+    }
 }
 
 const COLOR_SIZE: usize = 4;  // 4 components of each color in png
@@ -62,7 +70,13 @@ fn file_to_bool_matrix(path: &str) -> ImgMatrix {
     v
 }
 
-fn parse_image(img: &ImgMatrix, unidentified: &mut Vec<ImgMatrix>) -> String {
+// =====================================
+// PARSING BEGINS
+// =====================================
+
+fn parse_image(img: &ImgMatrix,
+            unidentified: &mut Vec<ImgMatrix>,
+            operations: &HashMap<&str, ImgMatrix>) -> String {
     let height = img[0].len();
     let mut frame = SymbolFrameInfo { top: 0, bottom: 1, left: 0, right: 0 };
     let mut result = String::new();
@@ -78,7 +92,7 @@ fn parse_image(img: &ImgMatrix, unidentified: &mut Vec<ImgMatrix>) -> String {
         }
         if frame.bottom >= height { break; }
 
-        result.push_str(&format!("{}\n", &parse_strip(img, &mut frame, unidentified)));
+        result.push_str(&format!("{}\n", &parse_strip(img, &mut frame, unidentified, operations)));
         frame.top = frame.bottom;
     }
     result
@@ -96,8 +110,10 @@ fn is_horizontal_divider(img: &ImgMatrix, y: usize) -> bool {
 
 // parses one strip of symbols
 fn parse_strip(img: &ImgMatrix,
-               frame: &mut SymbolFrameInfo,
-               unidentified: &mut Vec<ImgMatrix>) -> String {
+    frame: &mut SymbolFrameInfo,
+    unidentified: &mut Vec<ImgMatrix>,
+    operations: &HashMap<&str, ImgMatrix>) -> String {
+
     let width = img.len();
     let mut result = String::new();
     frame.left = 0;
@@ -109,11 +125,11 @@ fn parse_strip(img: &ImgMatrix,
         if frame.left >= width { break; }
 
         // parse_symbol changes the right border of the frame while parsing
-        match parse_symbol(img, frame, unidentified) {
+        match parse_symbol(img, frame, unidentified, operations) {
             Symbol::Integer(x) => result.push_str(&x.to_string()),
             // Symbol::Float(x) => result.push_str(&x.to_string()),
             // Symbol::Operation(x) => result.push_str(&x),
-            Symbol::Unknown(x) => result.push_str(&format!("#{}", x)),
+            Symbol::Unknown(x) => result.push_str(&format!("?{}", x)),
             Symbol::Omission => result.push_str("...."),
             Symbol::EOL => break,
         }
@@ -133,11 +149,21 @@ fn is_vertical_divider(img: &ImgMatrix, frame: &SymbolFrameInfo, x: usize) -> bo
     true
 }
 
+// ===================================
+// PARSING INDIVIDUAL TOKENS
+// ===================================
+
 fn parse_symbol(img: &ImgMatrix,
-                frame: &mut SymbolFrameInfo,
-                unidentified: &mut Vec<ImgMatrix>) -> Symbol {
+    frame: &mut SymbolFrameInfo,
+    unidentified: &mut Vec<ImgMatrix>,
+    operations: &HashMap<&str, ImgMatrix>) -> Symbol {
+
     let width = img.len();
-    // if frame.right >= width - 1 { return Symbol::EOL };
+
+    frame.right = frame.left + 1;
+    while frame.right < width && !is_vertical_divider(img, frame, frame.right) {
+        frame.right += 1;
+    }
     
     if is_integer(img, frame.left, frame.top) {
         return parse_integer(img, frame);
@@ -148,32 +174,26 @@ fn parse_symbol(img: &ImgMatrix,
         return Symbol::Omission;
     }
 
-    frame.right = frame.left + 1;
-    while frame.right < width && !is_vertical_divider(img, frame, frame.right) {
-        frame.right += 1;
-    }
-
     if frame.right >= width {
         return Symbol::EOL;
     }
 
-    return Symbol::Unknown(0);  // a stab
+    return get_unknown(img, frame, unidentified);
 }
+
 
 // assuming every integer number has corner of 0, 1, 1
 fn is_integer(img: &ImgMatrix, x: usize, y: usize) -> bool {
     !img[x][y] && img[x + 1][y] && img[x][y + 1]
 }
 
-fn parse_integer(img: &ImgMatrix, frame: &mut SymbolFrameInfo) -> Symbol {
+fn parse_integer(img: &ImgMatrix, frame: &SymbolFrameInfo) -> Symbol {
     let mut base = 0;
     for i in 1.. {
         if !img[frame.left + i][frame.top] { break; }
         base = i;
     }
-
-    frame.right = frame.left + base + 1;
-    assert!(is_vertical_divider(img, frame, frame.right));
+    assert!(frame.right == frame.left + base + 1);
 
     let sgn = if img[frame.left][frame.top + base + 1] { -1 } else { 1 };
 
@@ -187,6 +207,7 @@ fn parse_integer(img: &ImgMatrix, frame: &mut SymbolFrameInfo) -> Symbol {
     }
     Symbol::Integer(n * sgn)
 }
+
 
 // checks if it's "...." sign
 fn is_omission(img: &ImgMatrix, frame: &SymbolFrameInfo, x: usize) -> bool {
@@ -206,3 +227,43 @@ fn is_omission(img: &ImgMatrix, frame: &SymbolFrameInfo, x: usize) -> bool {
     }
     true
 }
+
+fn get_unknown(img: &ImgMatrix,
+    frame: &SymbolFrameInfo,
+    unidentified: &mut Vec<ImgMatrix>) -> Symbol {
+    let lookup = crop_image(img, frame);
+    for (i, m) in unidentified.iter().enumerate() {
+        if m == &lookup { return Symbol::Unknown(i); }
+    }
+    unidentified.push(lookup);
+    Symbol::Unknown(unidentified.len() - 1)
+}
+
+// makes a small Image Matrix with just a given symbol in it
+fn crop_image(img: &ImgMatrix, frame: &SymbolFrameInfo) -> ImgMatrix {
+    let mut v: ImgMatrix = vec![Vec::new(); frame.right - frame.left];
+    for y in frame.top..frame.bottom {
+        let mut end = true;
+        for x in frame.left..frame.right {
+            if img[x][y] { end = false; }
+        }
+        if end { break; }
+        for x in frame.left..frame.right {
+            v[x - frame.left].push(img[x][y]);
+        }
+    }
+
+    v
+}
+
+fn show_image(img: &ImgMatrix) {
+    for y in 0..img[0].len() {
+        for x in 0..img.len() {
+            if img[x][y] { print!("# "); }
+            else { print!(". "); }
+        }
+        println!();
+    }
+}
+
+// надо брать из WSL-ного ~/.ssh/id_rsa.pub
