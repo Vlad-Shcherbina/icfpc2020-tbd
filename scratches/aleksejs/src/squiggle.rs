@@ -72,80 +72,80 @@ pub fn squiggle_to_int(squiggle: &[u8]) -> Option<(i32, bool)> {
 
 #[cfg(test)]
 mod tests {
-  use super::*;
+    use super::*;
 
-  #[test]
-  fn i2s_examples() {
-    assert_eq!(int_to_squiggle(0), vec!{0, 1, 0});
-    assert_eq!(int_to_squiggle(1), vec!{0, 1, 1, 0, 0, 0, 0, 1});
-    assert_eq!(int_to_squiggle(-1), vec!{1, 0, 1, 0, 0, 0, 0, 1});
-    assert_eq!(int_to_squiggle(2), vec!{0, 1, 1, 0, 0, 0, 1, 0});
-    assert_eq!(int_to_squiggle(-2), vec!{1, 0, 1, 0, 0, 0, 1, 0});
-    assert_eq!(int_to_squiggle(16), vec!{0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0});
-    assert_eq!(int_to_squiggle(-16), vec!{1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0});
-    assert_eq!(int_to_squiggle(255), vec!{0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1});
-    assert_eq!(int_to_squiggle(-255), vec!{1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1});
-    assert_eq!(int_to_squiggle(256), vec!{0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0});
-    assert_eq!(int_to_squiggle(-256), vec!{1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0});
-  }
+    #[test]
+    fn i2s_examples() {
+        assert_eq!(int_to_squiggle(0), vec!{0, 1, 0});
+        assert_eq!(int_to_squiggle(1), vec!{0, 1, 1, 0, 0, 0, 0, 1});
+        assert_eq!(int_to_squiggle(-1), vec!{1, 0, 1, 0, 0, 0, 0, 1});
+        assert_eq!(int_to_squiggle(2), vec!{0, 1, 1, 0, 0, 0, 1, 0});
+        assert_eq!(int_to_squiggle(-2), vec!{1, 0, 1, 0, 0, 0, 1, 0});
+        assert_eq!(int_to_squiggle(16), vec!{0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0});
+        assert_eq!(int_to_squiggle(-16), vec!{1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0});
+        assert_eq!(int_to_squiggle(255), vec!{0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1});
+        assert_eq!(int_to_squiggle(-255), vec!{1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1});
+        assert_eq!(int_to_squiggle(256), vec!{0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0});
+        assert_eq!(int_to_squiggle(-256), vec!{1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0});
+    }
 
-  #[test]
-  fn s2i_examples() {
-    assert_eq!(squiggle_to_int(&vec!{0, 1, 0}), Some((0, true)));
-    assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 0, 1}), Some((1, true)));
-    assert_eq!(squiggle_to_int(&vec!{1, 0, 1, 0, 0, 0, 0, 1}), Some((-1, true)));
-    assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 1, 0}), Some((2, true)));
-    assert_eq!(squiggle_to_int(&vec!{1, 0, 1, 0, 0, 0, 1, 0}), Some((-2, true)));
-    assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0}), Some((16, true)));
-    assert_eq!(squiggle_to_int(&vec!{1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0}), Some((-16, true)));
-    assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1}), Some((255, true)));
-    assert_eq!(squiggle_to_int(&vec!{1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1}), Some((-255, true)));
-    assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0}), Some((256, true)));
-    assert_eq!(squiggle_to_int(&vec!{1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0}), Some((-256, true)));
-  }
+    #[test]
+    fn s2i_examples() {
+        assert_eq!(squiggle_to_int(&vec!{0, 1, 0}), Some((0, true)));
+        assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 0, 1}), Some((1, true)));
+        assert_eq!(squiggle_to_int(&vec!{1, 0, 1, 0, 0, 0, 0, 1}), Some((-1, true)));
+        assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 1, 0}), Some((2, true)));
+        assert_eq!(squiggle_to_int(&vec!{1, 0, 1, 0, 0, 0, 1, 0}), Some((-2, true)));
+        assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0}), Some((16, true)));
+        assert_eq!(squiggle_to_int(&vec!{1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0}), Some((-16, true)));
+        assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1}), Some((255, true)));
+        assert_eq!(squiggle_to_int(&vec!{1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1}), Some((-255, true)));
+        assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0}), Some((256, true)));
+        assert_eq!(squiggle_to_int(&vec!{1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0}), Some((-256, true)));
+    }
 
-  #[test]
-  fn s2i_invalid() {
-    // too short
-    assert_eq!(squiggle_to_int(&vec!{}), None);
-    assert_eq!(squiggle_to_int(&vec!{0}), None);
-    assert_eq!(squiggle_to_int(&vec!{1}), None);
-    // invalid sign
-    assert_eq!(squiggle_to_int(&vec!{0, 0}), None);
-    assert_eq!(squiggle_to_int(&vec!{1, 1}), None);
-    assert_eq!(squiggle_to_int(&vec!{0, 0, 1, 0, 0, 0, 1, 0}), None);
-    assert_eq!(squiggle_to_int(&vec!{1, 1, 1, 0, 0, 0, 1, 0}), None);
-    // truncated bits
-    assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 0}), None);
-    assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0}), None);
-    assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0}), None);
-    // bits missing
-    assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0}), None);
-    // chunk count unterminated
-    assert_eq!(squiggle_to_int(&vec!{0, 1, 1}), None);
-    assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 1}), None);
-    // invalid values
-    assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 2, 0}), None);
-    // too many bits
-    assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 1, 0, 0}), None);
-    assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0}), None);
-  }
+    #[test]
+    fn s2i_invalid() {
+        // too short
+        assert_eq!(squiggle_to_int(&vec!{}), None);
+        assert_eq!(squiggle_to_int(&vec!{0}), None);
+        assert_eq!(squiggle_to_int(&vec!{1}), None);
+        // invalid sign
+        assert_eq!(squiggle_to_int(&vec!{0, 0}), None);
+        assert_eq!(squiggle_to_int(&vec!{1, 1}), None);
+        assert_eq!(squiggle_to_int(&vec!{0, 0, 1, 0, 0, 0, 1, 0}), None);
+        assert_eq!(squiggle_to_int(&vec!{1, 1, 1, 0, 0, 0, 1, 0}), None);
+        // truncated bits
+        assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 0}), None);
+        assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0}), None);
+        assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0}), None);
+        // bits missing
+        assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0}), None);
+        // chunk count unterminated
+        assert_eq!(squiggle_to_int(&vec!{0, 1, 1}), None);
+        assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 1}), None);
+        // invalid values
+        assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 2, 0}), None);
+        // too many bits
+        assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 1, 0, 0}), None);
+        assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0}), None);
+    }
 
-  #[test]
-  fn s2i_noncanonical() {
-    // zero encoded as negative
-    assert_eq!(squiggle_to_int(&vec!{1, 0, 0}), Some((0, false)));
-    // zero encoded as negative with extra chunks
-    assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 0, 0}), Some((0, false)));
-    assert_eq!(squiggle_to_int(&vec!{1, 0, 1, 0, 0, 0, 0, 0}), Some((0, false)));
-    // one with extra chunks
-    assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1}), Some((1, false)));
-    assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 1}), Some((1, false)));
-  }
+    #[test]
+    fn s2i_noncanonical() {
+        // zero encoded as negative
+        assert_eq!(squiggle_to_int(&vec!{1, 0, 0}), Some((0, false)));
+        // zero encoded as negative with extra chunks
+        assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 0, 0}), Some((0, false)));
+        assert_eq!(squiggle_to_int(&vec!{1, 0, 1, 0, 0, 0, 0, 0}), Some((0, false)));
+        // one with extra chunks
+        assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1}), Some((1, false)));
+        assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 1}), Some((1, false)));
+    }
 
-  #[quickcheck]
-  fn i2s_s2i_roundtrip(x: i32) -> bool {
-    let squiggle = int_to_squiggle(x);
-    squiggle_to_int(&squiggle) == Some((x, true))
-  }
+    #[quickcheck]
+    fn i2s_s2i_roundtrip(x: i32) -> bool {
+        let squiggle = int_to_squiggle(x);
+        squiggle_to_int(&squiggle) == Some((x, true))
+    }
 }
