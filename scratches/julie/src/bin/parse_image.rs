@@ -1,5 +1,6 @@
-extern crate png;
-use std::fs::File;
+extern crate julie;
+use julie::png_interface as pngs;
+
 use std::collections::HashMap;
 
 // optional: add number of the message to parse as a command line argument
@@ -12,9 +13,9 @@ fn main() {
         filename = format!("message{}.png", args[1]);
     }
 
-    let v = file_to_bool_matrix(&format!("scratches/julie/data/{}", filename));
+    let v = pngs::bordered_png_to_matrix(&format!("scratches/julie/data/{}", filename));
     let mut unidentified: Vec<ImgMatrix> = Vec::new();
-    let operations: HashMap<&str, ImgMatrix> = HashMap::new();
+    let operations = pngs::read_operations();
     println!("{}", parse_image(&v, &mut unidentified, &operations));
 
     println!("Unidentified symbols:");
@@ -23,8 +24,6 @@ fn main() {
         show_image(m);
     }
 }
-
-const COLOR_SIZE: usize = 4;  // 4 components of each color in png
 
 struct SymbolFrameInfo {
     // frame of current symbol, to be mutated while reading
@@ -37,38 +36,13 @@ struct SymbolFrameInfo {
 enum Symbol {
     Integer(i64),
     // Float(f64),
-    // Operation(String),
+    Operation(String),
     Unknown(usize),  // id in list of unknown symbols
     Omission,
     EOL,
 }
 
-// takes path to an image and turns it into WIDTH x HEIGHT bool matrix
-fn file_to_bool_matrix(path: &str) -> ImgMatrix {
-    let decoder = png::Decoder::new(File::open(path).unwrap());
-    let (info, mut reader) = decoder.read_info().unwrap();
-    let mut buf = vec![0; info.buffer_size()];
-    reader.next_frame(&mut buf).unwrap();
 
-    // assuming there is a border, find out the size of the "pixel" (4x4 on messages 2-13)
-    let mut pixel_size = 1;
-    while buf[(pixel_size * info.width as usize + pixel_size) * COLOR_SIZE] == 255 { 
-        pixel_size += 1
-    }
-
-    // -2 - excluding the border
-    let width = info.width as usize / pixel_size - 2;
-    let height = info.height as usize / pixel_size - 2;
-    let mut v: ImgMatrix = vec![vec![false; height]; width];  
-    for x in 0..width {
-        for y in 0..height {
-            // + 1 due to border
-            let coord = ((y + 1) * (info.width as usize) + (x + 1)) * pixel_size * COLOR_SIZE;
-            v[x][y] = if buf[coord] == 0 { false } else { true };
-        }
-    }
-    v
-}
 
 // =====================================
 // PARSING BEGINS
@@ -76,7 +50,7 @@ fn file_to_bool_matrix(path: &str) -> ImgMatrix {
 
 fn parse_image(img: &ImgMatrix,
             unidentified: &mut Vec<ImgMatrix>,
-            operations: &HashMap<&str, ImgMatrix>) -> String {
+            operations: &HashMap<String, ImgMatrix>) -> String {
     let height = img[0].len();
     let mut frame = SymbolFrameInfo { top: 0, bottom: 1, left: 0, right: 0 };
     let mut result = String::new();
@@ -112,7 +86,7 @@ fn is_horizontal_divider(img: &ImgMatrix, y: usize) -> bool {
 fn parse_strip(img: &ImgMatrix,
     frame: &mut SymbolFrameInfo,
     unidentified: &mut Vec<ImgMatrix>,
-    operations: &HashMap<&str, ImgMatrix>) -> String {
+    operations: &HashMap<String, ImgMatrix>) -> String {
 
     let width = img.len();
     let mut result = String::new();
@@ -128,7 +102,7 @@ fn parse_strip(img: &ImgMatrix,
         match parse_symbol(img, frame, unidentified, operations) {
             Symbol::Integer(x) => result.push_str(&x.to_string()),
             // Symbol::Float(x) => result.push_str(&x.to_string()),
-            // Symbol::Operation(x) => result.push_str(&x),
+            Symbol::Operation(x) => result.push_str(&x),
             Symbol::Unknown(x) => result.push_str(&format!("?{}", x)),
             Symbol::Omission => result.push_str("...."),
             Symbol::EOL => break,
@@ -156,7 +130,7 @@ fn is_vertical_divider(img: &ImgMatrix, frame: &SymbolFrameInfo, x: usize) -> bo
 fn parse_symbol(img: &ImgMatrix,
     frame: &mut SymbolFrameInfo,
     unidentified: &mut Vec<ImgMatrix>,
-    operations: &HashMap<&str, ImgMatrix>) -> Symbol {
+    operations: &HashMap<String, ImgMatrix>) -> Symbol {
 
     let width = img.len();
 
@@ -178,7 +152,12 @@ fn parse_symbol(img: &ImgMatrix,
         return Symbol::EOL;
     }
 
-    return get_unknown(img, frame, unidentified);
+    let sample = crop_image(img, frame);
+    if let Some(a) = get_operation(&sample, operations) {
+        return a;
+    }
+
+    return get_unknown(&sample, unidentified);
 }
 
 
@@ -228,14 +207,18 @@ fn is_omission(img: &ImgMatrix, frame: &SymbolFrameInfo, x: usize) -> bool {
     true
 }
 
-fn get_unknown(img: &ImgMatrix,
-    frame: &SymbolFrameInfo,
-    unidentified: &mut Vec<ImgMatrix>) -> Symbol {
-    let lookup = crop_image(img, frame);
-    for (i, m) in unidentified.iter().enumerate() {
-        if m == &lookup { return Symbol::Unknown(i); }
+fn get_operation(sample: &ImgMatrix, operations: &HashMap<String, ImgMatrix>) -> Option<Symbol> {
+    for (k, v) in operations.iter() {
+        if v == sample { return Some(Symbol::Operation(k.clone())) }
     }
-    unidentified.push(lookup);
+    None
+}
+
+fn get_unknown(sample: &ImgMatrix, unidentified: &mut Vec<ImgMatrix>) -> Symbol {
+    for (i, m) in unidentified.iter().enumerate() {
+        if m == sample { return Symbol::Unknown(i); }
+    }
+    unidentified.push(sample.clone());
     Symbol::Unknown(unidentified.len() - 1)
 }
 
