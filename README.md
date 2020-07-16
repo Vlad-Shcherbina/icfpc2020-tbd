@@ -3,15 +3,15 @@
 Let's say relatively recent nightly toolchain.
 OS is not important, this should work on any major one.
 
-### crates != compilation units != modules != files
+### packages != compilation units != modules != files
 
 (The following is oversimplification and lies but this shit is confusing as it is already.)
 
-Crate is a thing with `Cargo.toml`. It's a unit of dependency management.
+Package is a thing with `Cargo.toml`. It's a unit of dependency management.
 
-A crate contains exactly one lib compilation unit and any number of bin compilation units.
+A package contains exactly one lib compilation unit and any number of bin compilation units.
 
-By the way, Rust docs and compiler messages use the word "crate" to refer to compilation units as well.
+By the way, Rust docs and compiler messages use the word "crate" to refer to packages and compilation units, depending on the context.
 
 Lib compilation unit is a tree of modules with the root at `src/lib.rs`.
 This tree structure could be defined either inline, or in separate files. Or any combination.
@@ -45,18 +45,18 @@ Bin compilation unit is a single file like `src/bin/my_executable.rs`.
 
 ### Dependencies
 
-Dependencies are declared at the level of crates ("crate A depends on crate B").
+Dependencies are declared at the level of packages ("package A depends on package B").
 
 In terms of compilation units:
 
- * bin compilation units can use stuff from the lib compilation unit of their crate
- * bin and lib compilation units in crate A can use stuff from the lib compilation unit in crate B
+ * bin compilation units can use stuff from the lib compilation unit of their package
+ * bin and lib compilation units in package A can use stuff from the lib compilation unit in package B
  * stuff defined in bin compilation units can't be used in other compilation units
 
 ### Project structure
 
 ```
-Cargo.toml              <-- crate "tbd"
+Cargo.toml              <-- package "tbd"
 src/
   lib.rs                <-\
   module1.rs            <-|- lib compilation unit "tbd"
@@ -65,30 +65,30 @@ src/
     hw.rs               <-- bin compilation unit "hw"
 scratches/
   username/
-    Cargo.toml          <-- crate "username"
+    Cargo.toml          <-- package "username"
     src/
       lib.rs            <-- lib compilation unit "username"
       bin/
         my_script.rs    <-- bin compilation unit "my_script"
 ```
 
-Crate "tbd" is what we used to call "production".
+Package "tbd" is what we used to call "production".
 
-Crate "username" declares "tbd" as an external dependency.
+Package "username" declares "tbd" as an external dependency.
 
 Compilation units and what they can use:
 <!--
 To update, run
-    dot compilation_untis.dot -Tpng -o compilation_units.png
+    dot compilation_units.dot -Tpng -o compilation_units.png
 -->
 ![mess](compilation_units.png)
 
 ### How to run
 
 ```
-cargo test              # run all tests in crate "tbd"
-cargo test -p username  # run all tests in crate "username"
+cargo test              # run all tests in package "tbd"
+cargo test -p username  # run all tests in package "username"
 cargo test --all        # run all tests in all our crates
-cargo run --bin hw      # run hw.rs in crate "tbd"
-cargo run -p username --bin my_script   # run my_script.rs in crate "username"
+cargo run --bin hw      # run hw.rs in package "tbd"
+cargo run -p username --bin my_script   # run my_script.rs in package "username"
 ```
