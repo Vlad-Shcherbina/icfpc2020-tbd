@@ -27,35 +27,36 @@ pub fn int_to_squiggle(x: i32) -> Vec<u8> {
 }
 
 // TODO: bound checking
-pub fn squiggle_to_int(squiggle: &Vec<u8>) -> Option<(i32, bool)> {
-    if squiggle.len() < 3 {
-        return None
-    }
-    if !squiggle.iter().all(|&x| (x == 0) || (x == 1)) {
-        return None
-    }
+pub fn squiggle_to_int(squiggle: &[u8]) -> Option<(i32, bool)> {
+    let mut squiggle = squiggle.iter();
 
-    let sign = match (squiggle[0], squiggle[1]) {
-        (0, 1) => 1,
-        (1, 0) => -1,
+    let sign = match (squiggle.next(), squiggle.next()) {
+        (Some(0), Some(1)) => 1,
+        (Some(1), Some(0)) => -1,
         _ => return None
     };
 
-    let mut chunks = 0;
-    while squiggle[2 + chunks] == 1 {
-        chunks += 1;
-        if 2 + chunks == squiggle.len() {
-            return None
+    let mut counter = 0;
+    let chunks = loop {
+        match squiggle.next() {
+            Some(0) => break counter,
+            Some(1) => counter += 1,
+            _ => return None
+        }
+    };
+
+    let mut result: i32 = 0;
+    for index in (0..4*chunks).rev() {
+        match squiggle.next() {
+            Some(0) => {},
+            Some(1) => result |= 1 << index,
+            _ => return None
         }
     }
 
-    if squiggle.len() != 2 + (chunks + 1) + 4 * chunks {
+    // squiggle must be over by now
+    if squiggle.next() != None {
         return None
-    }
-
-    let mut result: i32 = 0;
-    for (index, &value) in (0..4*chunks).rev().zip(squiggle.iter().skip(2 + (chunks + 1))) {
-        result |= (value as i32) << index;
     }
 
     // check if the number would've fit in a smaller number of chunks
@@ -105,6 +106,10 @@ mod tests {
 
   #[test]
   fn s2i_invalid() {
+    // too short
+    assert_eq!(squiggle_to_int(&vec!{}), None);
+    assert_eq!(squiggle_to_int(&vec!{0}), None);
+    assert_eq!(squiggle_to_int(&vec!{1}), None);
     // invalid sign
     assert_eq!(squiggle_to_int(&vec!{0, 0}), None);
     assert_eq!(squiggle_to_int(&vec!{1, 1}), None);
@@ -119,6 +124,11 @@ mod tests {
     // chunk count unterminated
     assert_eq!(squiggle_to_int(&vec!{0, 1, 1}), None);
     assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 1}), None);
+    // invalid values
+    assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 2, 0}), None);
+    // too many bits
+    assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 1, 0, 0}), None);
+    assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0}), None);
   }
 
   #[test]
