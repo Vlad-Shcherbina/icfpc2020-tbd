@@ -1,0 +1,9 @@
+[package]
+name = "aleksejs"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+tbd = { path = "../.."}
+quickcheck = "0.9"
+quickcheck_macros = "0.9"
