@@ -1,6 +1,19 @@
 extern crate png;
 use std::fs::File;
 
+// optional: add number of the message to parse as a command line argument
+
+fn main() {
+    let mut filename = "message2.png".to_string();
+    let args: Vec<String> = std::env::args().collect();
+    if args.len() > 1 {
+        filename = format!("message{}.png", args[1]);
+    }
+
+    let v = file_to_bool_matrix(&format!("scratches/julie/data/{}", filename));
+    println!("{}", parse_image(&v));
+}
+
 const COLOR_SIZE: usize = 4;  // 4 components of each color in png
 
 struct SymbolFrameInfo {
@@ -17,11 +30,6 @@ enum Symbol {
     // Operation(String),
     Unknown(usize),  // id in list of unknown symbols
     EOL,
-}
-
-fn main() {
-    let v = file_to_bool_matrix("scratches/julie/data/message3.png");
-    println!("{}", parse_image(&v));
 }
 
 // takes path to an image and turns it into WIDTH x HEIGHT bool matrix
@@ -87,11 +95,14 @@ fn is_horizontal_divider(img: &Vec<Vec<bool>>, y: usize) -> bool {
 fn parse_strip(img: &Vec<Vec<bool>>, frame: &mut SymbolFrameInfo) -> String {
     let width = img.len();
     let mut result = String::new();
+    frame.left = 0;
+    // print!("({} - {}) :", frame.top, frame.bottom);
 
     loop {
         while frame.left < width && is_vertical_divider(img, frame, frame.left) {
             frame.left += 1;
         }
+        // print!("- {} ", frame.left);
         if frame.left >= width { break; }
 
         // parse_symbol changes the right border of the frame while parsing
@@ -106,6 +117,7 @@ fn parse_strip(img: &Vec<Vec<bool>>, frame: &mut SymbolFrameInfo) -> String {
     
         frame.left = frame.right + 1;
     }
+    // println!("// {}", result);
     result
 }
 
@@ -120,7 +132,7 @@ fn is_vertical_divider(img: &Vec<Vec<bool>>, frame: &SymbolFrameInfo, x: usize) 
 
 fn parse_symbol(img: &Vec<Vec<bool>>, frame: &mut SymbolFrameInfo) -> Symbol {
     let width = img.len();
-    if frame.right >= width - 1 { return Symbol::EOL };
+    // if frame.right >= width - 1 { return Symbol::EOL };
     
     if is_integer(img, frame.left, frame.top) {
         return parse_integer(img, frame);
@@ -137,7 +149,6 @@ fn parse_symbol(img: &Vec<Vec<bool>>, frame: &mut SymbolFrameInfo) -> Symbol {
 
     return Symbol::Unknown(0);  // a stab
 }
-
 
 // assuming every integer number has corner of 0, 1, 1
 fn is_integer(img : &Vec<Vec<bool>>, x: usize, y: usize) -> bool {
