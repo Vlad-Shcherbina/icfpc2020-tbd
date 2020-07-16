@@ -41,7 +41,7 @@ def main():
         ], cwd=project_root)
 
     command = 'python3 icfpc2020-tbd/ops/make_submission_local.py ' + ' '.join(sys.argv[1:])
-    subprocess.check_call(['ssh', '-p21984', server, command])
+    subprocess.check_call(['ssh', '-p21984', server, '-t', command])
 
 
 if __name__ == '__main__':
