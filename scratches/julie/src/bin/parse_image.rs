@@ -20,7 +20,7 @@ fn main() {
 
     println!("Unidentified symbols:");
     for (i, m) in unidentified.iter().enumerate() {
-        println!("\n?{}", i);
+        println!("\n?{}", (97 + i as u8) as char);
         show_image(m);
     }
 }
@@ -103,7 +103,7 @@ fn parse_strip(img: &ImgMatrix,
             Symbol::Integer(x) => result.push_str(&x.to_string()),
             // Symbol::Float(x) => result.push_str(&x.to_string()),
             Symbol::Operation(x) => result.push_str(&x),
-            Symbol::Unknown(x) => result.push_str(&format!("?{}", x)),
+            Symbol::Unknown(x) => result.push_str(&format!("?{}", (97 + x as u8) as char)),
             Symbol::Omission => result.push_str("...."),
             Symbol::EOL => break,
         }

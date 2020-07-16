@@ -10,6 +10,20 @@ pub fn read_operations() -> HashMap<String, ImgMatrix> {
         ("=".to_string(),
         vec![vec![true, true, true], vec![true, false, true], vec![true, false, true]]),
 
+        ("incr".to_string(),
+        vec![vec![true, true, true, true], vec![true, true, false, false],
+             vec![true, false, false, true], vec![true, false, true, true]]),
+
+        ("decr".to_string(),
+        vec![vec![true, true, true, true], vec![true, true, false, false],
+            vec![true, false, true, true], vec![true, false, false, true]]),
+
+        ("*".to_string(),
+        vec![vec![true, true, true, true], vec![true, true, true, true],
+            vec![true, false, false, false], vec![true, true, true, true]]),
+
+        ("`".to_string(),
+        vec![vec![true, true], vec![true, false]]),
     ].iter().cloned().collect()
 }
 
