@@ -11,6 +11,8 @@ Crate is a thing with `Cargo.toml`. It's a unit of dependency management.
 
 A crate contains exactly one lib compilation unit and any number of bin compilation units.
 
+By the way, Rust docs and compiler messages use the word "crate" to refer to compilation units as well.
+
 Lib compilation unit is a tree of modules with the root at `src/lib.rs`.
 This tree structure could be defined either inline, or in separate files. Or any combination.
 ```rust
