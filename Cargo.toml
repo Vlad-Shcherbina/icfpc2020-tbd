@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
+ureq = { version = "*", default-features = false }
 
 [workspace]
 members = [".", "scratches/*"]
+
+[profile.release]
+lto = true
