@@ -36,6 +36,7 @@ struct TokenFrameInfo {
 enum Token {
     Integer(i64),
     // Float(f64),
+    Variable(i64),
     Operation(String),
     Unknown(usize),  // id in list of unknown tokens
     Omission,
@@ -105,6 +106,7 @@ fn parse_strip(img: &ImgMatrix,
         match parse_token(img, frame, unidentified, operations) {
             Token::Integer(x)   => result.push_str(&x.to_string()),
             // Token::Float(x) => result.push_str(&x.to_string()),
+            Token::Variable(x)  => result.push_str(&((97 + x as u8) as char).to_string()),
             Token::Operation(x) => result.push_str(&x),
             Token::Unknown(x)   => result.push_str(&format!("?{}", x)),
             Token::Omission     => {
@@ -147,6 +149,10 @@ fn parse_token(img: &ImgMatrix,
         return parse_integer(img, frame);
     }
 
+    if is_variable(img, frame) {
+        return parse_variable(img, frame);
+    }
+
     if is_omission(img, frame, frame.left) {
         return Token::Omission;
     }
@@ -185,6 +191,36 @@ fn parse_integer(img: &ImgMatrix, frame: &TokenFrameInfo) -> Token {
         }
     }
     Token::Integer(n * sgn)
+}
+
+
+fn is_variable(img: &ImgMatrix, frame: &TokenFrameInfo) -> bool {
+    let size = frame.right - frame.left;
+    if size < 4 { return false };
+    for i in 0..size {
+        if !img[frame.left + i][frame.top] { return false; }
+        if !img[frame.left + i][frame.top + size - 1] { return false; }
+        if !img[frame.left][frame.top + i] { return false; }
+        if !img[frame.left + size - 1][frame.top + i] { return false; }
+    }
+
+    true
+}
+
+
+fn parse_variable(img: &ImgMatrix, frame: &TokenFrameInfo) -> Token {
+    let base = frame.right - frame.left - 3;
+    // additional -2 due to the border
+
+    let mut digit = 1;
+    let mut n = 0;
+    for i in 2..base + 2 {
+        for j in 2..base + 2 {
+            if !img[frame.left + j][frame.top + i] { n += digit; }
+            digit *= 2;
+        }
+    }
+    Token::Variable(n)
 }
 
 
@@ -250,3 +286,4 @@ fn show_image(img: &ImgMatrix) {
         println!();
     }
 }
+
