@@ -10,6 +10,14 @@ Usage:
     value 'username/z' means 'scratches/username/src/bin/z.rs'
 
 ***END_USAGE***
+
+This script makes a submission to their system.
+The system is described in https://github.com/icfpcontest2020/dockerfiles
+The submissions show up in https://icfpcontest2020.github.io/#/submissions
+
+The script builds the specified submission binary locally, and then pushes it
+to the specified branch in our submission repository (which is different from
+the source repository).
 '''
 
 import os
@@ -23,7 +31,8 @@ from pathlib import Path
 
 def main():
     if platform.system() != 'Linux':
-        print('This script needs to produce Linux binaries so it only runs on Linux')
+        print('This script needs to produce Linux binaries so it only runs on Linux.')
+        print('You can use make_submission_remote.py instead.')
         sys.exit(1)
 
     if len(sys.argv) != 3:
