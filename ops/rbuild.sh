@@ -17,7 +17,7 @@
 #
 # I also omitted shebang on puprpose, because I don't know if mac os has /usr/env.
 
-if [ ! -f opts/rbuild.sh ] ; then
+if [ ! -f ops/rbuild.sh ] ; then
   echo "Use from the repository root!"
   exit
 fi
