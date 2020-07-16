@@ -14,6 +14,7 @@ Usage:
 
 import os
 import sys
+import time
 import shutil
 import platform
 import subprocess
@@ -41,7 +42,9 @@ def main():
 
     project_root = (Path(__file__)/'..'/'..').resolve()
 
-    subprocess.check_call(['cargo', 'build', '-p', package, '--bin', binary, '--release'])
+    subprocess.check_call(
+        ['cargo', 'build', '-p', package, '--bin', binary, '--release'],
+        cwd=project_root)
 
     cache = project_root / 'cache'
     assert cache.exists()
@@ -66,11 +69,11 @@ def main():
     subprocess.check_call(['git', 'pull', '--rebase'], cwd=sub_repo, env=ssh_env)
 
     return_code = subprocess.call(['git', 'checkout', raw_branch], cwd=sub_repo)
-    print('return code', return_code)
     if return_code:
         subprocess.check_call(['git', 'checkout', '-b', raw_branch], cwd=sub_repo)
         subprocess.check_call(['git', 'push', '--set-upstream', 'origin', raw_branch], cwd=sub_repo, env=ssh_env)
 
+    time.sleep(0.1)  # to avoid interliving with the output from the above commands
     print('*' * 30)
     message = input('Describe this submission in one line:\n')
 
