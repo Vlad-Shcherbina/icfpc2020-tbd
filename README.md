@@ -92,3 +92,19 @@ cargo test --all        # run all tests in all our crates
 cargo run --bin hw      # run hw.rs in package "tbd"
 cargo run -p username --bin my_script   # run my_script.rs in package "username"
 ```
+
+### Data directories
+
+ * `data/`: For stuff like examples from the problem statement.
+   Everything here is under version control.
+   Maybe don't commit tons of generated files here without a good reason.
+ * `outputs/`: For logs, images rendered by visualizers, etc.
+   In other word, stuff produced by machines for humans.
+   Not under version control.
+ * `cache/`: This directory is for generated files that could be helpful to have around,
+   but should be safe to delete at any time (they should be regenerated if needed).
+   Not under version control.
+
+By the way, there is an utility function:
+`project_path("data/zzz")` returns absolute path to this file
+independently of the current directory.
