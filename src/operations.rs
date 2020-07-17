@@ -156,5 +156,42 @@ pub fn read_operations() -> HashMap<String, ImgMatrix> {
                                   vec![1, 1, 1]])
     );
   
+    m.insert(
+        "pic30_1".to_string(),   // message30
+        ImgMatrix::from_vec(&vec![vec![0, 0, 1],
+                                  vec![0, 1, 1],
+                                  vec![1, 1, 1],
+                                  vec![0, 1, 1],
+                                  vec![0, 0, 1]])
+    );
+
+    m.insert(
+        "pic30_2".to_string(),   // message30
+        ImgMatrix::from_vec(&vec![vec![1, 1],
+                                  vec![1, 1],
+                                  vec![1, 1],
+                                  vec![1, 1],
+                                  vec![1, 1]])
+    );
+
+    m.insert(
+        "pic30_3".to_string(),   // message30
+        ImgMatrix::from_vec(&vec![vec![1, 0, 0],
+                                  vec![1, 1, 0],
+                                  vec![1, 1, 1],
+                                  vec![1, 1, 0],
+                                  vec![1, 0, 0]])
+    );
+  
+    m.insert(
+        "pic31".to_string(),   // message31
+        ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1, 1, 1],
+                                  vec![1, 1, 0, 0, 0, 0],
+                                  vec![1, 0, 1, 0, 0, 0],
+                                  vec![1, 0, 0, 1, 0, 0],
+                                  vec![1, 0, 0, 0, 1, 0],
+                                  vec![1, 0, 0, 0, 0, 1]])
+    );
+  
     m
 }
