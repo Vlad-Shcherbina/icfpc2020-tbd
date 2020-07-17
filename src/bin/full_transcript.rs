@@ -7,9 +7,22 @@ fn main() {
 
     let operations = tbd::operations::read_operations();
     let mut unidentified: Vec<ImgMatrix> = Vec::new();
-    for i in 2..=12 {
+    for i in 2..=36 {
+        println!("{}", i);
         writeln!(fout, "<h3>Message {}</h3>", i).unwrap();
         writeln!(fout, "<img src='../data/messages/message{}.png'><br>", i).unwrap();
+
+        match i {
+            15 => {
+                writeln!(fout, "not supported by the parser").unwrap();
+                continue;
+            }
+            13 | 35 => {
+                writeln!(fout, "FIX ME").unwrap();
+                continue;
+            }
+            _ => {}
+        }
 
         let matrix = tbd::png_files::bordered_png_to_matrix(
             format!("data/messages/message{}.png", i));
