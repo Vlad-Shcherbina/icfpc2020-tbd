@@ -3,9 +3,10 @@ use tbd::img_matrix::ImgMatrix;
 use tbd::operations::read_operations;
 use tbd::parse_image::{ show_image, parse_image };
 
-use std::path::{Path, PathBuf};
+use std::path::{Path};
 
 // optional: add number of the message to parse as a command line argument
+
 fn main() {
     let mut filename = "message2.png".to_string();
     let args: Vec<String> = std::env::args().collect();

@@ -1,9 +1,7 @@
 use crate::img_matrix::ImgMatrix;
 use crate::img_matrix::Coord;
-use crate::operations::read_operations;
 
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
 
 struct TokenFrameInfo {
     // frame of the current token, to be mutated while reading
