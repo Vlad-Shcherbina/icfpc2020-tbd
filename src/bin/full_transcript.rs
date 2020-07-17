@@ -17,10 +17,6 @@ fn main() {
                 writeln!(fout, "not supported by the parser").unwrap();
                 continue;
             }
-            13 | 35 => {
-                writeln!(fout, "FIX ME").unwrap();
-                continue;
-            }
             _ => {}
         }
 

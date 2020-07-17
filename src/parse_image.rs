@@ -171,6 +171,7 @@ fn parse_integer(img: &ImgMatrix, frame: &TokenFrameInfo) -> Option<Token> {
 fn is_variable(img: &ImgMatrix, frame: &TokenFrameInfo) -> bool {
     let size = frame.right - frame.left;
     if size < 4 { return false };
+    if size < 1 ||  size > (frame.bottom - frame.top - 1) { return false; }
     for i in 0..size {
         if img[Coord { x : frame.left + i, y : frame.top }] == 0 
         || img[Coord { x : frame.left + i, y : frame.top + size - 1 }] == 0
