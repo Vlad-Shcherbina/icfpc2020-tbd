@@ -26,8 +26,17 @@ fn main() {
 
         let matrix = tbd::png_files::bordered_png_to_matrix(
             format!("data/messages/message{}.png", i));
-        let t = parse_image(&matrix, &mut unidentified, &operations);
-        writeln!(fout, "<pre>{}</pre>", t).unwrap();
+
+        let mut s = String::new();
+        for line in parse_image(&matrix, &mut unidentified, &operations) {
+            use std::fmt::Write;
+            for token in line {
+                write!(s, "{} ", token).unwrap();
+            }
+            writeln!(s).unwrap();
+        }
+
+        writeln!(fout, "<pre>{}</pre>", s).unwrap();
     }
 
     writeln!(fout, "<h3>Unindentified</h3>").unwrap();

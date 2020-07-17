@@ -11,13 +11,26 @@ struct TokenFrameInfo {
     right: usize,
 }
 
-enum Token {
+#[derive(PartialEq, Eq)]
+pub enum Token {
     Integer(i64),
     // Float(f64),
     Variable(i64),
     Operation(String),
     Unknown(usize),  // id in list of unknown tokens
     Omission,
+}
+
+impl Display for Token {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Token::Integer(x)   => write!(f, "{}", x),
+            Token::Variable(x)  => write!(f, "{}", (97 + *x as u8) as char),
+            Token::Operation(x) => write!(f, "{}", x),
+            Token::Unknown(x)   => write!(f, "?{}", x),
+            Token::Omission     => write!(f, "..."),
+        }
+    }
 }
 
 
@@ -27,10 +40,10 @@ enum Token {
 
 pub fn parse_image(img: &ImgMatrix,
             unidentified: &mut Vec<ImgMatrix>,
-            operations: &HashMap<String, ImgMatrix>) -> String {
+            operations: &HashMap<String, ImgMatrix>) -> Vec<Vec<Token>> {
 
     let mut frame = TokenFrameInfo { top: 0, bottom: 1, left: 0, right: 0 };
-    let mut result = String::new();
+    let mut result = Vec::new();
 
     loop {
         while frame.top < img.height && is_horizontal_separator(img, frame.top) {
@@ -43,8 +56,7 @@ pub fn parse_image(img: &ImgMatrix,
         }
         if frame.bottom >= img.height { break; }
 
-        result.push_str(&parse_strip(img, &mut frame, unidentified, operations));
-        result.push_str("\n");
+        result.push(parse_strip(img, &mut frame, unidentified, operations));
         frame.top = frame.bottom;
     }
     result
@@ -64,9 +76,9 @@ fn is_horizontal_separator(img: &ImgMatrix, y: usize) -> bool {
 fn parse_strip(img: &ImgMatrix,
     frame: &mut TokenFrameInfo,
     unidentified: &mut Vec<ImgMatrix>,
-    operations: &HashMap<String, ImgMatrix>) -> String {
+    operations: &HashMap<String, ImgMatrix>) -> Vec<Token> {
 
-    let mut result = String::new();
+    let mut result = Vec::new();
     frame.left = 0;
 
     loop {
@@ -79,19 +91,13 @@ fn parse_strip(img: &ImgMatrix,
         }
 
         if frame.right >= img.width { break; }
-        
-        match parse_token(img, frame, unidentified, operations) {
-            Token::Integer(x)   => result.push_str(&x.to_string()),
-            // Token::Float(x) => result.push_str(&x.to_string()),
-            Token::Variable(x)  => result.push_str(&((97 + x as u8) as char).to_string()),
-            Token::Operation(x) => result.push_str(&x),
-            Token::Unknown(x)   => result.push_str(&format!("?{}", x)),
-            Token::Omission     => {
-                frame.right = frame.left + 8;
-                result.push_str("....");
-            },
+
+        let token = parse_token(img, frame, unidentified, operations);
+        if token == Token::Omission {
+            frame.right = frame.left + 8;
         }
-        result.push_str(" ");
+        result.push(token);
+
         frame.left = frame.right + 1;
     }
     result

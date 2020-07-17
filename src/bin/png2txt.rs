@@ -19,7 +19,13 @@ fn main() {
     let mut unidentified: Vec<ImgMatrix> = Vec::new();
     let operations = read_operations();
 
-    println!("{}", parse_image(&v, &mut unidentified, &operations));
+    let lines = parse_image(&v, &mut unidentified, &operations);
+    for line in lines {
+        for token in line {
+            print!("{} ", token);
+        }
+        println!();
+    }
     println!("Unidentified tokens:");
     for (i, m) in unidentified.iter().enumerate() {
         println!("\n?{}", i);
