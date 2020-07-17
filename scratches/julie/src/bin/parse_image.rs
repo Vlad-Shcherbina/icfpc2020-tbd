@@ -4,6 +4,7 @@ use julie::img_matrix::Coord;
 use julie::operations::read_operations;
 
 use std::collections::HashMap;
+use std::path::{Path, PathBuf};
 
 // optional: add number of the message to parse as a command line argument
 fn main() {
@@ -12,8 +13,10 @@ fn main() {
     if args.len() > 1 {
         filename = format!("message{}.png", args[1]);
     }
-
-    let v = pngs::bordered_png_to_matrix(&format!("scratches\\julie\\data\\{}", filename));
+    let v = pngs::bordered_png_to_matrix(Path::new("scratches")
+        .join("julie")
+        .join("data")
+        .join(filename));
     let mut unidentified: Vec<ImgMatrix> = Vec::new();
     let operations = read_operations();
 
