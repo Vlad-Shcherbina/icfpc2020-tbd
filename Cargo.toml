@@ -11,3 +11,6 @@ members = [".", "scratches/*"]
 
 [profile.release]
 lto = true
+
+[lib]
+doctest = false
