@@ -163,8 +163,8 @@ fn parse_integer(img: &ImgMatrix) -> Option<Token> {
 
     let mut digit = 1;
     let mut n = 0;
-    for x in 1..img.width {
-        for y in 1..img.width {
+    for y in 1..img.width {
+        for x in 1..img.width {
             if img[Coord { x, y  }] == 1 {
                 n += digit;
             }
@@ -194,9 +194,9 @@ fn parse_variable(img: &ImgMatrix) -> Option<Token> {
 
     let mut digit = 1;
     let mut n = 0;
-    for i in 2..base + 2 {
-        for j in 2..base + 2 {
-            if img[Coord{ x : j, y : i}] == 0 { n += digit; }
+    for y in 2..base + 2 {
+        for x in 2..base + 2 {
+            if img[Coord{ x, y }] == 0 { n += digit; }
             digit *= 2;
         }
     }
