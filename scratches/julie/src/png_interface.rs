@@ -2,7 +2,6 @@ use crate::img_matrix::ImgMatrix;
 use crate::img_matrix::Coord;
 
 use std::fs::File;
-use std::collections::HashMap;
 
 const COLOR_SIZE: usize = 4;  // 4 components of each color in png
 
