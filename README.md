@@ -108,3 +108,23 @@ cargo run -p username --bin my_script   # run my_script.rs in package "username"
 By the way, there is an utility function:
 `project_path("data/zzz")` returns absolute path to this file
 independently of the current directory.
+
+### Poor man's continuous integration
+
+Try to avoid breaking compilation and tests in the package `tbd`.
+Breaking scratches is gray area.
+
+To help with that, create the file `.git/hooks/pre-push` with the following content:
+```
+#!/bin/sh
+
+cargo test
+
+# alternatively,
+# cargo test -p tbd -p my_username
+```
+and run `chmod +x ./git/hooks/pre-push`.
+
+To test the hook, run `git push --dry-run`.
+
+To bypass the hook in case of emergency, `git push --no-verify`.
