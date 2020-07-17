@@ -11,7 +11,7 @@ struct TokenFrameInfo {
     right: usize,
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Token {
     Integer(i64),
     // Float(f64),

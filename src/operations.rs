@@ -3,6 +3,8 @@ use crate::img_matrix::ImgMatrix;
 
 use std::collections::HashMap;
 
+pub const APP_OPERATION_NAME: &str = "`";
+
 pub fn read_operations() -> HashMap<String, ImgMatrix> {
     let mut m: HashMap<String, ImgMatrix> = HashMap::new();
     m.insert(
@@ -79,7 +81,7 @@ pub fn read_operations() -> HashMap<String, ImgMatrix> {
                                   vec![1, 0, 1, 1]])
     );
     m.insert(
-        "_".to_string(),
+        APP_OPERATION_NAME.to_string(),
         ImgMatrix::from_vec(&vec![vec![1, 1],
                                   vec![1, 0]])
     );

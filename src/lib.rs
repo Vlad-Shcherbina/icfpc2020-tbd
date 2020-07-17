@@ -4,7 +4,7 @@ pub mod png_files;
 pub mod img_matrix;
 pub mod operations;
 pub mod parse_image;
-
+pub mod tree;
 
 pub fn hello() {
     println!("hello");
