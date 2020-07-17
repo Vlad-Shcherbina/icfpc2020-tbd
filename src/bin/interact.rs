@@ -1,13 +1,9 @@
 use std::io::{self, Write};
-use tbd::squiggle::*;
+use tbd::{API_KEY, squiggle::*};
 
 const API_ENDPOINT: &str = "https://icfpc2020-api.testkontur.ru/aliens/send";
 
 fn main() {
-    let args: Vec<String> = std::env::args().collect();
-    assert_eq!(args.len(), 2);
-    let api_key = &args[1];
-
     loop {
         print!("> ");
         io::stdout().flush().ok().expect("flush stdout");
@@ -31,7 +27,7 @@ fn main() {
         println!("sending {}", modulated);
 
         let response = ureq::post(API_ENDPOINT)
-            .query("apiKey", api_key)
+            .query("apiKey", API_KEY)
             .send_string(&modulated);
 
         if !response.ok() {

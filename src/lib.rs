@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::{path::{Path, PathBuf}};
 
 pub mod png_files;
 pub mod img_matrix;
@@ -29,6 +29,9 @@ pub fn project_path(rel: impl AsRef<Path>) -> PathBuf {
     }
     result
 }
+
+pub const API_KEY : &str = "ab93b0620ae245a8b92f4229eece9f3f";
+
 
 #[cfg(test)]
 mod tests {
