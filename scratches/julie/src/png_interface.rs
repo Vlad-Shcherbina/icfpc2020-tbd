@@ -91,7 +91,7 @@ pub fn bordered_png_to_matrix(path: &str) -> ImgMatrix {
 
     // assuming there is a border, find out the size of the "pixel" (4x4 on messages 2-13)
     let mut pixel_size = 1;
-    while buf[(pixel_size * info.width as usize + pixel_size) * COLOR_SIZE] == 255 { 
+    while buf[(pixel_size * info.width as usize + pixel_size) * COLOR_SIZE] != 0 { 
         pixel_size += 1
     }
 

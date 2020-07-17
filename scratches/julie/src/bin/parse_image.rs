@@ -202,7 +202,7 @@ fn is_variable(img: &ImgMatrix, frame: &TokenFrameInfo) -> bool {
         }
     }
 
-    true
+    img[Coord {x : frame.left + 1, y : frame.top + 1 }] == 1
 }
 
 
