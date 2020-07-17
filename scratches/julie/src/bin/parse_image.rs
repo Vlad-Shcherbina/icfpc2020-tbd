@@ -1,4 +1,3 @@
-extern crate julie;
 use julie::png_interface as pngs;
 
 use std::collections::HashMap;
@@ -13,7 +12,7 @@ fn main() {
         filename = format!("message{}.png", args[1]);
     }
 
-    let v = pngs::bordered_png_to_matrix(&format!("scratches/julie/data/{}", filename));
+    let v = pngs::bordered_png_to_matrix(&format!("scratches\\julie\\data\\{}", filename));
     let mut unidentified: Vec<ImgMatrix> = Vec::new();
     let operations = pngs::read_operations();
 

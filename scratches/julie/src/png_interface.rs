@@ -51,7 +51,7 @@ pub fn read_operations() -> HashMap<String, ImgMatrix> {
 
 // takes path to an image and turns it into WIDTH x HEIGHT bool matrix
 pub fn bordered_png_to_matrix(path: &str) -> ImgMatrix {
-    let decoder = png::Decoder::new(File::open(path).unwrap());
+    let decoder = png::Decoder::new(File::open(tbd::project_path(path)).unwrap());
     let (info, mut reader) = decoder.read_info().unwrap();
     let mut buf = vec![0; info.buffer_size()];
     reader.next_frame(&mut buf).unwrap();
