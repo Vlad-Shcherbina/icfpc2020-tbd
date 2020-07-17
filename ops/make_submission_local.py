@@ -100,6 +100,19 @@ def main():
 RUST_BACKTRACE=1 ./a.out "$@"
 ''')
 
+    provenance = f'### Binary\ncargo build -p {package} --bin {binary} --release\n'
+    provenance += '\n\n### Base commit\n'
+    provenance += subprocess.check_output(
+        ['git', 'log', '-1', "--pretty=%C(auto)%h\n%s\n%an\n%ad", '--abbrev-commit'],
+        cwd=project_root, universal_newlines=True)
+    provenance += '\n\n### Local changes on top of this base commit\n\n'
+    provenance += subprocess.check_output(
+        ['git', 'diff', 'HEAD', '--ignore-space-at-eol', '--ignore-cr-at-eol',
+         '--diff-filter=d',  # ignore deleted files to avoid noise caused by rsync and gitignore interaction
+         ],
+        cwd=project_root, universal_newlines=True)
+    (sub_repo / 'provenance.txt').write_text(provenance)
+
     shutil.copy(
         project_root / 'cache/target/release' / binary,
         sub_repo / 'a.out')
