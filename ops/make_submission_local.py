@@ -6,7 +6,7 @@ Usage:
     value 'username_zzz' means 'submissions/username_zzz'
     special value 'main' means 'submission'
 <binary>:
-    value 'example_submission' means 'src/example_submission.rs'
+    value 'example_submission' means 'src/bin/example_submission.rs'
     value 'username/z' means 'scratches/username/src/bin/z.rs'
 
 ***END_USAGE***

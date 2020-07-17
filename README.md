@@ -88,7 +88,7 @@ To update, run
 ```
 cargo test              # run all tests in package "tbd"
 cargo test -p username  # run all tests in package "username"
-cargo test --all        # run all tests in all our crates
+cargo test --all        # run all tests in all our packages
 cargo run --bin hw      # run hw.rs in package "tbd"
 cargo run -p username --bin my_script   # run my_script.rs in package "username"
 ```
