@@ -16,7 +16,7 @@ impl Sign {
 #[derive(Debug, PartialEq)]
 pub enum Data {
     Nil,
-    Number(Sign, u32),
+    Number(Sign, u64),
     Cons(Box<Data>, Box<Data>)
 }
 
@@ -39,7 +39,7 @@ impl Data {
             Some(Data::Nil)
         } else if s.starts_with("+") || s.starts_with("-") {
             let sign = if s.starts_with("+") { Sign::Plus } else { Sign::Minus };
-            let value: u32 = s[1..].parse().ok()?;
+            let value: u64 = s[1..].parse().ok()?;
             Some(Data::Number(sign, value))
         } else if s.starts_with("(") && s.ends_with(")") {
             let s = &s[1..s.len()-1];
@@ -79,8 +79,8 @@ pub fn bytes_to_squiggle(bytes: &[u8]) -> Option<Vec<u8>> {
     }).collect())
 }
 
-fn modulate_int_into(x: u32, squiggle: &mut Vec<u8>) {
-    let bitlength = 32 - x.leading_zeros();
+fn modulate_int_into(x: u64, squiggle: &mut Vec<u8>) {
+    let bitlength = 64 - x.leading_zeros();
     let chunks = (bitlength + 3) / 4;
 
     for _ in 0..chunks {
@@ -156,7 +156,7 @@ where I: Iterator<Item = &'a u8>,
         }
     };
 
-    let mut result: u32 = 0;
+    let mut result: u64 = 0;
     for index in (0..4*chunks).rev() {
         match squiggle.next()? {
             0 => {},
@@ -238,7 +238,7 @@ mod tests {
     }
 
     // #[quickcheck]
-    // fn i2s_s2i_roundtrip(sign: bool, x: u32) -> bool {
+    // fn i2s_s2i_roundtrip(sign: bool, x: u64) -> bool {
     //     let sign = match sign {
     //         true => Plus,
     //         false => Minus
