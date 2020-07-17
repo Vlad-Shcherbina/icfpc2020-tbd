@@ -60,6 +60,8 @@ def main():
     assert cache.exists()
     sub_repo = cache / 'icfpc2020-tbd-submissions'
     sub_repo_deploy_key = project_root / 'ops' / 'submission_repo_deploy_key'
+    key = sub_repo_deploy_key.read_text()
+    sub_repo_deploy_key.write_text(key)  # fix crlf newlines
     os.chmod(sub_repo_deploy_key, 0o600)
     assert ' ' not in str(sub_repo_deploy_key), 'sorry :('
     ssh_env = dict(GIT_SSH_COMMAND='ssh -i ' + str(sub_repo_deploy_key))
