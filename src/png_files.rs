@@ -4,8 +4,12 @@ use crate::project_path;
 
 use std::fs::File;
 use std::path::Path;
+use std::ops::Index;
 
 const COLOR_SIZE: usize = 4;  // 4 components of each color in png
+const CELL_SIZE: usize = 4;
+const BLACK: [u8; 4] = [0, 0, 0, 255];
+const WHITE: [u8; 4] = [255, 255, 255, 255];
 
 
 // takes path to an image and turns it into WIDTH x HEIGHT bool matrix
@@ -33,6 +37,39 @@ pub fn bordered_png_to_matrix(path: impl AsRef<Path>) -> ImgMatrix {
         }
     }
     v
+}
+
+pub fn matrix_to_png(matrix: &ImgMatrix, path: impl AsRef<Path>) {
+    let image_width = (matrix.width * CELL_SIZE);
+    let image_height = (matrix.height * CELL_SIZE);
+    let mut encoder = png::Encoder::new(File::create(path).expect("No such file"),
+                                        image_width as u32,
+                                        image_height as u32);
+    encoder.set_color(png::ColorType::RGBA);
+    encoder.set_depth(png::BitDepth::Eight);
+    let mut writer = encoder.write_header().unwrap();
+    let mut image_data = vec![0; matrix.width * matrix.height * CELL_SIZE * CELL_SIZE * COLOR_SIZE];
+    for y in 0..matrix.height {
+        for x in 0..matrix.width {
+            for cell_y in 0..CELL_SIZE {
+                for cell_x in 0..CELL_SIZE {
+                    let y_pixel = y * CELL_SIZE + cell_y;
+                    let x_pixel = x * CELL_SIZE + cell_x;
+                    let offset = (y_pixel * image_width + x_pixel) * COLOR_SIZE;
+                    if matrix[Coord { x, y }] == 1 {
+                        for c in 0..COLOR_SIZE {
+                            image_data[offset + c] = WHITE[c];
+                        }
+                    } else {
+                        for c in 0..COLOR_SIZE {
+                            image_data[offset + c] = BLACK[c];
+                        }
+                    };
+                }
+            }
+        }
+    }
+    writer.write_image_data(&image_data);
 }
 
 // Filename without .png
