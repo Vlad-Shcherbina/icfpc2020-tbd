@@ -118,8 +118,8 @@ fn parse_token(img: &ImgMatrix,
 
     assert!(frame.right < img.width);
 
-    if is_integer(img, frame.left, frame.top) {
-        return parse_integer(img, frame);
+    if let Some(a) = parse_integer(img, frame) {
+        return a;
     }
 
     if is_variable(img, frame) {
@@ -138,20 +138,14 @@ fn parse_token(img: &ImgMatrix,
     return get_unknown(&sample, unidentified);
 }
 
+fn parse_integer(img: &ImgMatrix, frame: &TokenFrameInfo) -> Option<Token> {
+    if img[Coord {x : frame.left, y : frame.top}] != 0 { return None; }
 
-// assuming every integer number has corner of 0, 1, 1
-fn is_integer(img: &ImgMatrix, x: usize, y: usize) -> bool {
-    img[Coord {x, y}] == 0 && img[Coord {x: x + 1, y}] == 1 && img[Coord {x, y: y + 1}] == 1
-}
-
-
-fn parse_integer(img: &ImgMatrix, frame: &TokenFrameInfo) -> Token {
-    let mut base = 0;
-    for i in 1.. {
-        if img[Coord { x: frame.left + i, y: frame.top}] == 0 { break; }
-        base = i;
+    let base = frame.right - frame.left - 1;
+    for i in 1..base + 1 {
+        if img[Coord {x : frame.left, y : frame.top + i}] == 0 { return None; }
+        if img[Coord {x : frame.left + i, y : frame.top}] == 0 { return None; }
     }
-    assert!(frame.right == frame.left + base + 1);
 
     let sgn = if img[Coord { x: frame.left, y: frame.top + base + 1}] == 1 { -1 } else { 1 };
 
@@ -165,7 +159,7 @@ fn parse_integer(img: &ImgMatrix, frame: &TokenFrameInfo) -> Token {
             digit *= 2;
         }
     }
-    Token::Integer(n * sgn)
+    Some(Token::Integer(n * sgn))
 }
 
 
