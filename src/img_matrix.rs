@@ -52,6 +52,14 @@ impl PartialEq for ImgMatrix {
     }
 }
 
+pub struct FrameInfo {
+    // frame of the current token, to be mutated while reading
+    pub top: usize,
+    pub left: usize,
+    pub bottom: usize,
+    pub right: usize,
+}
+
 impl ImgMatrix {
     pub fn new(width: usize, height: usize) -> ImgMatrix {
         assert_ne!(height, 0);
@@ -83,6 +91,21 @@ impl ImgMatrix {
         self.data = new_data;
         self.width = new_width;
         self.height = new_height;
+    }
+
+    pub fn crop(&self, frame: &FrameInfo) -> Self {
+        let mut v: Vec<Vec<u8>> = Vec::new();
+        for y in frame.top..frame.bottom {
+            let mut u: Vec<u8> = Vec::new();
+            let mut end = true;
+            for x in frame.left..frame.right {
+                u.push(self[Coord { x, y }]);
+                if self[Coord { x, y }] == 1 { end = false; }
+            }
+            if end && v.len() > 0 { break; }
+            v.push(u)
+        }
+        ImgMatrix::from_vec(&v)
     }
 }
 

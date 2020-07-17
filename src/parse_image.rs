@@ -1,15 +1,7 @@
-use crate::img_matrix::ImgMatrix;
+use crate::img_matrix::{ImgMatrix, FrameInfo};
 use crate::img_matrix::Coord;
 
 use std::{fmt::Display, collections::HashMap};
-
-struct TokenFrameInfo {
-    // frame of the current token, to be mutated while reading
-    top: usize,
-    left: usize,
-    bottom: usize,
-    right: usize,
-}
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Token {
@@ -43,7 +35,7 @@ pub fn parse_image(img: &ImgMatrix,
             unidentified: &mut Vec<ImgMatrix>,
             operations: &HashMap<String, ImgMatrix>) -> Vec<Vec<Token>> {
 
-    let mut frame = TokenFrameInfo { top: 0, bottom: 1, left: 0, right: 0 };
+    let mut frame = FrameInfo { top: 0, bottom: 1, left: 0, right: 0 };
     let mut result = Vec::new();
 
     loop {
@@ -75,7 +67,7 @@ fn is_horizontal_separator(img: &ImgMatrix, y: usize) -> bool {
 
 // parses one strip — a line of tokens
 fn parse_strip(img: &ImgMatrix,
-    frame: &mut TokenFrameInfo,
+    frame: &mut FrameInfo,
     unidentified: &mut Vec<ImgMatrix>,
     operations: &HashMap<String, ImgMatrix>) -> Vec<Token> {
 
@@ -105,7 +97,7 @@ fn parse_strip(img: &ImgMatrix,
 }
 
 // vertical separator is a column within the strip with no white pixels, separates tokens
-fn is_vertical_separator(img: &ImgMatrix, frame: &TokenFrameInfo, x: usize) -> bool {
+fn is_vertical_separator(img: &ImgMatrix, frame: &FrameInfo, x: usize) -> bool {
     for y in frame.top..frame.bottom {
         if img[Coord{x, y}] == 1 {
             return false;
@@ -119,7 +111,7 @@ fn is_vertical_separator(img: &ImgMatrix, frame: &TokenFrameInfo, x: usize) -> b
 // ===================================
 
 fn parse_token(img: &ImgMatrix,
-    frame: &TokenFrameInfo,
+    frame: &FrameInfo,
     unidentified: &mut Vec<ImgMatrix>,
     operations: &HashMap<String, ImgMatrix>) -> Token {
 
@@ -129,7 +121,7 @@ fn parse_token(img: &ImgMatrix,
         return Token::Omission;
     }
 
-    let sample = crop_image(img, frame);
+    let sample = img.crop(frame);
 
     if let Some(a) = parse_integer(&sample) {
         return a;
@@ -221,7 +213,7 @@ fn parse_squiggly(img: &ImgMatrix) -> Option<Token> {
 
 
 // checks if it's "...." sign
-fn is_omission(img: &ImgMatrix, frame: &TokenFrameInfo, x: usize) -> bool {
+fn is_omission(img: &ImgMatrix, frame: &FrameInfo, x: usize) -> bool {
     if frame.left > img.width - 8 { return false; }
 
     let mut h = 0;  // vertical position of the ellipsis
@@ -257,7 +249,7 @@ fn get_unknown(sample: &ImgMatrix, unidentified: &mut Vec<ImgMatrix>) -> Token {
 }
 
 // makes a small Image Matrix with just a given token in it
-fn crop_image(img: &ImgMatrix, frame: &TokenFrameInfo) -> ImgMatrix {
+fn crop_image(img: &ImgMatrix, frame: &FrameInfo) -> ImgMatrix {
     let mut v: Vec<Vec<u8>> = Vec::new();
     for y in frame.top..frame.bottom {
         let mut u: Vec<u8> = Vec::new();
