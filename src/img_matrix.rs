@@ -70,6 +70,20 @@ impl ImgMatrix {
         }
         ImgMatrix { width, height, data: data.clone() }
     }
+
+    pub fn grow(&mut self, new_width: usize, new_height: usize) {
+        assert!(new_width > self.width);
+        assert!(new_height > self.height);
+        let mut new_data = vec![vec![0; new_width]; new_height];
+        for y in 0..self.height {
+            for x in 0..self.width {
+                new_data[y][x] = self.data[y][x];
+            }
+        }
+        self.data = new_data;
+        self.width = new_width;
+        self.height = new_height;
+    }
 }
 
 #[cfg(test)]
@@ -92,6 +106,7 @@ mod tests {
         m1[c1] = 1;
         m3[c2] = 1;
         assert_ne!(m1, m3);
-        
+
+        m1.grow(10, 10);
     }
 }
