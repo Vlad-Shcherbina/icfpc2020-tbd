@@ -20,7 +20,13 @@ fn project_root() -> PathBuf {
 }
 
 pub fn project_path(rel: impl AsRef<Path>) -> PathBuf {
-    project_root().join(rel)
+    // Can't simply return project_root().join(rel)
+    // Need to deal with forward and backward slashes on Windows.
+    let mut result = project_root();
+    for part in rel.as_ref().iter() {
+        result = result.join(part);
+    }
+    result
 }
 
 #[cfg(test)]
@@ -30,5 +36,6 @@ mod tests {
     #[test]
     fn test_project_path() {
         assert!(project_path("Cargo.lock").exists());
+        assert!(project_path("data/README.md").exists());
     }
 }
