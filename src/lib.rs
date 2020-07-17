@@ -6,6 +6,7 @@ pub mod operations;
 pub mod parse_image;
 pub mod tree;
 pub mod squiggle;
+pub mod ufolang;
 
 pub fn hello() {
     println!("hello");

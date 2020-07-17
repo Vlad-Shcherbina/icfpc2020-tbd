@@ -1,4 +1,4 @@
-use tbd::{project_path, tree::Tree};
+use crate::tree::Tree;
 use std::{collections::HashMap, rc::Rc};
 
 fn ap_to_none(s: &str) -> Option<&str> {
@@ -27,7 +27,7 @@ fn parse(src: &str) -> Vec<(&str, Tree<&str>)> {
 // For example,
 //   S a b c  =>  S1(a) b c  =>  S2(a, b) c  =>  (a c) (b c)
 #[derive(Debug, PartialEq)]
-enum Value {
+pub enum Value {
     App(Rc<Value>, Rc<Value>),
     Number(i64),
     Use(usize),  // reference to a definition like ':1234'
@@ -198,7 +198,7 @@ fn tree_to_value<T>(tree: &Tree<T>, leaf_to_value: &mut dyn FnMut(&T) -> Rc<Valu
     }
 }
 
-fn main1() {
+/*fn main1() {
     // let src = std::fs::read_to_string(project_path("data/messages/galaxy.txt")).unwrap();
     // let src = "\
     // :1141 = ap ap c b ap ap s ap ap b c ap ap b ap b b ap eq 0 ap ap b ap c :1141 ap add -1
@@ -222,7 +222,7 @@ fn main() {
     std::thread::Builder::new().stack_size(500 * 1024 * 1024)
         .spawn(main1).unwrap()
         .join().unwrap();
-}
+}*/
 
 #[cfg(test)]
 mod tests {
