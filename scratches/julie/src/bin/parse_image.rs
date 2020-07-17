@@ -40,7 +40,6 @@ enum Token {
     Operation(String),
     Unknown(usize),  // id in list of unknown tokens
     Omission,
-    EOL,
 }
 
 
@@ -103,6 +102,8 @@ fn parse_strip(img: &ImgMatrix,
             frame.right += 1;
         }
 
+        if frame.right >= width { break; }
+
         match parse_token(img, frame, unidentified, operations) {
             Token::Integer(x)   => result.push_str(&x.to_string()),
             // Token::Float(x) => result.push_str(&x.to_string()),
@@ -113,7 +114,6 @@ fn parse_strip(img: &ImgMatrix,
                 frame.right = frame.left + 8;
                 result.push_str("....");
             },
-            Token::EOL => break,
         }
         result.push_str(" ");
         frame.left = frame.right + 1;
@@ -141,9 +141,7 @@ fn parse_token(img: &ImgMatrix,
     operations: &HashMap<String, ImgMatrix>) -> Token {
 
     let width = img.len();
-    if frame.right >= width {
-        return Token::EOL;
-    }
+    assert!(frame.right < width);
 
     if is_integer(img, frame.left, frame.top) {
         return parse_integer(img, frame);
