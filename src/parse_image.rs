@@ -1,7 +1,7 @@
 use crate::img_matrix::ImgMatrix;
 use crate::img_matrix::Coord;
 
-use std::collections::HashMap;
+use std::{fmt::Display, collections::HashMap};
 
 struct TokenFrameInfo {
     // frame of the current token, to be mutated while reading
@@ -248,13 +248,23 @@ fn crop_image(img: &ImgMatrix, frame: &TokenFrameInfo) -> ImgMatrix {
     ImgMatrix::from_vec(&v)
 }
 
-pub fn show_image(img: &ImgMatrix) {
-    for y in 0..img.height {
-        for x in 0..img.width {
-            if img[Coord { x, y }]  == 1 { print!("# "); }
-            else { print!(". "); }
+impl Display for ImgMatrix {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for y in 0..self.height {
+            for x in 0..self.width {
+                match self[Coord { x, y }] {
+                    0 => write!(f, ". ")?,
+                    1 => write!(f, "* ")?,
+                    x => panic!("{:?}", x),
+                }
+            }
+            writeln!(f)?
         }
-        println!();
+        Ok(())
     }
+}
+
+pub fn show_image(img: &ImgMatrix) {
+    print!("{}", img);
 }
 
