@@ -10,8 +10,5 @@ edition = "2018"
 png = "0.16.6"
 tbd = { path = "../.."}
 
-[profile.release]
-lto = true
-
 [lib]
 doctest = false
