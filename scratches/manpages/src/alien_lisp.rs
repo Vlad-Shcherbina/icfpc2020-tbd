@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub fn known_operators() -> [&'static str; 7] {
   [
@@ -15,8 +16,8 @@ pub fn known_operators() -> [&'static str; 7] {
 
 pub fn lisp_equivalents() -> [&'static str; 7] {
   [
-    "(+ 1",
-    "(- 1",
+    "(+ 01",
+    "(- 01",
     "(+",
     "(*",
     "(truncate (/",
@@ -39,94 +40,129 @@ pub fn known_operators_with_arity_and_lisp_equivalent() -> HashMap<String, (usiz
   hm
 }
 
-pub fn ufo_to_lisp(str_ufo_expr : String) -> Option<String> {
-  fn find_leftmost_operator(here : String) -> Option<(String, String)> {
-    for op in &known_operators() {
-      //println!("op is {:?} ; Here is {:?}", here1, op, here);
-      //let heresplit : Vec<&str> = here.split(op).collect();
-      //println!("Here when splitted: {:?}", heresplit);
-      if here.split(op).next().unwrap().is_empty() {
-        //println!("Returning: {:?}, {:?}", op.to_string(), here.clone().replacen(op, "", 1).trim().to_string());
-        return Some((op.to_string(), here.clone().replacen(op, "", 1).trim().to_string()));
-      }
+pub fn lisp_operators_with_arity_and_known_equivalent() -> HashMap<String, (usize, String)> {
+  fn arity(x : String) -> usize {
+    let ap_splitted : Vec<&str> = x.split("ap").collect();
+    ap_splitted.len() - 1
+  }
+  let mut hm = HashMap::new();
+  let lisp = &lisp_equivalents();
+  let ko = &known_operators();
+  for i in 0..ko.len() {
+    //hm.insert(ko[i].to_string(), (arity(ko[i].to_string()), lisp[i].to_string()));
+    hm.insert(lisp[i].to_string(), (arity(ko[i].to_string()), ko[i].to_string()));
+  }
+  hm
+}
+
+fn find_leftmost_operator(here : String, ops : Vec<&String>) -> Option<(String, String)> {
+  let mut candidates : BTreeMap<usize, (String, String)> = BTreeMap::new();
+  for op in ops {
+    //println!("op is {:?} ; Here is {:?}", here1, op, here);
+    //let heresplit : Vec<&str> = here.split(op).collect();
+    //println!("Here when splitted: {:?}", heresplit);
+    if here.split(op).next().unwrap().is_empty() {
+      //println!("Returning: {:?}, {:?}", op.to_string(), here.clone().replacen(op, "", 1).trim().to_string());
+      candidates.insert(op.len(), (op.to_string(), here.clone().replacen(op, "", 1).trim().to_string()));
     }
+  }
+  if candidates.is_empty() {
     None
+  } else {
+    let wtf = candidates.iter().last().unwrap();
+    //println!("        WTF {:?}", wtf.1);
+    Some(wtf.1.clone())
   }
+}
 
-  fn find_leftmost_argument(here : String) -> Option<(String, String)> {
-    let mut splitted = here.split(" ");
-    let first_maybe = splitted.next();
-    match first_maybe {
-      None => None,
-      Some(first) => {
-        //println!("FIRST IS {:?}", &first);
-        match first {
-          "" => None,
-          "f" => Some(("#f".to_string(), here.clone().replacen(first, "", 1).trim().to_string())),
-          "t" => Some(("#t".to_string(), here.clone().replacen(first, "", 1).trim().to_string())),
-          _   => Some((first.to_string(), here.clone().replacen(first, "", 1).trim().to_string()))
-        }
-      },
-    }
-  }
-
-  fn deop(rest : String, ops : &HashMap<String, (usize, String)>, acc : String, searching_for_n_terms : usize) -> Option<(String, String)> {
-    //println!("Searching for {:?} terms in {:?} with accumulator of {:?}", searching_for_n_terms, rest, acc);
-    // Recursion termination
-    if searching_for_n_terms <= 0 {
-      if rest.is_empty() {
-        //println!("Returning {:?}", rest);
-        return Some((acc, rest));
-      } else {
-        return None;
+fn find_leftmost_argument(here : String) -> Option<(String, String)> {
+  let mut splitted = here.split(" ");
+  let first_maybe = splitted.next();
+  match first_maybe {
+    None => None,
+    Some(first) => {
+      //println!("FIRST IS {:?}", &first);
+      match first {
+        "" => None,
+        "f" => Some(("#f".to_string(), here.clone().replacen(first, "", 1).trim().to_string())),
+        "t" => Some(("#t".to_string(), here.clone().replacen(first, "", 1).trim().to_string())),
+        "#f" => Some(("f".to_string(), here.clone().replacen(first, "", 1).trim().to_string())),
+        "#t" => Some(("t".to_string(), here.clone().replacen(first, "", 1).trim().to_string())),
+        _   => Some((first.to_string(), here.clone().replacen(first, "", 1).trim().to_string()))
       }
-    }
+    },
+  }
+}
 
-    // Searching for the next term
-    match find_leftmost_operator(rest.clone()) {
-      None => match find_leftmost_argument(rest.clone()) {
-        None =>
-          return None,
-        Some((argument_found, rest1)) => {
-          //println!(" Found {:?} instead!", argument_found);
-          // Pad found argument with a space on the left if accumulator wasn't empty
-          let acc1 = if acc.is_empty() { argument_found } else { format!("{} {}", acc, argument_found) };
-          //println!("New accumulator state {:?}", acc1);
-          // Return found argument for operator search to continue
-          return Some((acc1, rest1));
-        },
+fn deop(rest : String, ops : &HashMap<String, (usize, String)>, acc : String, searching_for_n_terms : usize) -> Option<(String, String)> {
+  //println!("Searching for {:?} terms in {:?} with accumulator of {:?}", searching_for_n_terms, rest, acc);
+  // Recursion termination
+  if searching_for_n_terms <= 0 {
+    if rest.is_empty() {
+      //println!("Returning {:?}", rest);
+      return Some((acc, rest));
+    } else {
+      return None;
+    }
+  }
+
+  // Searching for the next term
+  match find_leftmost_operator(rest.clone(), ops.keys().collect()) {
+    None => match find_leftmost_argument(rest.clone()) {
+      None =>
+        return None,
+      Some((argument_found, rest1)) => {
+        //println!(" Found {:?} instead!", argument_found);
+        // Pad found argument with a space on the left if accumulator wasn't empty
+        let acc1 = if acc.is_empty() { argument_found } else { format!("{} {}", acc, argument_found) };
+        //println!("New accumulator state {:?}", acc1);
+        // Return found argument for operator search to continue
+        return Some((acc1, rest1));
       },
-      Some((operator_found, rest1)) => {
-        //println!(" Found {:?}", operator_found);
-        //println!("Ops hashmap is {:?}; searching for {:?}", ops, operator_found);
-        let (arity, lisp) = ops.get(&operator_found).unwrap();
-        // Split recursion, searching for the appropriate amount of terms
-        let mut args = "".to_string();
-        let mut rest_current = rest1;
-        for i in 0..*arity {
-          //println!("On iteration #{:?} :: args {:?} :: rest_current {:?}", i + 1, args, rest_current);
-          if rest_current.is_empty() {
-            return None;
-          }
-          let new_args_maybe = deop(rest_current, ops, "".to_string(), *arity - i);
-          match new_args_maybe {
-            None => return None,
-            Some((new_args, new_rest)) => {
-              args = if args.is_empty() { new_args } else { args + " " + &new_args };
-              rest_current = new_rest;
-            },
-          }
+    },
+    Some((operator_found, rest1)) => {
+      //println!(" Found {:?}", operator_found);
+      //println!("Ops hashmap is {:?}; searching for {:?}", ops, operator_found);
+      let (arity, target_operator) = ops.get(&operator_found).unwrap();
+      //println!("Found {:?}/{:?}", target_operator, arity);
+      // Split recursion, searching for the appropriate amount of terms
+      let mut args = "".to_string();
+      let mut rest_current = rest1;
+      for i in 0..*arity {
+        //println!("On iteration #{:?} :: args {:?} :: rest_current {:?}", i + 1, args, rest_current);
+        if rest_current.is_empty() {
+          return None;
         }
-        // For each opening paren in the Lisp equivalent, close it
-        let closing_time = ")".repeat(lisp.matches("(").count());
+        let new_args_maybe = deop(rest_current, ops, "".to_string(), *arity - i);
+        match new_args_maybe {
+          None => return None,
+          Some((new_args, new_rest)) => {
+            args = if args.is_empty() { new_args } else { args + " " + &new_args };
+            rest_current = new_rest;
+          },
+        }
+      }
+      // For each opening paren in the Lisp equivalent, close it
+      let closing_time = ")".repeat(target_operator.matches("(").count());
+      //println!("CLOSING TIME ``{:?}''", closing_time);
+      //println!("ARGS ``{:?}''", args);
+      //println!(">>>> {} {}", target_operator, args);
+      if target_operator.starts_with("(") {
         return Some((
-          format!("{} {}{}", lisp, args, closing_time),
+          format!("{} {}{}", target_operator, args, closing_time),
+          rest_current
+        ))
+      } else {
+        return Some((
+          format!("{} {}{}", target_operator, args, closing_time).replace(")", ""),
           rest_current
         ))
       }
     }
-
   }
+}
+
+pub fn ufo_to_lisp(str_ufo_expr : String) -> Option<String> {
   //println!("Running ufo_to_lisp with {}", str_ufo_expr);
   match deop(str_ufo_expr, &known_operators_with_arity_and_lisp_equivalent(), "".to_string(), 1) {
     Some( (resu, _) ) => Some(resu),
@@ -134,11 +170,13 @@ pub fn ufo_to_lisp(str_ufo_expr : String) -> Option<String> {
   }
 }
 
-/*
-pub fn lisp_to_ufo(str_lisp_expr : String) -> Option<String> {
-  None
+pub fn lisp_to_ufo(str_ufo_expr : String) -> Option<String> {
+  //println!("Running lisp_to_ufo with {}", str_ufo_expr);
+  match deop(str_ufo_expr, &lisp_operators_with_arity_and_known_equivalent(), "".to_string(), 1) {
+    Some( (resu, _) ) => Some(resu),
+    None => None,
+  }
 }
-*/
 
 #[cfg(test)]
 mod tests {
@@ -149,11 +187,9 @@ mod tests {
     ufo_to_lisp(x).unwrap()
   }
 
-  /*
   fn lisp_to_ufo_(x : String) -> String {
     lisp_to_ufo(x).unwrap()
   }
-  */
 
   #[derive(Debug, Clone)]
   struct UFOStringWrapper(String);
@@ -174,14 +210,12 @@ mod tests {
     }
   }
 
-  /*
   #[quickcheck]
-  fn to_comp_from_is_id(UFOStringWrapper(str_ufo_exp) : UFOStringWrapper) -> bool {
+  fn to_composed_with_from_is_id_for_lisp(UFOStringWrapper(str_ufo_exp) : UFOStringWrapper) -> bool {
     let str_lisp_expr = ufo_to_lisp_(str_ufo_exp.clone());
     ( str_ufo_exp == lisp_to_ufo_(ufo_to_lisp_(str_ufo_exp.clone())) ) &&
     ( str_lisp_expr == ufo_to_lisp_(lisp_to_ufo_(str_lisp_expr.clone())) )
   }
-  */
 
   // 1,2,3
   #[quickcheck]
@@ -195,8 +229,8 @@ mod tests {
   // 5,6
   #[quickcheck]
   fn inc_dec_are_plus_minus_one(x : i32) -> bool {
-    ( ufo_to_lisp_(format!("ap inc {}", x)) == format!("(+ 1 {})", x) ) &&
-    ( ufo_to_lisp_(format!("ap dec {}", x)) == format!("(- 1 {})", x) )
+    ( ufo_to_lisp_(format!("ap inc {}", x)) == format!("(+ 01 {})", x) ) &&
+    ( ufo_to_lisp_(format!("ap dec {}", x)) == format!("(- 01 {})", x) )
   }
 
   // 7
