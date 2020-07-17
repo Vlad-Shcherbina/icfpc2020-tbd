@@ -7,7 +7,7 @@ fn main() {
 
     let operations = tbd::operations::read_operations();
     let mut unidentified: Vec<ImgMatrix> = Vec::new();
-    for i in 2..=36 {
+    for i in 2..=42 {
         println!("{}", i);
         writeln!(fout, "<h3>Message {}</h3>", i).unwrap();
         writeln!(fout, "<img src='../data/messages/message{}.png'><br>", i).unwrap();
