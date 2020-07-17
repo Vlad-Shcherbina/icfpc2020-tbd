@@ -1,5 +1,3 @@
-pub mod squiggle;
-
 #[cfg(test)]
 extern crate quickcheck;
 #[cfg(test)]

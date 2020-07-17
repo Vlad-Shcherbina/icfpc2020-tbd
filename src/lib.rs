@@ -5,6 +5,7 @@ pub mod img_matrix;
 pub mod operations;
 pub mod parse_image;
 pub mod tree;
+pub mod squiggle;
 
 pub fn hello() {
     println!("hello");

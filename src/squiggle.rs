@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Sign {
     Plus,
     Minus
@@ -9,6 +9,17 @@ pub enum Data {
     Nil,
     Number(Sign, u32),
     Cons(Box<Data>, Box<Data>)
+}
+
+pub fn bytes_to_squiggle(bytes: &[u8]) -> Option<Vec<u8>> {
+    if !bytes.iter().all(|&x| (x == b'0') || (x == b'1')) {
+        return None
+    }
+    Some(bytes.iter().map(|&x| match x {
+        b'0' => 0,
+        b'1' => 1,
+        _ => unreachable!()
+    }).collect())
 }
 
 fn modulate_int_into(x: u32, squiggle: &mut Vec<u8>) {
@@ -109,12 +120,14 @@ where I: Iterator<Item = &'a u8>,
     Some((Data::Number(sign, result), squiggle))
 }
 
-/*
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use super::Data::*;
     use super::Sign::*;
+
+
 
     #[test]
     fn i2s_examples() {
@@ -132,64 +145,74 @@ mod tests {
     }
 
     #[test]
-    fn s2i_examples() -> Result<(), std::option::NoneError> {
-        assert_eq!(demodulate((vec!{0, 1, 0}).iter())?.0, Number(Plus, 0));
-        assert_eq!(demodulate((vec!{0, 1, 1, 0, 0, 0, 0, 1}).iter())?.0, Number(Plus, 1));
-        assert_eq!(demodulate((vec!{1, 0, 1, 0, 0, 0, 0, 1}).iter())?.0, Number(Minus, 1));
-        assert_eq!(demodulate((vec!{0, 1, 1, 0, 0, 0, 1, 0}).iter())?.0, Number(Plus, 2));
-        assert_eq!(demodulate((vec!{1, 0, 1, 0, 0, 0, 1, 0}).iter())?.0, Number(Minus, 2));
-        assert_eq!(demodulate((vec!{0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0}).iter())?.0, Number(Plus, 16));
-        assert_eq!(demodulate((vec!{1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0}).iter())?.0, Number(Minus, 16));
-        assert_eq!(demodulate((vec!{0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1}).iter())?.0, Number(Plus, 255));
-        assert_eq!(demodulate((vec!{1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1}).iter())?.0, Number(Minus, 255));
-        assert_eq!(demodulate((vec!{0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0}).iter())?.0, Number(Plus, 256));
-        assert_eq!(demodulate((vec!{1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0}).iter())?.0, Number(Minus, 256));
-        Ok(())
+    fn s2i_examples() {
+        assert_eq!(demodulate((vec!{0, 1, 0}).iter()).unwrap().0, Number(Plus, 0));
+        assert_eq!(demodulate((vec!{0, 1, 1, 0, 0, 0, 0, 1}).iter()).unwrap().0, Number(Plus, 1));
+        assert_eq!(demodulate((vec!{1, 0, 1, 0, 0, 0, 0, 1}).iter()).unwrap().0, Number(Minus, 1));
+        assert_eq!(demodulate((vec!{0, 1, 1, 0, 0, 0, 1, 0}).iter()).unwrap().0, Number(Plus, 2));
+        assert_eq!(demodulate((vec!{1, 0, 1, 0, 0, 0, 1, 0}).iter()).unwrap().0, Number(Minus, 2));
+        assert_eq!(demodulate((vec!{0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0}).iter()).unwrap().0, Number(Plus, 16));
+        assert_eq!(demodulate((vec!{1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0}).iter()).unwrap().0, Number(Minus, 16));
+        assert_eq!(demodulate((vec!{0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1}).iter()).unwrap().0, Number(Plus, 255));
+        assert_eq!(demodulate((vec!{1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1}).iter()).unwrap().0, Number(Minus, 255));
+        assert_eq!(demodulate((vec!{0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0}).iter()).unwrap().0, Number(Plus, 256));
+        assert_eq!(demodulate((vec!{1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0}).iter()).unwrap().0, Number(Minus, 256));
     }
 
-    // #[test]
-    // fn s2i_invalid() {
-    //     // too short
-    //     assert_eq!(squiggle_to_int(&vec!{}), None);
-    //     assert_eq!(squiggle_to_int(&vec!{0}), None);
-    //     assert_eq!(squiggle_to_int(&vec!{1}), None);
-    //     // invalid sign
-    //     assert_eq!(squiggle_to_int(&vec!{0, 0}), None);
-    //     assert_eq!(squiggle_to_int(&vec!{1, 1}), None);
-    //     assert_eq!(squiggle_to_int(&vec!{0, 0, 1, 0, 0, 0, 1, 0}), None);
-    //     assert_eq!(squiggle_to_int(&vec!{1, 1, 1, 0, 0, 0, 1, 0}), None);
-    //     // truncated bits
-    //     assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 0}), None);
-    //     assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0}), None);
-    //     assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0}), None);
-    //     // bits missing
-    //     assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0}), None);
-    //     // chunk count unterminated
-    //     assert_eq!(squiggle_to_int(&vec!{0, 1, 1}), None);
-    //     assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 1}), None);
-    //     // invalid values
-    //     assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 2, 0}), None);
-    //     // too many bits
-    //     assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 1, 0, 0}), None);
-    //     assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0}), None);
-    // }
-
-    // #[test]
-    // fn s2i_noncanonical() {
-    //     // zero encoded as negative
-    //     assert_eq!(squiggle_to_int(&vec!{1, 0, 0}), Some((0, false)));
-    //     // zero encoded as negative with extra chunks
-    //     assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 0, 0, 0, 0, 0}), Some((0, false)));
-    //     assert_eq!(squiggle_to_int(&vec!{1, 0, 1, 0, 0, 0, 0, 0}), Some((0, false)));
-    //     // one with extra chunks
-    //     assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1}), Some((1, false)));
-    //     assert_eq!(squiggle_to_int(&vec!{0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 1}), Some((1, false)));
-    // }
+    #[test]
+    fn s2i_invalid() {
+        // too short
+        assert!(demodulate((vec!{}).iter()).is_none());
+        assert!(demodulate((vec!{0}).iter()).is_none());
+        assert!(demodulate((vec!{1}).iter()).is_none());
+        // truncated bits
+        assert!(demodulate((vec!{0, 1, 1, 0, 0, 0, 0}).iter()).is_none());
+        assert!(demodulate((vec!{0, 1, 1, 0, 0, 0}).iter()).is_none());
+        assert!(demodulate((vec!{0, 1, 1, 0, 0}).iter()).is_none());
+        // bits missing
+        assert!(demodulate((vec!{0, 1, 1, 0}).iter()).is_none());
+        // chunk count unterminated
+        assert!(demodulate((vec!{0, 1, 1, 1}).iter()).is_none());
+        assert!(demodulate((vec!{0, 1, 1}).iter()).is_none());
+        // chunk count missing
+        assert!(demodulate((vec!{0, 1}).iter()).is_none());
+        // invalid values
+        assert!(demodulate((vec!{0, 1, 1, 0, 0, 0, 2, 0}).iter()).is_none());
+    }
 
     // #[quickcheck]
-    // fn i2s_s2i_roundtrip(x: i32) -> bool {
-    //     let squiggle = int_to_squiggle(x);
-    //     squiggle_to_int(&squiggle) == Some((x, true))
+    // fn i2s_s2i_roundtrip(sign: bool, x: u32) -> bool {
+    //     let sign = match sign {
+    //         true => Plus,
+    //         false => Minus
+    //     };
+    //     let squiggle = modulate(Number(sign, x));
+    //     demodulate(squiggle.iter()).unwrap().0 == Number(sign, x)
     // }
+
+    #[test]
+    fn nil() {
+        assert_eq!(modulate(Nil), vec!{0, 0});
+        assert_eq!(demodulate((vec!{0, 0}).iter()).unwrap().0, Nil);
+    }
+
+    #[test]
+    fn lists() {
+        assert_eq!(modulate(Cons(Box::new(Nil), Box::new(Nil))), vec!{1, 1, 0, 0, 0, 0});
+        assert_eq!(demodulate((vec!{1, 1, 0, 0, 0, 0}).iter()).unwrap().0, Cons(Box::new(Nil), Box::new(Nil)));
+        assert_eq!(
+            modulate(Cons(
+                Box::new(Number(Plus, 0)),
+                Box::new(Nil)
+            )),
+            vec!{1, 1, 0, 1, 0, 0, 0}
+        );
+        assert_eq!(
+            demodulate((vec!{1, 1, 0, 1, 0, 0, 0}).iter()).unwrap().0,
+            Cons(
+                Box::new(Number(Plus, 0)),
+                Box::new(Nil)
+            )
+        );
+    }
 }
-*/

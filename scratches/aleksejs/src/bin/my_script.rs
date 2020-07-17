@@ -1,7 +1,7 @@
-use aleksejs::squiggle::*;
+use tbd::squiggle::*;
 
 fn main() {
-    println!("{:?}", demodulate((vec!{1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0}).iter()));
+    println!("{:?}", demodulate(bytes_to_squiggle(b"110110000100").unwrap().iter()));
     println!("{:?}", modulate(Data::Cons(
         Box::new(Data::Number(Sign::Plus, 3)),
         Box::new(Data::Nil)
