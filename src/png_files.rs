@@ -4,7 +4,6 @@ use crate::project_path;
 
 use std::fs::File;
 use std::path::Path;
-use std::ops::Index;
 
 const COLOR_SIZE: usize = 4;  // 4 components of each color in png
 const CELL_SIZE: usize = 4;
@@ -21,7 +20,7 @@ pub fn bordered_png_to_matrix(path: impl AsRef<Path>) -> ImgMatrix {
 
     // assuming there is a border, find out the size of the "pixel" (4x4 on messages 2-13)
     let mut pixel_size = 1;
-    while buf[(pixel_size * info.width as usize + pixel_size) * COLOR_SIZE] != 0 { 
+    while buf[(pixel_size * info.width as usize + pixel_size) * COLOR_SIZE] != 0 {
         pixel_size += 1
     }
 
@@ -40,8 +39,8 @@ pub fn bordered_png_to_matrix(path: impl AsRef<Path>) -> ImgMatrix {
 }
 
 pub fn matrix_to_png(matrix: &ImgMatrix, path: impl AsRef<Path>) {
-    let image_width = (matrix.width * CELL_SIZE);
-    let image_height = (matrix.height * CELL_SIZE);
+    let image_width = matrix.width * CELL_SIZE;
+    let image_height = matrix.height * CELL_SIZE;
     let mut encoder = png::Encoder::new(File::create(path).expect("No such file"),
                                         image_width as u32,
                                         image_height as u32);
@@ -69,7 +68,7 @@ pub fn matrix_to_png(matrix: &ImgMatrix, path: impl AsRef<Path>) {
             }
         }
     }
-    writer.write_image_data(&image_data);
+    writer.write_image_data(&image_data).expect("Failed to write");
 }
 
 // Filename without .png
@@ -90,10 +89,10 @@ pub fn matrix_to_png(matrix: &ImgMatrix, path: impl AsRef<Path>) {
 //     reader.next_frame(&mut buf).unwrap();
 
 //     let pixel_size = 4;
-    
+
 //     let width = info.width as usize / pixel_size;
 //     let height = info.height as usize / pixel_size;
-//     let mut v: ImgMatrix = vec![vec![false; height]; width];  
+//     let mut v: ImgMatrix = vec![vec![false; height]; width];
 //     for x in 0..width {
 //         for y in 0..height {
 //             let coord = (y * (info.width as usize) + x) * pixel_size * COLOR_SIZE;

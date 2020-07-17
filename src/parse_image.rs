@@ -17,7 +17,7 @@ impl Display for Token {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Token::Integer(x)   => write!(f, "{}", x),
-            Token::Variable(x)  => write!(f, "{}", (97 + *x as u8) as char),
+            Token::Variable(x)  => write!(f, "x{}", x),
             Token::Operation(x) => write!(f, "{}", x),
             Token::Unknown(x)   => write!(f, "?{}", x),
             Token::Omission     => write!(f, "..."),
@@ -42,7 +42,7 @@ pub fn parse_image(img: &ImgMatrix,
         while frame.top < img.height && is_horizontal_separator(img, frame.top) {
             frame.top += 1;
         }
-    
+
         frame.bottom = frame.top + 1;
         while frame.bottom < img.height && !is_horizontal_separator(img, frame.bottom) {
             frame.bottom += 1;
@@ -123,15 +123,15 @@ fn parse_token(img: &ImgMatrix,
 
     let sample = img.crop(frame);
 
+    if let Some(a) = get_operation(&sample, operations) {
+        return a;
+    }
+
     if let Some(a) = parse_integer(&sample) {
         return a;
     }
 
     if let Some(a) = parse_variable(&sample) {
-        return a;
-    }
-
-    if let Some(a) = get_operation(&sample, operations) {
         return a;
     }
 
@@ -172,10 +172,10 @@ fn parse_variable(img: &ImgMatrix) -> Option<Token> {
     if img.width < 4 { return None; }
     if img.width < 1 ||  img.width != img.height { return None; }
     for i in 0..size {
-        if img[Coord { x : i, y : 0 }] == 0 
+        if img[Coord { x : i, y : 0 }] == 0
         || img[Coord { x : i, y : size - 1 }] == 0
         || img[Coord { x : 0, y : 0 }] == 0
-        || img[Coord { x : size - 1, y : i }] == 0 { 
+        || img[Coord { x : size - 1, y : i }] == 0 {
                return None;
         }
     }
@@ -218,7 +218,7 @@ fn is_omission(img: &ImgMatrix, frame: &FrameInfo, x: usize) -> bool {
 
     let mut h = 0;  // vertical position of the ellipsis
     for y in frame.top..frame.bottom {
-        if img[Coord{ x, y }] == 1 { 
+        if img[Coord{ x, y }] == 1 {
             h = y;
             break;
         }
