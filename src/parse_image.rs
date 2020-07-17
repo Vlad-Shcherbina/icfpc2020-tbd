@@ -1,32 +1,9 @@
-use julie::png_interface as pngs;
-use julie::img_matrix::ImgMatrix;
-use julie::img_matrix::Coord;
-use julie::operations::read_operations;
+use crate::img_matrix::ImgMatrix;
+use crate::img_matrix::Coord;
+use crate::operations::read_operations;
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-
-// optional: add number of the message to parse as a command line argument
-fn main() {
-    let mut filename = "message2.png".to_string();
-    let args: Vec<String> = std::env::args().collect();
-    if args.len() > 1 {
-        filename = format!("message{}.png", args[1]);
-    }
-    let v = pngs::bordered_png_to_matrix(Path::new("scratches")
-        .join("julie")
-        .join("data")
-        .join(filename));
-    let mut unidentified: Vec<ImgMatrix> = Vec::new();
-    let operations = read_operations();
-
-    println!("{}", parse_image(&v, &mut unidentified, &operations));
-    println!("Unidentified tokens:");
-    for (i, m) in unidentified.iter().enumerate() {
-        println!("\n?{}", i);
-        show_image(m);
-    }
-}
 
 struct TokenFrameInfo {
     // frame of the current token, to be mutated while reading
@@ -50,7 +27,7 @@ enum Token {
 // PARSING BEGINS
 // =====================================
 
-fn parse_image(img: &ImgMatrix,
+pub fn parse_image(img: &ImgMatrix,
             unidentified: &mut Vec<ImgMatrix>,
             operations: &HashMap<String, ImgMatrix>) -> String {
 
@@ -279,7 +256,7 @@ fn crop_image(img: &ImgMatrix, frame: &TokenFrameInfo) -> ImgMatrix {
     ImgMatrix::from_vec(&v)
 }
 
-fn show_image(img: &ImgMatrix) {
+pub fn show_image(img: &ImgMatrix) {
     for y in 0..img.height {
         for x in 0..img.width {
             if img[Coord { x, y }]  == 1 { print!("# "); }

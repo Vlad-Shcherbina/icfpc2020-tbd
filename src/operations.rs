@@ -87,27 +87,32 @@ pub fn read_operations() -> HashMap<String, ImgMatrix> {
     //  CONTEST STARS
 
     m.insert(
-        "L18".to_string(),   // message18
+        "pic18".to_string(),   // message18
         ImgMatrix::from_vec(&vec![vec![1, 1, 1],
                                   vec![1, 1, 1],
                                   vec![1, 1, 0]])
     );
 
     m.insert(
-        "L19".to_string(),   // message19
+        "pic19".to_string(),   // message19
         ImgMatrix::from_vec(&vec![vec![1, 1, 1],
                                   vec![1, 0, 1],
                                   vec![1, 1, 0]])
     );
 
     m.insert(
-        "L20".to_string(),   // message20
+        "pic20".to_string(),   // message20
         ImgMatrix::from_vec(&vec![vec![1, 1, 1],
                                   vec![1, 1, 0],
                                   vec![1, 1, 0]])
     );
 
-
+    m.insert(
+        "pic21".to_string(),   // message21
+        ImgMatrix::from_vec(&vec![vec![1, 1],
+                                  vec![1, 1]])
+    );
+ 
     
     m
 }

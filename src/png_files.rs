@@ -1,5 +1,6 @@
 use crate::img_matrix::ImgMatrix;
 use crate::img_matrix::Coord;
+use crate::project_path;
 
 use std::fs::File;
 use std::path::Path;
@@ -9,7 +10,7 @@ const COLOR_SIZE: usize = 4;  // 4 components of each color in png
 
 // takes path to an image and turns it into WIDTH x HEIGHT bool matrix
 pub fn bordered_png_to_matrix(path: impl AsRef<Path>) -> ImgMatrix {
-    let decoder = png::Decoder::new(File::open(tbd::project_path(path)).unwrap());
+    let decoder = png::Decoder::new(File::open(project_path(path)).unwrap());
     let (info, mut reader) = decoder.read_info().unwrap();
     let mut buf = vec![0; info.buffer_size()];
     reader.next_frame(&mut buf).unwrap();

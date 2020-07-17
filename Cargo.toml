@@ -5,6 +5,7 @@ edition = "2018"
 
 [dependencies]
 ureq = { version = "*", default-features = false }
+png = "0.16.6"
 
 [workspace]
 members = [".", "scratches/*"]
