@@ -1,5 +1,10 @@
 '''
 Same as make_submission_local.py, but uses the build server.
+
+If the build server is stuck in a weird state, you could try
+ssh -p21984 tbd-build-$(cat .build-server-id)@thoughtflare.memorici.de rm -rf icfpc2020-tbd
+
+And then rerun the submission script.
 '''
 
 import sys
