@@ -1,10 +1,10 @@
 use julie::png_interface as pngs;
+use julie::img_matrix::ImgMatrix;
+use julie::img_matrix::Coord;
 
 use std::collections::HashMap;
 
 // optional: add number of the message to parse as a command line argument
-type ImgMatrix = Vec<Vec<bool>>;
-
 fn main() {
     let mut filename = "message2.png".to_string();
     let args: Vec<String> = std::env::args().collect();
@@ -50,20 +50,19 @@ fn parse_image(img: &ImgMatrix,
             unidentified: &mut Vec<ImgMatrix>,
             operations: &HashMap<String, ImgMatrix>) -> String {
 
-    let height = img[0].len();
     let mut frame = TokenFrameInfo { top: 0, bottom: 1, left: 0, right: 0 };
     let mut result = String::new();
 
     loop {
-        while frame.top < height && is_horizontal_separator(img, frame.top) {
+        while frame.top < img.height && is_horizontal_separator(img, frame.top) {
             frame.top += 1;
         }
     
         frame.bottom = frame.top + 1;
-        while frame.bottom < height && !is_horizontal_separator(img, frame.bottom) {
+        while frame.bottom < img.height && !is_horizontal_separator(img, frame.bottom) {
             frame.bottom += 1;
         }
-        if frame.bottom >= height { break; }
+        if frame.bottom >= img.height { break; }
 
         result.push_str(&parse_strip(img, &mut frame, unidentified, operations));
         result.push_str("\n");
@@ -74,8 +73,8 @@ fn parse_image(img: &ImgMatrix,
 
 // separator is a horizontal line with no white pixels, separates strips of tokens
 fn is_horizontal_separator(img: &ImgMatrix, y: usize) -> bool {
-    for x in 0..img.len() {
-        if img[x][y] {
+    for x in 0..img.width {
+        if img[Coord {x, y}] == 1 {
             return false;
         }
     }
@@ -88,20 +87,19 @@ fn parse_strip(img: &ImgMatrix,
     unidentified: &mut Vec<ImgMatrix>,
     operations: &HashMap<String, ImgMatrix>) -> String {
 
-    let width = img.len();
     let mut result = String::new();
     frame.left = 0;
 
     loop {
-        while frame.left < width - 1 && is_vertical_separator(img, frame, frame.left) {
+        while frame.left < img.width - 1 && is_vertical_separator(img, frame, frame.left) {
             frame.left += 1;
         }
         frame.right = frame.left + 1;
-        while frame.right < width && !is_vertical_separator(img, frame, frame.right) {
+        while frame.right < img.width && !is_vertical_separator(img, frame, frame.right) {
             frame.right += 1;
         }
 
-        if frame.right >= width { break; }
+        if frame.right >= img.width { break; }
 
         match parse_token(img, frame, unidentified, operations) {
             Token::Integer(x)   => result.push_str(&x.to_string()),
@@ -123,7 +121,7 @@ fn parse_strip(img: &ImgMatrix,
 // vertical separator is a column within the strip with no white pixels, separates tokens
 fn is_vertical_separator(img: &ImgMatrix, frame: &TokenFrameInfo, x: usize) -> bool {
     for y in frame.top..frame.bottom {
-        if img[x][y] {
+        if img[Coord{x, y}] == 1 {
             return false;
         }
     }
@@ -139,8 +137,7 @@ fn parse_token(img: &ImgMatrix,
     unidentified: &mut Vec<ImgMatrix>,
     operations: &HashMap<String, ImgMatrix>) -> Token {
 
-    let width = img.len();
-    assert!(frame.right < width);
+    assert!(frame.right < img.width);
 
     if is_integer(img, frame.left, frame.top) {
         return parse_integer(img, frame);
@@ -165,25 +162,27 @@ fn parse_token(img: &ImgMatrix,
 
 // assuming every integer number has corner of 0, 1, 1
 fn is_integer(img: &ImgMatrix, x: usize, y: usize) -> bool {
-    !img[x][y] && img[x + 1][y] && img[x][y + 1]
+    img[Coord {x, y}] == 0 && img[Coord {x: x + 1, y}] == 1 && img[Coord {x, y: y + 1}] == 1
 }
 
 
 fn parse_integer(img: &ImgMatrix, frame: &TokenFrameInfo) -> Token {
     let mut base = 0;
     for i in 1.. {
-        if !img[frame.left + i][frame.top] { break; }
+        if img[Coord { x: frame.left + i, y: frame.top}] == 0 { break; }
         base = i;
     }
     assert!(frame.right == frame.left + base + 1);
 
-    let sgn = if img[frame.left][frame.top + base + 1] { -1 } else { 1 };
+    let sgn = if img[Coord { x: frame.left, y: frame.top + base + 1}] == 1 { -1 } else { 1 };
 
     let mut digit = 1;
     let mut n = 0;
     for i in 1..base+1 {
         for j in 1..base+1 {
-            if img[frame.left + j][frame.top + i] { n += digit; }
+            if img[Coord { x: frame.left + j, y: frame.top + i }] == 1 {
+                n += digit;
+            }
             digit *= 2;
         }
     }
@@ -195,10 +194,12 @@ fn is_variable(img: &ImgMatrix, frame: &TokenFrameInfo) -> bool {
     let size = frame.right - frame.left;
     if size < 4 { return false };
     for i in 0..size {
-        if !img[frame.left + i][frame.top] { return false; }
-        if !img[frame.left + i][frame.top + size - 1] { return false; }
-        if !img[frame.left][frame.top + i] { return false; }
-        if !img[frame.left + size - 1][frame.top + i] { return false; }
+        if img[Coord { x : frame.left + i, y : frame.top }] == 0 
+        || img[Coord { x : frame.left + i, y : frame.top + size - 1 }] == 0
+        || img[Coord { x : frame.left, y : frame.top + i }] == 0
+        || img[Coord { x : frame.left + size - 1, y : frame.top + i }] == 0 { 
+               return false;
+        }
     }
 
     true
@@ -213,7 +214,7 @@ fn parse_variable(img: &ImgMatrix, frame: &TokenFrameInfo) -> Token {
     let mut n = 0;
     for i in 2..base + 2 {
         for j in 2..base + 2 {
-            if !img[frame.left + j][frame.top + i] { n += digit; }
+            if img[Coord{ x : frame.left + j, y : frame.top + i}] == 0 { n += digit; }
             digit *= 2;
         }
     }
@@ -223,11 +224,11 @@ fn parse_variable(img: &ImgMatrix, frame: &TokenFrameInfo) -> Token {
 
 // checks if it's "...." sign
 fn is_omission(img: &ImgMatrix, frame: &TokenFrameInfo, x: usize) -> bool {
-    if frame.left > img.len() - 8 { return false; }
+    if frame.left > img.width - 8 { return false; }
 
     let mut h = 0;  // vertical position of the ellipsis
     for y in frame.top..frame.bottom {
-        if img[x][y] { 
+        if img[Coord{ x, y }] == 1 { 
             h = y;
             break;
         }
@@ -235,7 +236,7 @@ fn is_omission(img: &ImgMatrix, frame: &TokenFrameInfo, x: usize) -> bool {
 
     for i in 0..4 {
         for y in frame.top..frame.bottom {
-            if img[x + i * 2][y] != (y == h) { return false; }
+            if (img[Coord { x : x + i * 2, y }] == 1) != (y == h) { return false; }
         }
         if !is_vertical_separator(img, frame, x + i*2 + 1) { return false; }
     }
@@ -259,25 +260,25 @@ fn get_unknown(sample: &ImgMatrix, unidentified: &mut Vec<ImgMatrix>) -> Token {
 
 // makes a small Image Matrix with just a given token in it
 fn crop_image(img: &ImgMatrix, frame: &TokenFrameInfo) -> ImgMatrix {
-    let mut v: ImgMatrix = vec![Vec::new(); frame.right - frame.left];
+    let mut v: Vec<Vec<u8>> = Vec::new();
     for y in frame.top..frame.bottom {
+        let mut u: Vec<u8> = Vec::new();
         let mut end = true;
         for x in frame.left..frame.right {
-            if img[x][y] { end = false; }
+            u.push(img[Coord { x, y }]);
+            if img[Coord { x, y }] == 1 { end = false; }
         }
         if end { break; }
-        for x in frame.left..frame.right {
-            v[x - frame.left].push(img[x][y]);
-        }
+        v.push(u)
     }
 
-    v
+    ImgMatrix::from_vec(&v)
 }
 
 fn show_image(img: &ImgMatrix) {
-    for y in 0..img[0].len() {
-        for x in 0..img.len() {
-            if img[x][y] { print!("# "); }
+    for y in 0..img.height {
+        for x in 0..img.width {
+            if img[Coord { x, y }]  == 1 { print!("# "); }
             else { print!(". "); }
         }
         println!();
