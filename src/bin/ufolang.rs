@@ -32,7 +32,7 @@ enum Value {
     Number(i64),
     Use(usize),  // reference to a definition like ':1234'
     K,  // aka True
-    C, C1(Rc<Value>), C2(Rc<Value>),
+    C, C1(Rc<Value>), C2(Rc<Value>, Rc<Value>),
     B, B1(Rc<Value>), B2(Rc<Value>, Rc<Value>),
     S, S1(Rc<Value>), S2(Rc<Value>, Rc<Value>),
     I,
@@ -43,12 +43,21 @@ enum Value {
     Cdr,
     Neg,
     Eq, Eq1(Rc<Value>),
-    Mul,
+    Mul, Mul1(Rc<Value>),
     Add, Add1(Rc<Value>),
     Lt,
     Div,
 }
 use Value::*;
+
+impl Value {
+    fn try_as_number(&self) -> Option<i64> {
+        match self {
+            Number(x) => Some(*x),
+            _ => None,
+        }
+    }
+}
 
 struct Context {
     names: Vec<String>,
@@ -73,9 +82,12 @@ impl Context {
                 if let Ok(num) = s.parse() {
                     return Rc::new(Number(num))
                 }
-                if s.starts_with(':') {
-                    return Rc::new(Use(name_to_def_idx[s]))
+                if let Some(&def_idx) = name_to_def_idx.get(s) {
+                    return Rc::new(Use(def_idx));
                 }
+                // if s.starts_with(':') {
+                //     return Rc::new(Use(name_to_def_idx[s]))
+                // }
                 match s {
                     "cons" => Rc::new(Cons),
                     "nil" => Rc::new(Nil),
@@ -131,6 +143,7 @@ fn apply(f: Rc<Value>, x: Rc<Value>, ctx: &Context) -> Rc<Value> {
         B1(ref a) => Rc::new(B2(a.clone(), x)),
 
         C => Rc::new(C1(x)),
+        C1(ref a) => Rc::new(C2(a.clone(), x)),
 
         Eq => Rc::new(Eq1(x)),
 
@@ -138,15 +151,12 @@ fn apply(f: Rc<Value>, x: Rc<Value>, ctx: &Context) -> Rc<Value> {
 
         Add => Rc::new(Add1(x)),
         Add1(ref a) => {
-            let a = match **a {
-                Number(a) => a,
-                _ => panic!("can't add {:?}", a),
-            };
-            let b = match *x {
-                Number(b) => b,
-                _ => panic!("canot add {:?}", x),
-            };
-            Rc::new(Number(a + b))
+            Rc::new(Number(a.try_as_number().unwrap() + x.try_as_number().unwrap()))
+        }
+
+        Mul => Rc::new(Mul1(x)),
+        Mul1(ref a) => {
+            Rc::new(Number(a.try_as_number().unwrap() * x.try_as_number().unwrap()))
         }
 
         _ => panic!("{:?}", f),
@@ -192,7 +202,6 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use super::Value::*;
 
     fn run_snippet(src: &str) -> Rc<Value> {
         let src = parse(src.trim_end());
@@ -202,7 +211,7 @@ mod tests {
     }
 
     #[test]
-    fn test_add() {
+    fn add() {
         assert_eq!(run_snippet("\
             main = ap ap add 20 30
         "), Rc::new(Number(50)));
@@ -217,4 +226,15 @@ mod tests {
             main = ap ap add ap ap add 100 20 3
         "), Rc::new(Number(123)));
     }
+
+    /*
+    TODO: this overflows stack
+    #[test]
+    fn pwr2() {
+        assert_eq!(run_snippet("\
+            pwr2   =   ap ap s ap ap c ap eq 0 1 ap ap b ap mul 2 ap ap b pwr2 ap add -1
+            main = ap pwr2 0
+        "), Rc::new(Number(1)));
+    }
+    */
 }
