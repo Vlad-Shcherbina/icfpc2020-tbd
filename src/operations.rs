@@ -84,6 +84,25 @@ pub fn read_operations() -> HashMap<String, ImgMatrix> {
                                   vec![1, 0]])
     );
 
+    
+      
+    m.insert(
+        "demod".to_string(),   // message38
+        ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1],
+                                  vec![1, 1, 0, 1],
+                                  vec![1, 0, 1, 0],
+                                  vec![1, 1, 0, 1]])
+    );
+
+      
+    m.insert(
+        "mod".to_string(),   // message38
+        ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1],
+                                  vec![1, 0, 1, 0],
+                                  vec![1, 1, 0, 1],
+                                  vec![1, 0, 1, 0]])
+    );
+
     //  CONTEST STARS
 
     m.insert(
@@ -249,5 +268,78 @@ pub fn read_operations() -> HashMap<String, ImgMatrix> {
                                   vec![1, 0, 1, 0]])
     );
 
+    m.insert(
+        "pic37".to_string(),   // message37
+        ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1, 1],
+                                  vec![1, 0, 0, 0, 0],
+                                  vec![1, 0, 1, 1, 1],
+                                  vec![1, 1, 1, 0, 0],
+                                  vec![1, 0, 1, 1, 1]])
+    );
+
+ 
+    m.insert(
+        "pic38_1".to_string(),   // message38
+        ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1, 1, 1],
+                                  vec![1, 0, 0, 0, 0, 1],
+                                  vec![1, 0, 1, 1, 0, 1],
+                                  vec![1, 0, 1, 1, 0, 1],
+                                  vec![1, 0, 0, 0, 0, 1],
+                                  vec![1, 1, 1, 1, 1, 1]])
+    );
+  
+    m.insert(
+        "pic38_2".to_string(),   // message38
+        ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1, 1, 1],
+                                  vec![1, 0, 0, 0, 0, 0],
+                                  vec![1, 0, 0, 0, 0, 0],
+                                  vec![1, 0, 0, 0, 0, 0],
+                                  vec![1, 1, 0, 0, 1, 1],
+                                  vec![1, 0, 1, 1, 0, 0]])
+    );
+
+    m.insert(
+        "pic38_5".to_string(),   // message38
+        ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1, 1, 1],
+                                  vec![1, 0, 1, 0, 0, 1],
+                                  vec![1, 0, 1, 1, 1, 1],
+                                  vec![1, 1, 1, 1, 0, 1],
+                                  vec![1, 0, 0, 1, 0, 1],
+                                  vec![1, 1, 1, 1, 1, 1]])
+    );
+
+    m.insert(
+        "pic40".to_string(),   // message40
+        ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1, 1, 1, 1],
+                                  vec![1, 0, 0, 0, 0, 1, 0],
+                                  vec![1, 0, 0, 0, 0, 0, 0],
+                                  vec![1, 0, 0, 0, 0, 0, 0],
+                                  vec![1, 0, 0, 0, 0, 0, 0],
+                                  vec![1, 0, 1, 0, 0, 0, 0],
+                                  vec![1, 0, 0, 0, 0, 0, 0]])
+    );
+  
+    m.insert(
+        "pic41".to_string(),   // message41
+        ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1, 1, 1, 1],
+                                  vec![1, 1, 0, 0, 0, 0, 0],
+                                  vec![1, 1, 0, 0, 0, 0, 0],
+                                  vec![1, 0, 0, 0, 0, 0, 0],
+                                  vec![1, 0, 0, 0, 0, 0, 0],
+                                  vec![1, 0, 0, 1, 0, 0, 0],
+                                  vec![1, 0, 0, 0, 0, 0, 0]])
+    );
+    
+    m.insert(
+        "pic42".to_string(),   // message42
+        ImgMatrix::from_vec(&vec![vec![0, 0, 1, 1, 1, 0, 0],
+                                  vec![0, 0, 0, 0, 0, 1, 0],
+                                  vec![0, 1, 1, 1, 0, 0, 1],
+                                  vec![1, 0, 1, 0, 1, 0, 1],
+                                  vec![1, 0, 0, 1, 1, 1, 0],
+                                  vec![0, 1, 0, 0, 0, 0, 0],
+                                  vec![0, 0, 1, 1, 1, 0, 0]])
+    );
+  
     m
 }
