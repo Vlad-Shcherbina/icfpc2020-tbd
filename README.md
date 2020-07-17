@@ -95,19 +95,20 @@ cargo run -p username --bin my_script   # run my_script.rs in package "username"
 
 ### Data directories
 
- * `data/`: For stuff like examples from the problem statement.
+ * `data/`: For stuff made by humans for computers.
+   Like examples from the problem statement that you want to use in tests.
    Everything here is under version control.
    Maybe don't commit tons of generated files here without a good reason.
- * `outputs/`: For logs, images rendered by visualizers, etc.
-   In other word, stuff produced by machines for humans.
+ * `outputs/`: For stuff made by computers for humans.
+   Like logs, images rendered by visualizers, etc.
    Not under version control.
- * `cache/`: This directory is for generated files that could be helpful to have around,
-   but should be safe to delete at any time (they should be regenerated if needed).
+ * `cache/`: For stuff made by computers for computers.
+   Like build artifact cache.
+   It should be safe to delete at any time (should be regenerated if needed).
    Not under version control.
 
-By the way, there is an utility function:
-`project_path("data/zzz")` returns absolute path to this file
-independently of the current directory.
+By the way, there is an utility function for dealing with project-relative paths:
+`project_path("data/zzz")` returns absolute path to this file independently of the current directory.
 
 ### Poor man's continuous integration
 
