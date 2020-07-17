@@ -1,6 +1,7 @@
 use julie::png_interface as pngs;
 use julie::img_matrix::ImgMatrix;
 use julie::img_matrix::Coord;
+use julie::operations::read_operations;
 
 use std::collections::HashMap;
 
@@ -14,7 +15,7 @@ fn main() {
 
     let v = pngs::bordered_png_to_matrix(&format!("scratches\\julie\\data\\{}", filename));
     let mut unidentified: Vec<ImgMatrix> = Vec::new();
-    let operations = pngs::read_operations();
+    let operations = read_operations();
 
     println!("{}", parse_image(&v, &mut unidentified, &operations));
     println!("Unidentified tokens:");
