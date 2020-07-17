@@ -79,7 +79,7 @@ fn parse_strip(img: &ImgMatrix,
         }
 
         if frame.right >= img.width { break; }
-
+        
         match parse_token(img, frame, unidentified, operations) {
             Token::Integer(x)   => result.push_str(&x.to_string()),
             // Token::Float(x) => result.push_str(&x.to_string()),
@@ -117,11 +117,9 @@ fn parse_token(img: &ImgMatrix,
     operations: &HashMap<String, ImgMatrix>) -> Token {
 
     assert!(frame.right < img.width);
-
     if let Some(a) = parse_integer(img, frame) {
         return a;
     }
-
     if is_variable(img, frame) {
         return parse_variable(img, frame);
     }
@@ -142,6 +140,7 @@ fn parse_integer(img: &ImgMatrix, frame: &TokenFrameInfo) -> Option<Token> {
     if img[Coord {x : frame.left, y : frame.top}] != 0 { return None; }
 
     let base = frame.right - frame.left - 1;
+    if base < 1 ||  base > (frame.bottom - frame.top - 1) { return None; }
     for i in 1..base + 1 {
         if img[Coord {x : frame.left, y : frame.top + i}] == 0 { return None; }
         if img[Coord {x : frame.left + i, y : frame.top}] == 0 { return None; }
@@ -241,10 +240,9 @@ fn crop_image(img: &ImgMatrix, frame: &TokenFrameInfo) -> ImgMatrix {
             u.push(img[Coord { x, y }]);
             if img[Coord { x, y }] == 1 { end = false; }
         }
-        if end { break; }
+        if end && v.len() > 0 { break; }
         v.push(u)
     }
-
     ImgMatrix::from_vec(&v)
 }
 

@@ -54,13 +54,17 @@ impl PartialEq for ImgMatrix {
 
 impl ImgMatrix {
     pub fn new(width: usize, height: usize) -> ImgMatrix {
+        assert_ne!(height, 0);
+        assert_ne!(width, 0);
         let data: Vec<Vec<u8>> = vec![vec![0; width]; height];
         ImgMatrix { width, height, data }
     }
 
     pub fn from_vec(data: &Vec<Vec<u8>>) -> ImgMatrix {
         let height = data.len();
+        assert_ne!(height, 0);
         let width = data[0].len();
+        assert_ne!(width, 0);
         for v in data.iter() {
             assert_eq!(width, v.len());
         }

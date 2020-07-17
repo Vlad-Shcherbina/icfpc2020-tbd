@@ -192,6 +192,62 @@ pub fn read_operations() -> HashMap<String, ImgMatrix> {
                                   vec![1, 0, 0, 0, 1, 0],
                                   vec![1, 0, 0, 0, 0, 1]])
     );
+
+    m.insert(
+        "pic33".to_string(),   // message33
+        ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1, 1, 1],
+                                  vec![1, 0, 1, 0, 1, 0],
+                                  vec![1, 1, 0, 1, 0, 1],
+                                  vec![1, 0, 1, 0, 1, 0],
+                                  vec![1, 1, 0, 1, 0, 1],
+                                  vec![1, 0, 1, 0, 1, 0]])
+    );
+
+
+    m.insert(
+        "pic34_1".to_string(),   // message34
+        ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1, 1, 1, 1],
+                                  vec![1, 0, 0, 1, 0, 0, 1],
+                                  vec![1, 0, 0, 1, 0, 0, 1],
+                                  vec![1, 1, 1, 1, 1, 1, 1],
+                                  vec![1, 0, 0, 1, 0, 0, 1],
+                                  vec![1, 0, 0, 1, 0, 0, 1],
+                                  vec![1, 1, 1, 1, 1, 1, 1]])
+    );
+ 
+    m.insert(
+        "pic34_2".to_string(),   // message34
+        ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1, 1, 1],
+                                  vec![1, 0, 0, 0, 0, 1],
+                                  vec![1, 0, 0, 0, 0, 1],
+                                  vec![1, 0, 0, 0, 0, 1],
+                                  vec![1, 0, 0, 0, 0, 1],
+                                  vec![1, 1, 1, 1, 1, 1]])
+    );
+
+    m.insert(
+        "pic35_1".to_string(),   // message35
+        ImgMatrix::from_vec(&vec![vec![0, 0],
+                                  vec![1, 1]])
+    );
+
+    m.insert(
+        "pic36_1".to_string(),   // message36
+        ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1, 1, 1],
+                                  vec![1, 1, 1, 1, 1, 1],
+                                  vec![1, 1, 1, 1, 1, 0],
+                                  vec![1, 1, 1, 1, 0, 0],
+                                  vec![1, 1, 1, 0, 0, 1],
+                                  vec![1, 1, 0, 0, 0, 0]])
+    );
   
+    m.insert(
+        "pic36_2".to_string(),   // message36
+        ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1],
+                                  vec![1, 0, 1, 1],
+                                  vec![1, 1, 0, 1],
+                                  vec![1, 0, 1, 0]])
+    );
+
     m
 }
