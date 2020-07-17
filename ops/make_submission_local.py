@@ -24,6 +24,7 @@ import os
 import sys
 import time
 import shutil
+import getpass
 import platform
 import subprocess
 from pathlib import Path
@@ -70,7 +71,7 @@ def main():
             str(sub_repo),
             ], env=ssh_env)
 
-        subprocess.check_call(['git', 'config', 'user.name', 'make_submission'], cwd=sub_repo)
+        subprocess.check_call(['git', 'config', 'user.name', getpass.getuser()], cwd=sub_repo)
         subprocess.check_call(['git', 'config', 'user.email', 'make@submission'], cwd=sub_repo)
 
     subprocess.check_call(['git', 'reset', '--hard'], cwd=sub_repo, env=ssh_env)
@@ -82,7 +83,7 @@ def main():
         subprocess.check_call(['git', 'checkout', '-b', raw_branch], cwd=sub_repo)
         subprocess.check_call(['git', 'push', '--set-upstream', 'origin', raw_branch], cwd=sub_repo, env=ssh_env)
 
-    time.sleep(0.1)  # to avoid interliving with the output from the above commands
+    time.sleep(0.1)  # to avoid interleaving with the output from the above commands
     print('*' * 30)
     message = input('Describe this submission in one line:\n')
 
