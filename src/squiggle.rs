@@ -4,11 +4,68 @@ pub enum Sign {
     Minus
 }
 
+impl Sign {
+    pub fn to_string(&self) -> String {
+        match self {
+            Sign::Plus => String::from("+"),
+            Sign::Minus => String::from("-"),
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub enum Data {
     Nil,
     Number(Sign, u32),
     Cons(Box<Data>, Box<Data>)
+}
+
+impl Data {
+    pub fn to_string(&self) -> String {
+        match self {
+            Data::Nil => String::from("nil"),
+            Data::Number(sign, x) => {
+                format!("{}{}", sign.to_string(), x)
+            }
+            Data::Cons(head, tail) => {
+                format!("({}, {})", head.to_string(), tail.to_string())
+            }
+        }
+    }
+
+    pub fn from_str(s: &str) -> Option<Self> {
+        // super hujovo
+        if s == "nil" {
+            Some(Data::Nil)
+        } else if s.starts_with("+") || s.starts_with("-") {
+            let sign = if s.starts_with("+") { Sign::Plus } else { Sign::Minus };
+            let value: u32 = s[1..].parse().ok()?;
+            Some(Data::Number(sign, value))
+        } else if s.starts_with("(") && s.ends_with(")") {
+            let s = &s[1..s.len()-1];
+
+            // find comma
+            let mut parens = 0;
+            let mut comma_pos = None;
+            for (i, ch) in s.char_indices() {
+                if (ch == ',') && (parens == 0) {
+                    comma_pos = Some(i);
+                    break;
+                } else if ch == '(' {
+                    parens += 1;
+                } else if ch == ')' {
+                    parens -= 1;
+                }
+            }
+
+            let comma_pos = comma_pos?;
+            let head = Data::from_str(&s[..comma_pos])?;
+            let tail = Data::from_str(&s[comma_pos+2..])?;
+            Some(Data::Cons(Box::new(head), Box::new(tail)))
+        } else {
+            None
+        }
+    }
 }
 
 pub fn bytes_to_squiggle(bytes: &[u8]) -> Option<Vec<u8>> {

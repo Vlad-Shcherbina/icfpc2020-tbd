@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-ureq = { version = "*", default-features = false }
+ureq = "1.3.0"
 png = "0.16.6"
 
 [workspace]
