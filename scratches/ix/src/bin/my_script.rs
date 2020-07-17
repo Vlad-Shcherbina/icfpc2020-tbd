@@ -1,4 +1,6 @@
+use ix::ufo_calc as uc;
+
 fn main() {
-    tbd::hello();
-    println!("(from scratch)");
+    uc::test();
+
 }
