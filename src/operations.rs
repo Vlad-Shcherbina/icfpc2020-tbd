@@ -86,8 +86,8 @@ pub fn read_operations() -> HashMap<String, ImgMatrix> {
                                   vec![1, 0]])
     );
 
-    
-      
+
+
     m.insert(
         "demodulate".to_string(),   // message38
         ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1],
@@ -96,7 +96,7 @@ pub fn read_operations() -> HashMap<String, ImgMatrix> {
                                   vec![1, 1, 0, 1]])
     );
 
-      
+
     m.insert(
         "modulate".to_string(),   // message38
         ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1],
@@ -185,7 +185,7 @@ pub fn read_operations() -> HashMap<String, ImgMatrix> {
                                   vec![1, 1, 1],
                                   vec![1, 1, 1]])
     );
-  
+
     m.insert(
         "[".to_string(),   // message30
         ImgMatrix::from_vec(&vec![vec![0, 0, 1],
@@ -212,7 +212,7 @@ pub fn read_operations() -> HashMap<String, ImgMatrix> {
                                   vec![1, 1, 0],
                                   vec![1, 0, 0]])
     );
-  
+
     m.insert(
         "vec".to_string(),   // message31
         ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1, 1, 1],
@@ -262,7 +262,7 @@ pub fn read_operations() -> HashMap<String, ImgMatrix> {
     );
 
     m.insert(
-        "send".to_string(),   // message36
+        "planetfall".to_string(),   // message36, not official name
         ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1, 1, 1],
                                   vec![1, 1, 1, 1, 1, 1],
                                   vec![1, 1, 1, 1, 1, 0],
@@ -270,9 +270,9 @@ pub fn read_operations() -> HashMap<String, ImgMatrix> {
                                   vec![1, 1, 1, 0, 0, 1],
                                   vec![1, 1, 0, 0, 0, 0]])
     );
-  
+
     m.insert(
-        "pic36_2".to_string(),   // message36
+        "send".to_string(),   // message36
         ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1],
                                   vec![1, 0, 1, 1],
                                   vec![1, 1, 0, 1],
@@ -288,7 +288,7 @@ pub fn read_operations() -> HashMap<String, ImgMatrix> {
                                   vec![1, 0, 1, 1, 1]])
     );
 
- 
+
     m.insert(
         "interact".to_string(),   // message38
         ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1, 1, 1],
@@ -298,7 +298,7 @@ pub fn read_operations() -> HashMap<String, ImgMatrix> {
                                   vec![1, 0, 0, 0, 0, 1],
                                   vec![1, 1, 1, 1, 1, 1]])
     );
-  
+
     m.insert(
         "modem".to_string(),   // message38
         ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1, 1, 1],
@@ -329,7 +329,7 @@ pub fn read_operations() -> HashMap<String, ImgMatrix> {
                                   vec![1, 0, 1, 0, 0, 0, 0],
                                   vec![1, 0, 0, 0, 0, 0, 0]])
     );
-  
+
     m.insert(
         "pic41".to_string(),   // message41
         ImgMatrix::from_vec(&vec![vec![1, 1, 1, 1, 1, 1, 1],
@@ -340,7 +340,7 @@ pub fn read_operations() -> HashMap<String, ImgMatrix> {
                                   vec![1, 0, 0, 1, 0, 0, 0],
                                   vec![1, 0, 0, 0, 0, 0, 0]])
     );
-    
+
     m.insert(
         "pic42".to_string(),   // message42
         ImgMatrix::from_vec(&vec![vec![0, 0, 1, 1, 1, 0, 0],
@@ -351,6 +351,6 @@ pub fn read_operations() -> HashMap<String, ImgMatrix> {
                                   vec![0, 1, 0, 0, 0, 0, 0],
                                   vec![0, 0, 1, 1, 1, 0, 0]])
     );
-  
+
     m
 }
