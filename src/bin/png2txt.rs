@@ -1,7 +1,7 @@
 use tbd::png_files as pngs;
 use tbd::img_matrix::ImgMatrix;
 use tbd::operations::read_operations;
-use tbd::parse_image::{ show_image, parse_image };
+use tbd::parse_image::{ parse_image };
 
 use std::path::{Path};
 
@@ -29,6 +29,6 @@ fn main() {
     println!("Unidentified tokens:");
     for (i, m) in unidentified.iter().enumerate() {
         println!("\n?{}", i);
-        show_image(m);
+        print!("{}", m);
     }
 }

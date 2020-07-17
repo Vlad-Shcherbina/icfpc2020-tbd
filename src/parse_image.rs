@@ -14,7 +14,7 @@ struct TokenFrameInfo {
 #[derive(Debug, PartialEq, Eq)]
 pub enum Token {
     Integer(i64),
-    // Float(f64),
+    Squiggly(String),
     Variable(i64),
     Operation(String),
     Unknown(usize),  // id in list of unknown tokens
@@ -29,6 +29,7 @@ impl Display for Token {
             Token::Operation(x) => write!(f, "{}", x),
             Token::Unknown(x)   => write!(f, "?{}", x),
             Token::Omission     => write!(f, "..."),
+            Token::Squiggly(x)  => write!(f, "[{}]", &x),
         }
     }
 }
@@ -123,42 +124,48 @@ fn parse_token(img: &ImgMatrix,
     operations: &HashMap<String, ImgMatrix>) -> Token {
 
     assert!(frame.right < img.width);
-    if let Some(a) = parse_integer(img, frame) {
-        return a;
-    }
-    if is_variable(img, frame) {
-        return parse_variable(img, frame);
-    }
 
     if is_omission(img, frame, frame.left) {
         return Token::Omission;
     }
 
     let sample = crop_image(img, frame);
+
+    if let Some(a) = parse_integer(&sample) {
+        return a;
+    }
+
+    if let Some(a) = parse_variable(&sample) {
+        return a;
+    }
+
     if let Some(a) = get_operation(&sample, operations) {
+        return a;
+    }
+
+    if let Some(a) = parse_squiggly(&sample) {
         return a;
     }
 
     return get_unknown(&sample, unidentified);
 }
 
-fn parse_integer(img: &ImgMatrix, frame: &TokenFrameInfo) -> Option<Token> {
-    if img[Coord {x : frame.left, y : frame.top}] != 0 { return None; }
+fn parse_integer(img: &ImgMatrix) -> Option<Token> {
+    if img[Coord {x : 0, y : 0}] != 0 { return None; }
 
-    let base = frame.right - frame.left - 1;
-    if base < 1 ||  base > (frame.bottom - frame.top - 1) { return None; }
-    for i in 1..base + 1 {
-        if img[Coord {x : frame.left, y : frame.top + i}] == 0 { return None; }
-        if img[Coord {x : frame.left + i, y : frame.top}] == 0 { return None; }
+    if img.width < 2 || img.width > img.height || img.width < img.height - 1 { return None; }
+    for i in 1..img.width {
+        if img[Coord {x : 0, y : i}] == 0 { return None; }
+        if img[Coord {x : i, y : 0}] == 0 { return None; }
     }
 
-    let sgn = if img[Coord { x: frame.left, y: frame.top + base + 1}] == 1 { -1 } else { 1 };
+    let sgn = if img.width == img.height { 1 } else { -1 };
 
     let mut digit = 1;
     let mut n = 0;
-    for i in 1..base+1 {
-        for j in 1..base+1 {
-            if img[Coord { x: frame.left + j, y: frame.top + i }] == 1 {
+    for x in 1..img.width {
+        for y in 1..img.width {
+            if img[Coord { x, y  }] == 1 {
                 n += digit;
             }
             digit *= 2;
@@ -168,36 +175,48 @@ fn parse_integer(img: &ImgMatrix, frame: &TokenFrameInfo) -> Option<Token> {
 }
 
 
-fn is_variable(img: &ImgMatrix, frame: &TokenFrameInfo) -> bool {
-    let size = frame.right - frame.left;
-    if size < 4 { return false };
-    if size < 1 ||  size > (frame.bottom - frame.top - 1) { return false; }
+fn parse_variable(img: &ImgMatrix) -> Option<Token> {
+    let size = img.width;
+    if img.width < 4 { return None; }
+    if img.width < 1 ||  img.width != img.height { return None; }
     for i in 0..size {
-        if img[Coord { x : frame.left + i, y : frame.top }] == 0 
-        || img[Coord { x : frame.left + i, y : frame.top + size - 1 }] == 0
-        || img[Coord { x : frame.left, y : frame.top + i }] == 0
-        || img[Coord { x : frame.left + size - 1, y : frame.top + i }] == 0 { 
-               return false;
+        if img[Coord { x : i, y : 0 }] == 0 
+        || img[Coord { x : i, y : size - 1 }] == 0
+        || img[Coord { x : 0, y : 0 }] == 0
+        || img[Coord { x : size - 1, y : i }] == 0 { 
+               return None;
         }
     }
+    if img[Coord {x : 1, y : 1 }] == 0 { return None; }
 
-    img[Coord {x : frame.left + 1, y : frame.top + 1 }] == 1
-}
-
-
-fn parse_variable(img: &ImgMatrix, frame: &TokenFrameInfo) -> Token {
-    let base = frame.right - frame.left - 3;
+    let base = size - 3;
     // additional -2 due to the border
 
     let mut digit = 1;
     let mut n = 0;
     for i in 2..base + 2 {
         for j in 2..base + 2 {
-            if img[Coord{ x : frame.left + j, y : frame.top + i}] == 0 { n += digit; }
+            if img[Coord{ x : j, y : i}] == 0 { n += digit; }
             digit *= 2;
         }
     }
-    Token::Variable(n)
+    Some(Token::Variable(n))
+}
+
+fn parse_squiggly(img: &ImgMatrix) -> Option<Token> {
+    if img.width < 2 { return None; }
+
+    let mut s = String::new();
+    for x in 0..img.width {
+        if img[Coord{x, y: 0}] == img[Coord{x, y: 1}] {
+            return None;
+        }
+        for y in 2..img.height {
+            if img[Coord{x, y}] == 1 { return None; }
+        }
+        s.push_str(&img[Coord{x, y: 0}].to_string());
+    }
+    Some(Token::Squiggly(s))
 }
 
 
@@ -268,8 +287,3 @@ impl Display for ImgMatrix {
         Ok(())
     }
 }
-
-pub fn show_image(img: &ImgMatrix) {
-    print!("{}", img);
-}
-
