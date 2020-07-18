@@ -1,5 +1,5 @@
 use tbd::project_path;
-use tbd::ufolang::Protocol;
+use tbd::ufolang::{Protocol, eval_multidraw, InteractResult};
 use tbd::squiggle::Data;
 
 use warp::Filter;
@@ -7,6 +7,9 @@ use serde::{Deserialize, Serialize};
 use tokio::runtime::Builder;
 use tokio::time::delay_for;
 use std::time::Duration;
+use tbd::png_files::matrices_to_png;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 
 #[derive(Deserialize, Serialize)]
 struct ClickParams {
@@ -28,6 +31,15 @@ struct ClickResponse {
     pixels: Vec<Vec<(i128, i128)>>
 }
 
+fn save_pics(result: &InteractResult) {
+    let matrices = eval_multidraw(result.data_out_to_multipledraw.clone());
+    let mut hasher = DefaultHasher::new();
+    result.final_state.hash(&mut hasher);
+    let step_dir = format!("outputs/galaxy--{:x}", hasher.finish());
+    matrices_to_png(&matrices, project_path(&step_dir));
+    std::fs::write(project_path(&step_dir).join("state.txt"), result.final_state.to_string()).unwrap();
+}
+
 fn process_click(click: &ClickParams) -> ClickResponse {
     let protocol = Protocol::load_galaxy();
     let state = match Data::from_str(&click.state) {
@@ -36,6 +48,7 @@ fn process_click(click: &ClickParams) -> ClickResponse {
     };
 
     let result = protocol.interact(state, Data::make_cons(click.x, click.y));
+    // save_pics(&result);
 
     // let pixels = result.data_out_to_multipledraw.into_vec().iter().map(
     //     |x| x.into_vec().iter().map(|y| data_try_to_coords(y).unwrap()).collect()
