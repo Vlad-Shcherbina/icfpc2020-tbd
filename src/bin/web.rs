@@ -69,7 +69,7 @@ async fn server_main() {
     let routes = index.or(click);
 
     warp::serve(routes)
-        .run(([127, 0, 0, 1], 3030))
+        .run(([127, 0, 0, 1], 22009))
         .await;
 }
 

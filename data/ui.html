@@ -7,6 +7,10 @@
 canvas {
 	image-rendering: optimizeSpeed;;
 }
+canvas.busy {
+	pointer-events: none;
+	mask-image: linear-gradient(rgba(0, 0, 0, 1.0), transparent);;
+}
 	</style>
 	<script type="text/javascript">
 var State = "(2, ((1, (-1, nil)), (0, (nil, nil))))"
@@ -19,6 +23,7 @@ var Colors = [
 ]
 
 function send_click(x, y) {
+	document.getElementById('canvas').classList.add('busy')
 	fetch('/click', {
 		method: 'POST',
 		headers: {
@@ -32,6 +37,7 @@ function send_click(x, y) {
 			document.getElementById('state').innerText = State
 
 			draw_pixels(pixels)
+			document.getElementById('canvas').classList.remove('busy')
 		})
 }
 
