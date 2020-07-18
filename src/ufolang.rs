@@ -49,6 +49,7 @@ pub enum Value {
     Lt,
     Div,
     False, False1,
+    Pair(Rc<Value>, Rc<Value>),  // result of cons
 }
 use Value::*;
 
@@ -87,9 +88,6 @@ impl Context {
                 if let Some(&def_idx) = name_to_def_idx.get(s) {
                     return Rc::new(Use(def_idx));
                 }
-                // if s.starts_with(':') {
-                //     return Rc::new(Use(name_to_def_idx[s]))
-                // }
                 match s {
                     "cons" => Rc::new(Cons),
                     "nil" => Rc::new(Nil),
@@ -122,7 +120,6 @@ impl Context {
 
 // never returns App, so eval() is idempotent
 fn eval(value: Rc<Value>, ctx: &Context) -> Rc<Value> {
-    // dbg!(&value);
     match *value {
         App(ref f, ref x) =>
             apply(
@@ -139,7 +136,6 @@ fn eval(value: Rc<Value>, ctx: &Context) -> Rc<Value> {
 
 // never returns App
 fn apply(f: Rc<Value>, x: Rc<Value>, ctx: &Context) -> Rc<Value> {
-    // todo!()
     match *f {
         K => Rc::new(K1(x)),
         K1(ref a) => eval(a.clone(), ctx),
