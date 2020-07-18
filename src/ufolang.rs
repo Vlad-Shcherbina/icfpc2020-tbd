@@ -48,7 +48,7 @@ pub enum Value {
     Add, Add1(Rc<Value>),
     Lt,
     Div,
-    False,
+    False, False1,
 }
 use Value::*;
 
@@ -142,10 +142,14 @@ fn apply(f: Rc<Value>, x: Rc<Value>, ctx: &Context) -> Rc<Value> {
     // todo!()
     match *f {
         K => Rc::new(K1(x)),
-        // K1
+        K1(ref a) => eval(a.clone(), ctx),
 
         B => Rc::new(B1(x)),
         B1(ref a) => Rc::new(B2(a.clone(), x)),
+        B2(ref a, ref b) => {
+            let bx = Rc::new(App(b.clone(), x));
+            eval(Rc::new(App(a.clone(), bx)), ctx)
+        }
 
         C => Rc::new(C1(x)),
         C1(ref a) => Rc::new(C2(a.clone(), x)),
@@ -156,6 +160,8 @@ fn apply(f: Rc<Value>, x: Rc<Value>, ctx: &Context) -> Rc<Value> {
 
         Eq => Rc::new(Eq1(x)),
         Eq1(ref a) => {
+            let a = eval(a.clone(), ctx);
+            let x = eval(x, ctx);
             if a.try_as_number().unwrap() == x.try_as_number().unwrap() {
                 Rc::new(K)
             } else {
@@ -176,13 +182,20 @@ fn apply(f: Rc<Value>, x: Rc<Value>, ctx: &Context) -> Rc<Value> {
 
         Add => Rc::new(Add1(x)),
         Add1(ref a) => {
-            Rc::new(Number(a.try_as_number().unwrap() + x.try_as_number().unwrap()))
+            let a = eval(a.clone(), ctx);
+            let b = eval(x, ctx);
+            Rc::new(Number(a.try_as_number().unwrap() + b.try_as_number().unwrap()))
         }
 
         Mul => Rc::new(Mul1(x)),
         Mul1(ref a) => {
-            Rc::new(Number(a.try_as_number().unwrap() * x.try_as_number().unwrap()))
+            let a = eval(a.clone(), ctx);
+            let b = eval(x, ctx);
+            Rc::new(Number(a.try_as_number().unwrap() * b.try_as_number().unwrap()))
         }
+
+        False => Rc::new(False1),
+        False1 => eval(x, &ctx),
 
         _ => panic!("{:?}", f),
     }
@@ -235,7 +248,7 @@ mod tests {
         eval(x, &ctx)
     }
 
-    /*#[test]
+    #[test]
     fn add() {
         assert_eq!(run_snippet("\
             main = ap ap add 20 30
@@ -250,13 +263,13 @@ mod tests {
         assert_eq!(run_snippet("\
             main = ap ap add ap ap add 100 20 3
         "), Rc::new(Number(123)));
-    }*/
+    }
 
-   /* #[test]
+    #[test]
     fn pwr2() {
         assert_eq!(run_snippet("\
             pwr2   =   ap ap s ap ap c ap eq 0 1 ap ap b ap mul 2 ap ap b pwr2 ap add -1
-            main = ap pwr2 0
-        "), Rc::new(Number(1)));
-    }*/
+            main = ap pwr2 7
+        "), Rc::new(Number(128)));
+    }
 }
