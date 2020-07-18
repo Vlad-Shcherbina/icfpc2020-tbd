@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset='utf-8'>
-	<title>hi</title>
+	<title>👽 hi</title>
 	<style>
 canvas {
 	image-rendering: optimizeSpeed;;
@@ -14,8 +14,8 @@ canvas.busy {
 	</style>
 	<script type="text/javascript">
 var State = "(2, ((1, (-1, nil)), (0, (nil, nil))))"
-var OffsetX = 0
-var OffsetY = 0
+var OffsetX = -200
+var OffsetY = -200
 var Colors = [
 	'rgb(255, 0, 0)', 'rgb(0, 255, 0)', 'rgb(0, 0, 255)',
 	'rgb(255, 255, 255)',
@@ -45,8 +45,8 @@ function draw_pixels(pixels) {
 	const canvas = document.getElementById('canvas')
 	const ctx = canvas.getContext('2d')
 
-	OffsetX = Math.min(...pixels.map(l => Math.min(...l.map(p => p[0]))))
-	OffsetY = Math.min(...pixels.map(l => Math.min(...l.map(p => p[1]))))
+	// OffsetX = Math.min(...pixels.map(l => Math.min(...l.map(p => p[0]))))
+	// OffsetY = Math.min(...pixels.map(l => Math.min(...l.map(p => p[1]))))
 
 	ctx.fillStyle = 'rgb(0, 0, 0)'
 	ctx.fillRect(0, 0, canvas.width, canvas.height)
