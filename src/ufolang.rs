@@ -149,7 +149,7 @@ impl Context {
 fn eval_draw(value: Data) -> ImgMatrix {
     // let mut points: Vec<Coord> = Vec::new();
     let points = value.into_vec();
-    let points: Vec<Coord> = points.iter().map(|p| match p {
+    let points: Vec<Coord> = points.into_iter().map(|p| match p {
         Data::Cons(car, cdr) => Coord {
             x: car.try_as_number().unwrap() as usize,
             y: cdr.try_as_number().unwrap() as usize
@@ -163,6 +163,10 @@ fn eval_draw(value: Data) -> ImgMatrix {
         image[p] = 1;
     }
     image
+}
+
+fn eval_multidraw(value: Data) -> Vec<ImgMatrix> {
+    value.into_vec().into_iter().map(|it| eval_draw(it)).collect()
 }
 
 // never returns App, so eval() is idempotent
