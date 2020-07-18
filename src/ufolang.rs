@@ -63,29 +63,34 @@ impl Value {
     }
 }
 
-impl TryFrom<Value> for squiggle::Data {
+impl TryFrom<&Value> for squiggle::Data {
     type Error = ();
 
-    fn try_from(val: Value) -> Result<Self, Self::Error> {
+    fn try_from(val: &Value) -> Result<Self, Self::Error> {
         match val {
             Number(i) => Ok(squiggle::Data::Number(
-                if i >= 0 {squiggle::Sign::Plus} else {squiggle::Sign::Minus},
+                if *i >= 0 {squiggle::Sign::Plus} else {squiggle::Sign::Minus},
                 i.abs() as u64)),
             Nil => Ok(squiggle::Data::Nil),
+            Pair(left, right) => Ok(squiggle::Data::Cons(
+                Box::new(Self::try_from(left.as_ref())?),
+                Box::new(Self::try_from(right.as_ref())?))),
             _ => Err(())
         }
     }
 }
 
-impl From<squiggle::Data> for Value {
-    fn from(val: squiggle::Data) -> Self {
+impl From<&squiggle::Data> for Value {
+    fn from(val: &squiggle::Data) -> Self {
         match val {
             squiggle::Data::Nil => Nil,
-            squiggle::Data::Number(sign, value) => Number(value as i64 * match sign {
+            squiggle::Data::Number(sign, value) => Number(*value as i64 * match sign {
                 squiggle::Sign::Plus => 1,
                 squiggle::Sign::Minus => -1,
             }),
-            squiggle::Data::Cons(left, right) => Cons, // FIXME
+            squiggle::Data::Cons(left, right) => Value::Pair(
+                Rc::new(Self::from(left.as_ref())),
+                Rc::new(Self::from(right.as_ref())))
         }
     }
 }
