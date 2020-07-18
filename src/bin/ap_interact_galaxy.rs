@@ -18,7 +18,8 @@ fn main1() {
     let stdin = std::io::stdin();
     let mut lines = stdin.lock().lines();
 
-    let mut state = Data::Nil;
+    //let mut state = Data::Nil;
+    let mut state = Data::make_list4(1, Data::make_cons(11, Data::Nil), 0, Data::Nil);
 
     let mut step = 0;
     println!("enter space-separated coordinates, e.g. '10 20'");

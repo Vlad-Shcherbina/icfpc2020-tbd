@@ -408,7 +408,7 @@ impl Protocol {
             }
             state = resp.new_state;
             eprintln!("sending to aliens: {:?}", resp.data_out);
-            data_in = aliens_send(resp.data_out);
+            data_in = aliens_send(None, resp.data_out);
             eprintln!("received from aliens: {:?}", data_in);
         }
     }

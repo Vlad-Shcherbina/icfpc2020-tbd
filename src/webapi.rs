@@ -2,16 +2,20 @@
 use crate::squiggle::*;
 use crate::API_KEY;
 
-const API_ENDPOINT: &str = "https://icfpc2020-api.testkontur.ru/aliens/send";
+const API_PROXY: &str = "https://icfpc2020-api.testkontur.ru/";
 
-pub fn aliens_send(data: Data) -> Data {
+pub fn aliens_send(api_url: Option<&str>, data: Data) -> Data {
     let modulated = modulate(data);
     // convert to string
     let modulated = modulated.iter().map(|&x| x.to_string()).collect::<Vec<_>>().join("");
 
     println!("sending {}", modulated);
 
-    let response = ureq::post(API_ENDPOINT)
+    let api_url = if let Some(url) = api_url { url } else { API_PROXY };
+
+    let api_endpoint = format!("{}{}", api_url, "/aliens/send");
+
+    let response = ureq::post(&api_endpoint)
         .query("apiKey", API_KEY)
         .send_string(&modulated);
 
