@@ -1,7 +1,7 @@
 use crate::{project_path, tree::Tree};
 use std::{collections::HashMap, rc::Rc, convert::TryFrom};
 use crate::squiggle;
-use crate::img_matrix::*;
+use crate::{webapi::aliens_send, img_matrix::*};
 
 fn ap_to_none(s: &str) -> Option<&str> {
     if s == "ap" { None } else { Some(s) }
@@ -374,16 +374,26 @@ impl Protocol {
         }
     }
 
-    fn interact(&self, initial_state: Rc<Value>, data_in: &squiggle::Data) -> InteractResult {
-        todo!()
-        // let mut state = initial_state;
-        // loop {
-        //     let resp = self.invoke(state, data_in);
-        //     // if resp.continue_flag =
-        // }
+    fn interact(&self, initial_state: Rc<Value>, mut data_in: squiggle::Data) -> InteractResult {
+        use std::convert::TryInto;
+        let mut state = initial_state;
+        loop {
+            let resp = self.invoke(state, &data_in);
+            if resp.continue_flag == 0 {
+                return InteractResult {
+                    final_state: resp.new_state.as_ref().try_into().unwrap(),
+                    data_out_to_multipledraw: resp.data_out,
+                }
+            }
+            state = resp.new_state;
+            eprintln!("sending to aliens: {}", resp.data_out.to_string());
+            data_in = aliens_send(resp.data_out);
+            eprintln!("received from aliens: {}", data_in.to_string());
+        }
     }
 }
 
+#[derive(Debug)]
 struct InteractResult {
     final_state: squiggle::Data,
     data_out_to_multipledraw: squiggle::Data,
@@ -471,5 +481,24 @@ mod tests {
 
         let expected_data_out = Data::make_list1(Data::make_list1(42));
         assert_eq!(resp.data_out, expected_data_out);
+    }
+
+    #[test]
+    fn statelessdraw_interact() {
+        // example from https://message-from-space.readthedocs.io/en/latest/message40.html
+        // ap ap ap interact statelessdraw nil ap ap vec 2 3 = ( nil , ( [2,3] ) )
+        let protocol = Protocol::from_snippet("\
+        main = ap ap c ap ap b b ap ap b ap b ap cons 0 ap ap c ap ap b b cons ap ap c cons nil ap ap c ap ap b cons ap ap c cons nil nil
+        ");
+        let res = protocol.interact(Rc::new(Nil), Data::make_cons(2, 3));
+        dbg!(&res);
+
+        match res.final_state {
+            Data::Nil => {}
+            _ => panic!(),
+        }
+
+        let expected = Data::make_list1(Data::make_list1(Data::make_cons(2, 3)));
+        assert_eq!(res.data_out_to_multipledraw, expected);
     }
 }
