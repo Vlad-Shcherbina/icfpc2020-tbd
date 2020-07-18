@@ -1,6 +1,7 @@
 use crate::{project_path, tree::Tree};
 use std::{collections::HashMap, rc::Rc, convert::TryFrom};
 use crate::squiggle;
+use crate::img_matrix::*;
 
 fn ap_to_none(s: &str) -> Option<&str> {
     if s == "ap" { None } else { Some(s) }
@@ -148,6 +149,34 @@ impl Context {
             name_to_def_idx,
         }
     }
+}
+
+fn eval_draw(value: Rc<Value>) -> ImgMatrix {
+    let mut points: Vec<Coord> = Vec::new();
+    let mut val = value.as_ref();
+    loop {
+        match val {
+            Nil => break,
+            Pair(ref car, ref cdr) => {
+                match car.as_ref() {
+                    Pair(ref car2, ref cdr2) => points.push(Coord {
+                        x: car2.try_as_number().expect("not an int") as usize,
+                        y: cdr2.try_as_number().expect("not an int") as usize
+                    }),
+                    _ => panic!("{:?}", *value)
+                }
+                val = cdr.as_ref();
+            }
+            _ => panic!("{:?}", *value)
+        }
+    }
+    let max_x = points.iter().map(|it| it.x).max().unwrap();
+    let max_y = points.iter().map(|it| it.y).max().unwrap();
+    let mut image = ImgMatrix::new(max_y, max_x);
+    for p in points {
+        image[p] = 1;
+    }
+    image
 }
 
 // never returns App, so eval() is idempotent
