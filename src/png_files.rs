@@ -2,7 +2,7 @@ use crate::img_matrix::ImgMatrix;
 use crate::img_matrix::Coord;
 use crate::project_path;
 
-use std::fs::File;
+use std::fs::{create_dir_all, File};
 use std::path::Path;
 use std::ops::Index;
 
@@ -70,6 +70,13 @@ pub fn matrix_to_png(matrix: &ImgMatrix, path: impl AsRef<Path>) {
         }
     }
     writer.write_image_data(&image_data).expect("Failed to write");
+}
+
+pub fn matrices_to_png(matrices: impl IntoIterator<Item=ImgMatrix>, path: impl AsRef<Path>) {
+    create_dir_all(path);
+    for (i, m) in &matrices {
+        matrix_to_png(m, path.join(format!("image{:03}", i)));
+    }
 }
 
 // Filename without .png
