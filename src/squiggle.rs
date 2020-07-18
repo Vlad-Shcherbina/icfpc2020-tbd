@@ -140,8 +140,8 @@ pub fn bytes_to_squiggle(bytes: &[u8]) -> Option<Vec<u8>> {
     }).collect())
 }
 
-fn modulate_int_into(x: u64, squiggle: &mut Vec<u8>) {
-    let bitlength = 64 - x.leading_zeros();
+fn modulate_int_into(x: u128, squiggle: &mut Vec<u8>) {
+    let bitlength = 128 - x.leading_zeros();
     let chunks = (bitlength + 3) / 4;
 
     for _ in 0..chunks {
@@ -169,7 +169,7 @@ pub fn modulate_into(data: Data, squiggle: &mut Vec<u8>) {
                 squiggle.push(0);
             }
 
-            modulate_int_into(x.abs() as u64, squiggle);
+            modulate_int_into(x.abs() as u128, squiggle);
         },
         Data::Cons(head, tail) => {
             squiggle.push(1);
