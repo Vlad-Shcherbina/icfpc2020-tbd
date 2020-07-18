@@ -1,0 +1,53 @@
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width; maximum-scale=1; minimum-scale=1;" />
+  <title>UFOpera Browser v.f36 - {{ uid }}@{{ sid }}</title>
+  <style>
+    #ufo_page {
+      position: relative;
+      top: 0px;
+      left: 0px;
+      height: 666px;
+      width: 666px;
+			background-color: #f00;
+    }
+  </style>
+  <body>
+
+  <div id="ufo_page" data-todo="TODO: THIS SHOULD BE IMG OR CANVAS THAT LOAD SHIT FROM THE SERVER"></div>
+
+  <div>Welcome, {{ uid }}. Check out the <a href="/{{ uid }}/{{ sid }}/archive">archive of the current session</a></div>
+  </body>
+  <script>
+		function testAndExecute(elem, event, area, func){
+				elem.addEventListener(event, function(e){
+						var page = {
+								x: e.pageX,
+								y: e.pageY
+						}
+						if (page.x >= area.x0 && page.x <= area.x1 && page.y >= area.y0 && page.y <= area.y1) {
+								func(x, y);
+						}
+				});
+		}
+
+		testAndExecute(
+				document.getElementById('example'),
+				'click',
+				{
+						x0: 0,
+            //x1: 0 + document.getElementById("ufo_page").width, TODO UPDATE WITH THIS CODE IF WE USE IMG
+						//x1: 0 + document.getElementById("ufo_page").getBoundingClientRect().width, TODO UPDATE WITH THIS CODE IF WE USE CANVAS
+            x1: 666,
+						y0: 0,
+            //y1: 0 + document.getElementById("ufo_page").height TODO UPDATE WITH THIS CODE IF WE USE IMG
+						//y1: 0 + document.getElementById("ufo_page").getBoundingClientRect().height TODO UPDATE WITH THIS CODE IF WE USE CANVAS
+            y1: 666
+				},
+				function(){
+          console.log("Registered a click at " + x + ", " + y);
+				}
+		);
+  </script>
+</head>
