@@ -1,4 +1,4 @@
-use crate::tree::Tree;
+use crate::{project_path, tree::Tree};
 use std::{collections::HashMap, rc::Rc, convert::TryFrom};
 use crate::squiggle;
 
@@ -9,7 +9,6 @@ fn ap_to_none(s: &str) -> Option<&str> {
 fn parse(src: &str) -> Vec<(&str, Tree<&str>)> {
     let mut result = Vec::new();
     for line in src.split_terminator('\n') {
-        dbg!(&line);
         let mut it = line.split_whitespace();
         let function = it.next().unwrap();
         let eq = it.next().unwrap();
@@ -40,17 +39,17 @@ pub enum Value {
     I,
     Nil,
     IsNil,
-    Cons,
+    Cons, Cons1(Rc<Value>),
+    Pair(Rc<Value>, Rc<Value>),  // aka Cons2
     Car,
     Cdr,
     Neg,
     Eq, Eq1(Rc<Value>),
     Mul, Mul1(Rc<Value>),
     Add, Add1(Rc<Value>),
-    Lt,
-    Div,
+    Lt, Lt1(Rc<Value>),
+    Div, Div1(Rc<Value>),
     False, False1,
-    Pair(Rc<Value>, Rc<Value>),  // result of cons
 }
 use Value::*;
 
@@ -173,6 +172,8 @@ fn apply(f: Rc<Value>, x: Rc<Value>, ctx: &Context) -> Rc<Value> {
         K => Rc::new(K1(x)),
         K1(ref a) => eval(a.clone(), ctx),
 
+        I => eval(x, ctx),
+
         B => Rc::new(B1(x)),
         B1(ref a) => Rc::new(B2(a.clone(), x)),
         B2(ref a, ref b) => {
@@ -198,6 +199,17 @@ fn apply(f: Rc<Value>, x: Rc<Value>, ctx: &Context) -> Rc<Value> {
             }
         }
 
+        Lt => Rc::new(Lt1(x)),
+        Lt1(ref a) => {
+            let a = eval(a.clone(), ctx);
+            let x = eval(x, ctx);
+            if a.try_as_number().unwrap() < x.try_as_number().unwrap() {
+                Rc::new(K)
+            } else {
+                Rc::new(False)
+            }
+        }
+
         S => Rc::new(S1(x)),
         S1(ref a) => Rc::new(S2(a.clone(), x)),
         S2(ref a, ref b) => {
@@ -207,6 +219,11 @@ fn apply(f: Rc<Value>, x: Rc<Value>, ctx: &Context) -> Rc<Value> {
             let ac = Rc::new(App(a, x.clone()));
             let bc = Rc::new(App(b, x));
             eval(Rc::new(App(ac, bc)), ctx)
+        }
+
+        Neg => {
+            let x = eval(x, ctx);
+            Rc::new(Number(-x.try_as_number().unwrap()))
         }
 
         Add => Rc::new(Add1(x)),
@@ -223,6 +240,33 @@ fn apply(f: Rc<Value>, x: Rc<Value>, ctx: &Context) -> Rc<Value> {
             Rc::new(Number(a.try_as_number().unwrap() * b.try_as_number().unwrap()))
         }
 
+        Div => Rc::new(Div1(x)),
+        Div1(ref a) => {
+            let a = eval(a.clone(), ctx);
+            let b = eval(x, ctx);
+            // TODO: make sure that native div has the same behavior on negative numbers
+            Rc::new(Number(a.try_as_number().unwrap() / b.try_as_number().unwrap()))
+        }
+
+        Cons => Rc::new(Cons1(x)),
+        Cons1(ref a) => {
+            let a = eval(a.clone(), ctx);
+            let b = eval(x, ctx);
+            Rc::new(Pair(a, b))
+        }
+        Pair(ref a, ref b) => {
+            let xa = Rc::new(App(x, a.clone()));
+            let xab = Rc::new(App(xa, b.clone()));
+            eval(xab, ctx)
+        }
+
+        IsNil =>
+            match &*eval(x, ctx) {
+                Nil => Rc::new(K),  // true
+                Pair(_, _) => Rc::new(False),
+                zzz => panic!("calling isnill on {:?}", zzz),
+            }
+
         False => Rc::new(False1),
         False1 => eval(x, &ctx),
 
@@ -237,6 +281,46 @@ fn tree_to_value<T>(tree: &Tree<T>, leaf_to_value: &mut dyn FnMut(&T) -> Rc<Valu
             tree_to_value(f, leaf_to_value),
             tree_to_value(x, leaf_to_value),
         )),
+    }
+}
+
+pub struct Protocol {
+    ctx: Context,
+    entry_point: &'static str,
+}
+
+pub struct ProtocolResponse {
+    continue_flag: Rc<Value>,
+    new_state: Rc<Value>,
+    data_out: Rc<Value>,
+}
+
+impl Protocol {
+    pub fn from_snippet(src: &str) -> Self {
+        let src = parse(src.trim_end());
+        let ctx = Context::new(&src);
+        Protocol {
+            ctx,
+            entry_point: "main",
+        }
+    }
+
+    pub fn load_galaxy() -> Self {
+        let src = std::fs::read_to_string(project_path("data/messages/galaxy.txt")).unwrap();
+        let src = parse(&src);
+        let ctx = Context::new(&src);
+        Protocol {
+            ctx,
+            entry_point: "galaxy",
+        }
+    }
+
+    pub fn invoke(&self, internal_state: Rc<Value>, data_in: Rc<Value>) -> ProtocolResponse {
+        let galaxy = self.ctx.defs[self.ctx.name_to_def_idx[self.entry_point]].clone();
+        let expr = Rc::new(App(Rc::new(App(galaxy, internal_state)), data_in));
+        let result = eval(expr, &self.ctx);
+        dbg!(result);
+        todo!()
     }
 }
 
