@@ -22,6 +22,11 @@ var Colors = [
 	'rgb(255, 255, 0)', 'rgb(255, 0, 255)', 'rgb(0, 255, 255)'
 ]
 
+function set_state(state) {
+	State = state
+	document.getElementById('state').innerText = State
+}
+
 function send_click(x, y) {
 	document.getElementById('canvas').classList.add('busy')
 	fetch('/click', {
@@ -33,8 +38,7 @@ function send_click(x, y) {
 	})
 		.then(response => response.json())
 		.then(({pixels, state}) => {
-			State = state
-			document.getElementById('state').innerText = State
+			set_state(state)
 
 			draw_pixels(pixels)
 			document.getElementById('canvas').classList.remove('busy')
@@ -66,9 +70,20 @@ function load() {
 	const canvas = document.getElementById('canvas')
 	canvas.addEventListener('click', e => {
 		const rect = canvas.getBoundingClientRect()
-	    const x = event.clientX - rect.left + OffsetX
-	    const y = event.clientY - rect.top + OffsetY
+	    const x = e.clientX - rect.left + OffsetX
+	    const y = e.clientY - rect.top + OffsetY
 	    send_click(Math.round(x), Math.round(y))
+	})
+
+	document.getElementById('new_state_go').addEventListener('click', e => {
+		let new_state = document.getElementById('new_state').value
+		set_state(new_state)
+	})
+
+	document.getElementById('click_go').addEventListener('click', e => {
+		let x = parseInt(document.getElementById('click_x').value)
+		let y = parseInt(document.getElementById('click_y').value)
+		send_click(x, y)
 	})
 }
 	</script>
@@ -76,5 +91,7 @@ function load() {
 <body onload="load()">
 	<canvas id='canvas' width=400 height=400></canvas>
 	<p>state is <span id='state'></span></p>
+	<p>change state: <textarea id='new_state'></textarea><button id='new_state_go'>go</button></p>
+	<p>simulate click: <input type='number' id='click_x' value=0> <input type='number' id='click_y' value=0> <button id='click_go'>go</button></p>
 </body>
 </html>
