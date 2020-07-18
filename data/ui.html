@@ -68,7 +68,7 @@ function load() {
 		const rect = canvas.getBoundingClientRect()
 	    const x = event.clientX - rect.left + OffsetX
 	    const y = event.clientY - rect.top + OffsetY
-	    send_click(x, y)
+	    send_click(Math.round(x), Math.round(y))
 	})
 }
 	</script>
