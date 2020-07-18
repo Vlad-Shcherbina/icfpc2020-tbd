@@ -1,11 +1,11 @@
 use tbd::ufolang::Protocol;
-use tbd::{squiggle::Data, ufolang::{eval_multidraw, InteractResult}, project_path, png_files::matrices_to_png};
+use tbd::{squiggle::Data, ufolang::{eval_multidraw, InteractResult}, project_path, png_files::matrices_to_png, webapi::Endpoint};
 use std::io::BufRead;
 
 #[allow(unused)]
 fn main_simple() {
     let protocol = Protocol::load_galaxy();
-    let result = protocol.interact(Data::Nil, Data::make_cons(0, 0));
+    let result = protocol.interact(Data::Nil, Data::make_cons(0, 0), &Endpoint::Proxy);
     dbg!(&result.final_state);
     dbg!(&result.data_out_to_multipledraw);
     let matrices = eval_multidraw(result.data_out_to_multipledraw);
@@ -40,15 +40,15 @@ fn click_all_pairs() {
     for (i, j) in [(1, 26), (7, 13), (10, 42), (20, 34), (24, 28), (25, 43), (31, 33)].iter() {
         let (y1, x1) = to_coord(*i);
         let (y2, x2) = to_coord(*j);
-        state = protocol.interact(state, Data::make_cons(x1, y1)).final_state;
-        state = protocol.interact(state, Data::make_cons(x2, y2)).final_state;
+        state = protocol.interact(state, Data::make_cons(x1, y1), &Endpoint::Proxy).final_state;
+        state = protocol.interact(state, Data::make_cons(x2, y2), &Endpoint::Proxy).final_state;
     }
-    state = protocol.interact(state, Data::make_cons(12, 0)).final_state;
+    state = protocol.interact(state, Data::make_cons(12, 0), &Endpoint::Proxy).final_state;
     println!("{}", state.to_string());
     // the only one not clicked is 0, 0
     // prints the state, that is one (0,0) click to finish
     
-    let result = protocol.interact(state, Data::make_cons(0, 0));
+    let result = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy);
     let matrices = eval_multidraw(result.data_out_to_multipledraw);
     matrices_to_png(&matrices, project_path("outputs/galaxyXX"));
 }
@@ -78,8 +78,8 @@ fn find_all_pairs() {
             let (y1, x1) = to_coord(i);
             let (y2, x2) = to_coord(j);
             
-            let result = protocol.interact(state, Data::make_cons(x1, y1));
-            let result = protocol.interact(result.final_state, Data::make_cons(x2, y2));
+            let result = protocol.interact(state, Data::make_cons(x1, y1), &Endpoint::Proxy);
+            let result = protocol.interact(result.final_state, Data::make_cons(x2, y2), &Endpoint::Proxy);
             state = result.final_state;
             // state_to_draw = result.data_out_to_multipledraw;
 
