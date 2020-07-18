@@ -248,22 +248,6 @@ fn get_unknown(sample: &ImgMatrix, unidentified: &mut Vec<ImgMatrix>) -> Token {
     Token::Unknown(unidentified.len() - 1)
 }
 
-// makes a small Image Matrix with just a given token in it
-fn crop_image(img: &ImgMatrix, frame: &FrameInfo) -> ImgMatrix {
-    let mut v: Vec<Vec<u8>> = Vec::new();
-    for y in frame.top..frame.bottom {
-        let mut u: Vec<u8> = Vec::new();
-        let mut end = true;
-        for x in frame.left..frame.right {
-            u.push(img[Coord { x, y }]);
-            if img[Coord { x, y }] == 1 { end = false; }
-        }
-        if end && v.len() > 0 { break; }
-        v.push(u)
-    }
-    ImgMatrix::from_vec(&v)
-}
-
 impl Display for ImgMatrix {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for y in 0..self.height {

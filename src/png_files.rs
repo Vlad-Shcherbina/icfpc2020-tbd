@@ -4,6 +4,7 @@ use crate::project_path;
 
 use std::fs::File;
 use std::path::Path;
+use std::ops::Index;
 
 const COLOR_SIZE: usize = 4;  // 4 components of each color in png
 const CELL_SIZE: usize = 4;

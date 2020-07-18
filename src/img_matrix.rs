@@ -80,8 +80,9 @@ impl ImgMatrix {
     }
 
     pub fn grow(&mut self, new_width: usize, new_height: usize) {
-        assert!(new_width > self.width);
-        assert!(new_height > self.height);
+        if new_width == self.width && new_height == self.height {
+            return;
+        }
         let mut new_data = vec![vec![0; new_width]; new_height];
         for y in 0..self.height {
             for x in 0..self.width {
@@ -106,6 +107,14 @@ impl ImgMatrix {
             v.push(u)
         }
         ImgMatrix::from_vec(&v)
+    }
+
+    pub fn blit(&mut self, x: usize, y: usize, other: &ImgMatrix) {
+        for j in 0..other.height {
+            for i in 0..other.width {
+                self.data[y + j][x + i] = other.data[j][i];
+            }
+        }
     }
 }
 
