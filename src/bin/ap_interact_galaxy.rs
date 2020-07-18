@@ -45,6 +45,6 @@ fn main1() {
 
 fn main() {
     std::thread::Builder::new().stack_size(100 * 1024 * 1024)
-        .spawn(main_simple).unwrap()
+        .spawn(main1).unwrap()
         .join().unwrap();
 }
