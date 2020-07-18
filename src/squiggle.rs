@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Clone)]
+#[derive(PartialEq, Clone)]
 pub enum Data {
     Nil,
     Number(i64),
@@ -8,6 +8,12 @@ pub enum Data {
 impl From<i64> for Data {
     fn from(x: i64) -> Self {
         Data::Number(x)
+    }
+}
+
+impl std::fmt::Debug for Data {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_pretty_string())
     }
 }
 
@@ -109,19 +115,6 @@ impl Data {
             }
         }
         res
-    }
-
-    pub fn is_list(&self) -> bool {
-        let mut val = self;
-        loop {
-            match &val {
-                Self::Nil => return true,
-                Self::Cons(_, ref cdr) => {
-                    val = &cdr;
-                }
-                Self::Number(_) => return false,
-            }
-        }
     }
 
     pub fn try_as_number(&self) -> Option<i64> {
