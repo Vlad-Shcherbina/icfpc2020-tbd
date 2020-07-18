@@ -289,6 +289,9 @@ fn apply(f: Rc<Value>, x: Rc<Value>, ctx: &Context) -> Rc<Value> {
         False => Rc::new(False1),
         False1 => eval(x, &ctx),
 
+        Car => eval(Rc::new(App(x, Rc::new(K))), ctx),
+        Cdr => eval(Rc::new(App(x, Rc::new(False))), ctx),
+
         _ => panic!("{:?}", f),
     }
 }
@@ -450,6 +453,13 @@ mod tests {
         assert_eq!(run_snippet("\
             main = ap ap add ap ap add 100 20 3
         "), Rc::new(Number(123)));
+    }
+
+    #[test]
+    fn car_cdr() {
+        assert_eq!(run_snippet("\
+            main = ap ap cons ap car ap ap cons 1 2 ap cdr ap ap cons 3 4
+        "), Rc::new(Pair(Rc::new(Number(1)), Rc::new(Number(4)))));
     }
 
     #[test]
