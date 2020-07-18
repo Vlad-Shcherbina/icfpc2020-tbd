@@ -149,23 +149,27 @@ impl Context {
 }
 
 fn eval_draw(value: Data) -> ImgMatrix {
-    // let mut points: Vec<Coord> = Vec::new();
+    struct Point2d {
+        pub x: i64,
+        pub y: i64,
+    }
     let points = value.into_vec();
-    dbg!(&points);
-    let points: Vec<Coord> = points.into_iter().map(|p| match p {
-        Data::Cons(car, cdr) => Coord {
-            x: car.try_as_number().unwrap() as usize,
-            y: cdr.try_as_number().unwrap() as usize
+    let points: Vec<Point2d> = points.into_iter().map(|p| match p {
+        Data::Cons(car, cdr) => Point2d {
+            x: car.try_as_number().unwrap(),
+            y: cdr.try_as_number().unwrap()
         },
         _ => panic!("{:?}", p)
     }).collect();
+    let min_x = points.iter().map(|it| it.x).min().unwrap();
+    let min_y = points.iter().map(|it| it.y).min().unwrap();
     let max_x = points.iter().map(|it| it.x).max().unwrap();
     let max_y = points.iter().map(|it| it.y).max().unwrap();
-    dbg!(max_x);
-    dbg!(max_y);
-    let mut image = ImgMatrix::new(max_y, max_x);
+    let width = std::cmp::max(10, max_x - min_x + 1);
+    let height = std::cmp::max(10, max_y - min_y + 1);
+    let mut image = ImgMatrix::new(width as usize, height as usize);
     for p in points {
-        image[p] = 1;
+        image[Coord {x: (p.x - min_x) as usize, y: (p.y - min_y) as usize}] = 1;
     }
     image
 }
