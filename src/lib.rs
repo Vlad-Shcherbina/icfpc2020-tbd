@@ -8,6 +8,7 @@ pub mod tree;
 pub mod squiggle;
 pub mod webapi;
 pub mod ufolang;
+pub mod uforest;
 
 pub fn hello() {
     println!("hello");

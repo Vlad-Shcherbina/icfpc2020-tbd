@@ -1,3 +1,6 @@
+// THIS IS A LOW-LEVEL EXAMPLE.
+// SEE example_player.rs INSTEAD.
+
 use tbd::{webapi::Endpoint, ufolang::Protocol, squiggle::Data};
 
 fn main() {

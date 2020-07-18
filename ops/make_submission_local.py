@@ -120,10 +120,12 @@ RUST_BACKTRACE=1 icfpc2020-tbd/a.out "$@"
     # to ensure that project_path() works
     sub_dir = sub_repo / 'icfpc2020-tbd'
     sub_dir.mkdir(exist_ok=True)
-    shutil.copytree(project_root / 'data', sub_dir / 'data')
     shutil.copy(
         project_root / 'cache/target/release' / binary,
         sub_dir / 'a.out')
+
+    # not needed on the server unless we want to run headless galaxy or something
+    #shutil.copytree(project_root / 'data', sub_dir / 'data')
 
     subprocess.check_call(['git', 'add', '.'], cwd=sub_repo, env=ssh_env)
     subprocess.check_call(
