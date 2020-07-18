@@ -2,9 +2,8 @@ use crate::img_matrix::ImgMatrix;
 use crate::img_matrix::Coord;
 use crate::project_path;
 
-use std::fs::{create_dir_all, File};
+use std::fs::{create_dir_all, File, read_dir, remove_file};
 use std::path::Path;
-use std::ops::Index;
 
 const COLOR_SIZE: usize = 4;  // 4 components of each color in png
 const CELL_SIZE: usize = 4;
@@ -74,6 +73,14 @@ pub fn matrix_to_png(matrix: &ImgMatrix, path: impl AsRef<Path>) {
 
 pub fn matrices_to_png(matrices: &Vec<ImgMatrix>, path: impl AsRef<Path>) {
     create_dir_all(&path).unwrap();
+
+    for entry in read_dir(&path).unwrap() {
+        let entry = entry.unwrap();
+        if entry.path().extension().map(|s| s == "png").unwrap_or(false) {
+            remove_file(entry.path()).unwrap();
+        }
+    }
+
     for (i, m) in matrices.iter().enumerate() {
         matrix_to_png(m, path.as_ref().join(format!("image{:03}.png", i)));
     }

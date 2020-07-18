@@ -155,7 +155,7 @@ fn eval_draw(value: Data) -> ImgMatrix {
     }
     let points = value.into_vec();
     if points.is_empty() {
-        return ImgMatrix::new(10, 10)
+        return ImgMatrix::new(1, 1)
     }
     let points: Vec<Point2d> = points.into_iter().map(|p| match p {
         Data::Cons(car, cdr) => Point2d {
@@ -170,8 +170,8 @@ fn eval_draw(value: Data) -> ImgMatrix {
     let max_y = points.iter().map(|it| it.y).max().unwrap();
     eprintln!("{} {} {} {}", min_x, min_y, max_x, max_y);
 
-    let width = std::cmp::max(10, max_x - min_x + 1);
-    let height = std::cmp::max(10, max_y - min_y + 1);
+    let width = max_x - min_x + 1;
+    let height = max_y - min_y + 1;
     let mut image = ImgMatrix::new(width as usize, height as usize);
     for p in points {
         image[Coord {x: (p.x - min_x) as usize, y: (p.y - min_y) as usize}] = 1;
@@ -397,7 +397,6 @@ impl Protocol {
     }
 
     pub fn interact(&self, initial_state: Data, mut data_in: Data) -> InteractResult {
-        use std::convert::TryInto;
         let mut state = initial_state;
         loop {
             let resp = self.invoke(&state, &data_in);

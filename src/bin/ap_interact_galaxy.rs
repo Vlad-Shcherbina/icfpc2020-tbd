@@ -1,6 +1,5 @@
 use tbd::ufolang::Protocol;
-use tbd::{squiggle::Data, ufolang::{eval_multidraw, Value::*}, project_path, png_files::matrices_to_png};
-use std::rc::Rc;
+use tbd::{squiggle::Data, ufolang::{eval_multidraw}, project_path, png_files::matrices_to_png};
 use std::io::BufRead;
 
 fn main1() {

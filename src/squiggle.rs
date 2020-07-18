@@ -62,7 +62,7 @@ impl Data {
 
     pub fn is_list(&self) -> bool {
         let mut t = self;
-        while let Data::Cons(head, tail) = t {
+        while let Data::Cons(_, tail) = t {
             t = tail.as_ref();
         }
         if let Data::Nil = t { true } else { false }
