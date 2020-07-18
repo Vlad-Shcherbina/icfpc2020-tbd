@@ -86,9 +86,11 @@ fn main() {
     let galaxy_path = Path::new("data").join("messages").join("galaxy1.txt");
     let galaxy_file = File::open(galaxy_path).expect("Galaxy.txt not found");
     let mut img = ImgMatrix::new(50, 50);
+    let origin_x = 2;
+    let origin_y = 2;
     let mut unknown = Vec::new();
-    let mut current_x = 0;
-    let mut current_y = 0;
+    let mut current_x = origin_x;
+    let mut current_y = origin_y;
     for l in BufReader::new(galaxy_file).lines() {
         let line = l.unwrap();
         let mut line_height = 0;
@@ -111,7 +113,7 @@ fn main() {
             line_height = max(line_height, token_img.height);
         }
         current_y += line_height + 1;
-        current_x = 0;
+        current_x = origin_x;
     }
     matrix_to_png(&img, Path::new("outputs")
         .join("galaxy.png"))
