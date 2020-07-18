@@ -71,6 +71,22 @@ pub fn matrix_to_png(matrix: &ImgMatrix, path: impl AsRef<Path>) {
     writer.write_image_data(&image_data).expect("Failed to write");
 }
 
+pub fn borderize(m: &ImgMatrix) -> ImgMatrix {
+    let mut result = ImgMatrix::new(m.width + 4, m.height + 4);
+    for x in 0..(m.width + 4) {
+        result[Coord { x, y: 0 }] = 1;
+        result[Coord { x, y: m.height + 3 }] = 1;
+    }
+
+    for y in 0..(m.height + 4) {
+        result[Coord { x: 0, y }] = 1;
+        result[Coord { x: m.width + 3, y }] = 1;
+    }
+
+    result.blit(2, 2, m);
+    result
+}
+
 pub fn matrices_to_png(matrices: &Vec<ImgMatrix>, path: impl AsRef<Path>) {
     create_dir_all(&path).unwrap();
 
@@ -82,7 +98,7 @@ pub fn matrices_to_png(matrices: &Vec<ImgMatrix>, path: impl AsRef<Path>) {
     }
 
     for (i, m) in matrices.iter().enumerate() {
-        matrix_to_png(m, path.as_ref().join(format!("image{:03}.png", i)));
+        matrix_to_png(&borderize(m), path.as_ref().join(format!("image{:03}.png", i)));
     }
 }
 

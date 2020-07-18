@@ -95,6 +95,18 @@ impl ImgMatrix {
     }
 
     pub fn crop(&self, frame: &FrameInfo) -> Self {
+        let width = frame.right - frame.left;
+        let height = frame.bottom - frame.top;
+        let mut result = ImgMatrix::new(width, height);
+        for y in frame.top..frame.bottom {
+            for x in frame.left..frame.right {
+                result[Coord { y: y - frame.top, x: x - frame.left }] = self[Coord { x, y }];
+            }
+        }
+        result
+    }
+
+    pub fn crop_symbol(&self, frame: &FrameInfo) -> Self {
         let mut v: Vec<Vec<u8>> = Vec::new();
         for y in frame.top..frame.bottom {
             let mut u: Vec<u8> = Vec::new();

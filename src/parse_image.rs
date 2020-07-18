@@ -121,7 +121,7 @@ fn parse_token(img: &ImgMatrix,
         return Token::Omission;
     }
 
-    let sample = img.crop(frame);
+    let sample = img.crop_symbol(frame);
 
     if let Some(a) = get_operation(&sample, operations) {
         return a;
