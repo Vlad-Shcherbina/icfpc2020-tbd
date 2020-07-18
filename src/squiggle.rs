@@ -13,14 +13,37 @@ impl Sign {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Data {
     Nil,
     Number(Sign, u64),
     Cons(Box<Data>, Box<Data>)
 }
 
+impl From<i64> for Data {
+    fn from(x: i64) -> Self {
+        let sign = if x >= 0 {Sign::Plus} else {Sign::Minus};
+        Data::Number(sign, x.abs() as u64)
+    }
+}
+
 impl Data {
+    pub fn make_cons(head: impl Into<Data>, tail: impl Into<Data>) -> Data {
+        Data::Cons(Box::new(head.into()), Box::new(tail.into()))
+    }
+
+    pub fn make_list1(x: impl Into<Data>) -> Data {
+        Data::make_cons(x, Data::Nil)
+    }
+
+    pub fn make_list2(x: impl Into<Data>, y: impl Into<Data>) -> Data {
+        Data::make_cons(x, Data::make_list1(y))
+    }
+
+    pub fn make_list3(x: impl Into<Data>, y: impl Into<Data>, z: impl Into<Data>) -> Data {
+        Data::make_cons(x, Data::make_list2(y, z))
+    }
+
     pub fn to_string(&self) -> String {
         match self {
             Data::Nil => String::from("nil"),

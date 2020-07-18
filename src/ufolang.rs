@@ -289,10 +289,11 @@ pub struct Protocol {
     entry_point: &'static str,
 }
 
+#[derive(Debug)]
 pub struct ProtocolResponse {
-    continue_flag: Rc<Value>,
+    continue_flag: i64,
     new_state: Rc<Value>,
-    data_out: Rc<Value>,
+    data_out: squiggle::Data,
 }
 
 impl Protocol {
@@ -315,12 +316,38 @@ impl Protocol {
         }
     }
 
-    pub fn invoke(&self, internal_state: Rc<Value>, data_in: Rc<Value>) -> ProtocolResponse {
-        let galaxy = self.ctx.defs[self.ctx.name_to_def_idx[self.entry_point]].clone();
-        let expr = Rc::new(App(Rc::new(App(galaxy, internal_state)), data_in));
+    pub fn invoke(&self, internal_state: Rc<Value>, data_in: &squiggle::Data) -> ProtocolResponse {
+        let data_in = Rc::new(data_in.into());
+        let entry_point = self.ctx.defs[self.ctx.name_to_def_idx[self.entry_point]].clone();
+        let expr = Rc::new(App(Rc::new(App(entry_point, internal_state)), data_in));
         let result = eval(expr, &self.ctx);
-        dbg!(result);
-        todo!()
+
+        // continue_flag, new_state, data_out = result
+        let (continue_flag, tail) = match &*result {
+            Pair(continue_flag, tail) => (continue_flag, tail.clone()),
+            _ => panic!("{:?}", result),
+        };
+        let (new_state, tail2) = match &*tail {
+            Pair(new_state, tail2) => (new_state.clone(), tail2.clone()),
+            _ => panic!("{:?}", tail),
+        };
+        let (data_out, tail3) = match &*tail2 {
+            Pair(data_out, tail3) => (data_out, tail3.clone()),
+            _ => panic!("{:?}", tail2),
+        };
+        match &*tail3 {
+            Nil => {}
+            _ => panic!("{:?}", tail3),
+        }
+
+        let continue_flag = continue_flag.try_as_number().unwrap();
+        let data_out = squiggle::Data::try_from(data_out.as_ref()).unwrap();
+
+        ProtocolResponse {
+            continue_flag,
+            new_state,
+            data_out,
+        }
     }
 }
 
@@ -353,6 +380,7 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::squiggle::Data;
 
     fn run_snippet(src: &str) -> Rc<Value> {
         let src = parse(src.trim_end());
@@ -384,5 +412,25 @@ mod tests {
             pwr2   =   ap ap s ap ap c ap eq 0 1 ap ap b ap mul 2 ap ap b pwr2 ap add -1
             main = ap pwr2 7
         "), Rc::new(Number(128)));
+    }
+
+    #[test]
+    fn statelessdraw_invoke() {
+        // example from https://message-from-space.readthedocs.io/en/latest/message40.html
+        // ap ap statelessdraw x0 x1 = ( 0 , nil , ( ( x1 ) ) )
+        let protocol = Protocol::from_snippet("\
+        main = ap ap c ap ap b b ap ap b ap b ap cons 0 ap ap c ap ap b b cons ap ap c cons nil ap ap c ap ap b cons ap ap c cons nil nil
+        ");
+        // x0 = nil, x1 = 42
+        let resp = protocol.invoke(Rc::new(Nil), &42.into());
+        assert_eq!(resp.continue_flag, 0);
+
+        match *resp.new_state {
+            Value::Nil => {},
+            _ => panic!(),
+        }
+
+        let expected_data_out = Data::make_list1(Data::make_list1(42));
+        assert_eq!(resp.data_out, expected_data_out);
     }
 }
