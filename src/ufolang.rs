@@ -378,7 +378,22 @@ impl Protocol {
             data_out,
         }
     }
+
+    fn interact(&self, initial_state: Rc<Value>, data_in: &squiggle::Data) -> InteractResult {
+        todo!()
+        // let mut state = initial_state;
+        // loop {
+        //     let resp = self.invoke(state, data_in);
+        //     // if resp.continue_flag =
+        // }
+    }
 }
+
+struct InteractResult {
+    final_state: squiggle::Data,
+    data_out_to_multipledraw: squiggle::Data,
+}
+
 
 /*fn main1() {
     // let src = std::fs::read_to_string(project_path("data/messages/galaxy.txt")).unwrap();
