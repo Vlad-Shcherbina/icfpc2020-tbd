@@ -72,6 +72,22 @@ impl Data {
             None
         }
     }
+
+    pub fn to_vec(self) -> Vec<Self> {
+        let mut res: Vec<Self> = Vec::new();
+        let mut val = self;
+        loop {
+            match val {
+                Self::Nil => break,
+                Self::Cons(car, cdr) => {
+                    res.push(*car);
+                    val = *cdr;
+                }
+                _ => panic!("{:?}", val)
+            }
+        }
+        res
+    }
 }
 
 pub fn bytes_to_squiggle(bytes: &[u8]) -> Option<Vec<u8>> {
