@@ -7,6 +7,7 @@ fn main1() {
 
     let result = protocol.interact(Data::Nil, Data::make_cons(0, 0));
     dbg!(&result.final_state);
+    dbg!(&result.data_out_to_multipledraw);
     let matrices = eval_multidraw(result.data_out_to_multipledraw);
     matrices_to_png(&matrices, project_path("outputs/galaxy00"));
 }
