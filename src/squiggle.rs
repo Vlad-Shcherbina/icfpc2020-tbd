@@ -76,7 +76,7 @@ impl Data {
         // super hujovo
         if s == "nil" {
             Some(Data::Nil)
-        } else if s.starts_with("+") || s.starts_with("-") {
+        } else if s.starts_with("+") || s.starts_with("-") || s.chars().next().filter(|&x| x.is_digit(10)).is_some() {
             let value: i128 = s.parse().ok()?;
             Some(Data::Number(value))
         } else if s.starts_with("(") && s.ends_with(")") {

@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset='utf-8'>
+	<title>hi</title>
+	<style>
+canvas {
+	image-rendering: optimizeSpeed;;
+}
+	</style>
+	<script type="text/javascript">
+var State = "(2, ((1, (-1, nil)), (0, (nil, nil))))"
+var OffsetX = 0
+var OffsetY = 0
+var Colors = [
+	'rgb(255, 0, 0)', 'rgb(0, 255, 0)', 'rgb(0, 0, 255)',
+	'rgb(255, 255, 255)',
+	'rgb(255, 255, 0)', 'rgb(255, 0, 255)', 'rgb(0, 255, 255)'
+]
+
+function send_click(x, y) {
+	fetch('/click', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({x, y, state: State}),
+	})
+		.then(response => response.json())
+		.then(({pixels, state}) => {
+			State = state
+			document.getElementById('state').innerText = State
+
+			draw_pixels(pixels)
+		})
+}
+
+function draw_pixels(pixels) {
+	const canvas = document.getElementById('canvas')
+	const ctx = canvas.getContext('2d')
+
+	OffsetX = Math.min(...pixels.map(l => Math.min(...l.map(p => p[0]))))
+	OffsetY = Math.min(...pixels.map(l => Math.min(...l.map(p => p[1]))))
+
+	ctx.fillStyle = 'rgb(0, 0, 0)'
+	ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+	for (let i = 0; i < pixels.length; i++) {
+		const ii = pixels.length - 1 - i
+		ctx.fillStyle = Colors[i]
+		for (let [x, y] of pixels[ii]) {
+			ctx.fillRect(x - OffsetX, y - OffsetY, 1, 1)
+		}
+	}
+}
+
+function load() {
+	send_click(-2, 4)
+
+	const canvas = document.getElementById('canvas')
+	canvas.addEventListener('click', e => {
+		const rect = canvas.getBoundingClientRect()
+	    const x = event.clientX - rect.left + OffsetX
+	    const y = event.clientY - rect.top + OffsetY
+	    send_click(x, y)
+	})
+}
+	</script>
+</head>
+<body onload="load()">
+	<canvas id='canvas' width=400 height=400></canvas>
+	<p>state is <span id='state'></span></p>
+</body>
+</html>
