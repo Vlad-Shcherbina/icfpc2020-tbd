@@ -38,8 +38,9 @@ function send_click(x, y) {
 		body: JSON.stringify({x, y, state: State}),
 	})
 		.then(response => response.json())
-		.then(({pixels, state}) => {
+		.then(({pixels, state, pretty_state}) => {
 			set_state(state)
+			document.getElementById('pretty_state').innerText = pretty_state
 
 			draw_pixels(pixels)
 			document.getElementById('canvas').classList.remove('busy')
@@ -99,9 +100,10 @@ function load() {
 </head>
 <body onload="load()">
 	<canvas id='canvas' width=400 height=400></canvas>
-	<p>state is <span id='state'></span></p>
+	<p>shortcuts: <button id='jump_battle_select'>battle selection screen</button></p>
 	<p>change state: <textarea id='new_state'></textarea><button id='new_state_go'>go</button></p>
 	<p>simulate click: <input type='number' id='click_x' value=0> <input type='number' id='click_y' value=0> <button id='click_go'>go</button></p>
-	<p>shortcuts: <button id='jump_battle_select'>battle selection screen</button></p>
+	<p>prettified state is <span id='pretty_state'></span></p>
+	<p>state is <span id='state'></span></p>
 </body>
 </html>
