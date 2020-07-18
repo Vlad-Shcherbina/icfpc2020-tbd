@@ -168,6 +168,7 @@ fn eval_draw(value: Data) -> ImgMatrix {
     let min_y = points.iter().map(|it| it.y).min().unwrap();
     let max_x = points.iter().map(|it| it.x).max().unwrap();
     let max_y = points.iter().map(|it| it.y).max().unwrap();
+    eprintln!("{} {} {} {}", min_x, min_y, max_x, max_y);
 
     let width = std::cmp::max(10, max_x - min_x + 1);
     let height = std::cmp::max(10, max_y - min_y + 1);
@@ -191,7 +192,7 @@ fn eval(value: Rc<Value>, ctx: &Context) -> Rc<Value> {
                 Rc::clone(x),
                 ctx),
         Use(def_idx) => {
-            println!("calling {}...", ctx.names[def_idx]);
+            // println!("calling {}...", ctx.names[def_idx]);
             eval(ctx.defs[def_idx].clone(), ctx)
         }
         Thunk(ref cell) => {
