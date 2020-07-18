@@ -9,7 +9,7 @@ fn main_simple() {
     dbg!(&result.final_state);
     dbg!(&result.data_out_to_multipledraw);
     let matrices = eval_multidraw(result.data_out_to_multipledraw);
-    matrices_to_png(&matrices, project_path("outputs/galaxyFJ"));
+    matrices_to_png(&matrices, project_path("outputs/galaxyXX"));
 }
 
 fn main1() {
@@ -27,8 +27,8 @@ fn main1() {
         println!("Click where?");
         let line = lines.next().unwrap().unwrap();
         let mut it = line.split_whitespace();
-        let x: i64 = it.next().unwrap().parse().unwrap();
-        let y: i64 = it.next().unwrap().parse().unwrap();
+        let x: i128 = 0; //it.next().unwrap().parse().unwrap();
+        let y: i128 = 0; //it.next().unwrap().parse().unwrap();
 
         let result = protocol.interact(state, Data::make_cons(x, y));
         dbg!(&result.final_state);
@@ -45,6 +45,6 @@ fn main1() {
 
 fn main() {
     std::thread::Builder::new().stack_size(100 * 1024 * 1024)
-        .spawn(main1).unwrap()
+        .spawn(main_simple).unwrap()
         .join().unwrap();
 }

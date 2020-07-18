@@ -1,12 +1,12 @@
 #[derive(PartialEq, Clone)]
 pub enum Data {
     Nil,
-    Number(i64),
+    Number(i128),
     Cons(Box<Data>, Box<Data>)
 }
 
-impl From<i64> for Data {
-    fn from(x: i64) -> Self {
+impl From<i128> for Data {
+    fn from(x: i128) -> Self {
         Data::Number(x)
     }
 }
@@ -77,7 +77,7 @@ impl Data {
         if s == "nil" {
             Some(Data::Nil)
         } else if s.starts_with("+") || s.starts_with("-") {
-            let value: i64 = s.parse().ok()?;
+            let value: i128 = s.parse().ok()?;
             Some(Data::Number(value))
         } else if s.starts_with("(") && s.ends_with(")") {
             let s = &s[1..s.len()-1];
@@ -121,7 +121,7 @@ impl Data {
         res
     }
 
-    pub fn try_as_number(&self) -> Option<i64> {
+    pub fn try_as_number(&self) -> Option<i128> {
         match self {
             Self::Number(x) => Some(*x),
             _ => None,
@@ -202,7 +202,7 @@ where I: Iterator<Item = &'a u8>,
     }
 }
 
-fn demodulate_int<'a, I>(mut squiggle: I, sign: i64) -> Option<(Data, I)>
+fn demodulate_int<'a, I>(mut squiggle: I, sign: i128) -> Option<(Data, I)>
 where I: Iterator<Item = &'a u8>,
 {
     let mut counter = 0;
@@ -214,7 +214,7 @@ where I: Iterator<Item = &'a u8>,
         }
     };
 
-    let mut result: i64 = 0;
+    let mut result: i128 = 0;
     for index in (0..4*chunks).rev() {
         match squiggle.next()? {
             0 => {},

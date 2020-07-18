@@ -30,7 +30,7 @@ fn parse(src: &str) -> Vec<(&str, Tree<&str>)> {
 #[derive(Debug, PartialEq)]
 pub enum Value {
     App(Rc<Value>, Rc<Value>),
-    Number(i64),
+    Number(i128),
     Use(usize),  // reference to a definition like ':1234'
     K,  // aka True
     K1(Rc<Value>),
@@ -57,7 +57,7 @@ pub enum Value {
 use Value::*;
 
 impl Value {
-    fn try_as_number(&self) -> Option<i64> {
+    fn try_as_number(&self) -> Option<i128> {
         match self {
             Number(x) => Some(*x),
             _ => None,
@@ -150,8 +150,8 @@ impl Context {
 
 fn eval_draw(value: Data) -> ImgMatrix {
     struct Point2d {
-        pub x: i64,
-        pub y: i64,
+        pub x: i128,
+        pub y: i128,
     }
     let points = value.into_vec();
     if points.is_empty() {
@@ -335,7 +335,7 @@ pub struct Protocol {
 
 #[derive(Debug)]
 pub struct ProtocolResponse {
-    continue_flag: i64,
+    continue_flag: i128,
     new_state: Data,
     data_out: Data,
 }
