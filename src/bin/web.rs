@@ -60,7 +60,7 @@ async fn server_main() {
 
     let click = warp::post()
         .and(warp::path("click"))
-        .and(warp::body::content_length_limit(1024 * 16))
+        .and(warp::body::content_length_limit(1024 * 1024))
         .and(warp::body::json())
         .map(|click: ClickParams| {
             warp::reply::json(&process_click(&click))
