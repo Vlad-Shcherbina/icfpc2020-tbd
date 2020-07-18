@@ -1,29 +1,13 @@
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Sign {
-    Plus,
-    Minus
-}
-
-impl Sign {
-    pub fn to_string(&self) -> String {
-        match self {
-            Sign::Plus => String::from("+"),
-            Sign::Minus => String::from("-"),
-        }
-    }
-}
-
 #[derive(Debug, PartialEq, Clone)]
 pub enum Data {
     Nil,
-    Number(Sign, u64),
+    Number(i64),
     Cons(Box<Data>, Box<Data>)
 }
 
 impl From<i64> for Data {
     fn from(x: i64) -> Self {
-        let sign = if x >= 0 {Sign::Plus} else {Sign::Minus};
-        Data::Number(sign, x.abs() as u64)
+        Data::Number(x)
     }
 }
 
@@ -47,8 +31,8 @@ impl Data {
     pub fn to_string(&self) -> String {
         match self {
             Data::Nil => String::from("nil"),
-            Data::Number(sign, x) => {
-                format!("{}{}", sign.to_string(), x)
+            Data::Number(x) => {
+                format!("{}", x)
             }
             Data::Cons(head, tail) => {
                 format!("({}, {})", head.to_string(), tail.to_string())
@@ -61,9 +45,8 @@ impl Data {
         if s == "nil" {
             Some(Data::Nil)
         } else if s.starts_with("+") || s.starts_with("-") {
-            let sign = if s.starts_with("+") { Sign::Plus } else { Sign::Minus };
-            let value: u64 = s[1..].parse().ok()?;
-            Some(Data::Number(sign, value))
+            let value: i64 = s.parse().ok()?;
+            Some(Data::Number(value))
         } else if s.starts_with("(") && s.ends_with(")") {
             let s = &s[1..s.len()-1];
 
@@ -122,19 +105,16 @@ pub fn modulate_into(data: Data, squiggle: &mut Vec<u8>) {
             squiggle.push(0);
             squiggle.push(0);
         },
-        Data::Number(sign, x) => {
-            match sign {
-                Sign::Plus => {
-                    squiggle.push(0);
-                    squiggle.push(1);
-                },
-                Sign::Minus => {
-                    squiggle.push(1);
-                    squiggle.push(0);
-                }
+        Data::Number(x) => {
+            if (x >= 0) {
+                squiggle.push(0);
+                squiggle.push(1);
+            } else {
+                squiggle.push(1);
+                squiggle.push(0);
             }
 
-            modulate_int_into(x, squiggle);
+            modulate_int_into(x.abs() as u64, squiggle);
         },
         Data::Cons(head, tail) => {
             squiggle.push(1);
@@ -155,8 +135,8 @@ pub fn demodulate<'a, I>(mut squiggle: I) -> Option<(Data, I)>
 where I: Iterator<Item = &'a u8>,
 {
     match (squiggle.next()?, squiggle.next()?) {
-        (0, 1) => demodulate_int(squiggle, Sign::Plus),
-        (1, 0) => demodulate_int(squiggle, Sign::Minus),
+        (0, 1) => demodulate_int(squiggle, 1),
+        (1, 0) => demodulate_int(squiggle, -1),
         (0, 0) => Some((Data::Nil, squiggle)),
         (1, 1) => {
             let (head, rest) = demodulate(squiggle)?;
@@ -167,7 +147,7 @@ where I: Iterator<Item = &'a u8>,
     }
 }
 
-fn demodulate_int<'a, I>(mut squiggle: I, sign: Sign) -> Option<(Data, I)>
+fn demodulate_int<'a, I>(mut squiggle: I, sign: i64) -> Option<(Data, I)>
 where I: Iterator<Item = &'a u8>,
 {
     let mut counter = 0;
@@ -179,7 +159,7 @@ where I: Iterator<Item = &'a u8>,
         }
     };
 
-    let mut result: u64 = 0;
+    let mut result: i64 = 0;
     for index in (0..4*chunks).rev() {
         match squiggle.next()? {
             0 => {},
@@ -197,7 +177,7 @@ where I: Iterator<Item = &'a u8>,
     }
     */
 
-    Some((Data::Number(sign, result), squiggle))
+    Some((Data::Number(result * sign), squiggle))
 }
 
 
@@ -205,38 +185,35 @@ where I: Iterator<Item = &'a u8>,
 mod tests {
     use super::*;
     use super::Data::*;
-    use super::Sign::*;
-
-
 
     #[test]
     fn i2s_examples() {
-        assert_eq!(modulate(Number(Plus, 0)), vec!{0, 1, 0});
-        assert_eq!(modulate(Number(Plus, 1)), vec!{0, 1, 1, 0, 0, 0, 0, 1});
-        assert_eq!(modulate(Number(Minus, 1)), vec!{1, 0, 1, 0, 0, 0, 0, 1});
-        assert_eq!(modulate(Number(Plus, 2)), vec!{0, 1, 1, 0, 0, 0, 1, 0});
-        assert_eq!(modulate(Number(Minus, 2)), vec!{1, 0, 1, 0, 0, 0, 1, 0});
-        assert_eq!(modulate(Number(Plus, 16)), vec!{0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0});
-        assert_eq!(modulate(Number(Minus, 16)), vec!{1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0});
-        assert_eq!(modulate(Number(Plus, 255)), vec!{0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1});
-        assert_eq!(modulate(Number(Minus, 255)), vec!{1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1});
-        assert_eq!(modulate(Number(Plus, 256)), vec!{0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0});
-        assert_eq!(modulate(Number(Minus, 256)), vec!{1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0});
+        assert_eq!(modulate(Number(0)), vec!{0, 1, 0});
+        assert_eq!(modulate(Number(1)), vec!{0, 1, 1, 0, 0, 0, 0, 1});
+        assert_eq!(modulate(Number(-1)), vec!{1, 0, 1, 0, 0, 0, 0, 1});
+        assert_eq!(modulate(Number(2)), vec!{0, 1, 1, 0, 0, 0, 1, 0});
+        assert_eq!(modulate(Number(-2)), vec!{1, 0, 1, 0, 0, 0, 1, 0});
+        assert_eq!(modulate(Number(16)), vec!{0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0});
+        assert_eq!(modulate(Number(-16)), vec!{1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0});
+        assert_eq!(modulate(Number(255)), vec!{0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1});
+        assert_eq!(modulate(Number(-255)), vec!{1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1});
+        assert_eq!(modulate(Number(256)), vec!{0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0});
+        assert_eq!(modulate(Number(-256)), vec!{1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0});
     }
 
     #[test]
     fn s2i_examples() {
-        assert_eq!(demodulate((vec!{0, 1, 0}).iter()).unwrap().0, Number(Plus, 0));
-        assert_eq!(demodulate((vec!{0, 1, 1, 0, 0, 0, 0, 1}).iter()).unwrap().0, Number(Plus, 1));
-        assert_eq!(demodulate((vec!{1, 0, 1, 0, 0, 0, 0, 1}).iter()).unwrap().0, Number(Minus, 1));
-        assert_eq!(demodulate((vec!{0, 1, 1, 0, 0, 0, 1, 0}).iter()).unwrap().0, Number(Plus, 2));
-        assert_eq!(demodulate((vec!{1, 0, 1, 0, 0, 0, 1, 0}).iter()).unwrap().0, Number(Minus, 2));
-        assert_eq!(demodulate((vec!{0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0}).iter()).unwrap().0, Number(Plus, 16));
-        assert_eq!(demodulate((vec!{1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0}).iter()).unwrap().0, Number(Minus, 16));
-        assert_eq!(demodulate((vec!{0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1}).iter()).unwrap().0, Number(Plus, 255));
-        assert_eq!(demodulate((vec!{1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1}).iter()).unwrap().0, Number(Minus, 255));
-        assert_eq!(demodulate((vec!{0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0}).iter()).unwrap().0, Number(Plus, 256));
-        assert_eq!(demodulate((vec!{1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0}).iter()).unwrap().0, Number(Minus, 256));
+        assert_eq!(demodulate((vec!{0, 1, 0}).iter()).unwrap().0, Number(0));
+        assert_eq!(demodulate((vec!{0, 1, 1, 0, 0, 0, 0, 1}).iter()).unwrap().0, Number(1));
+        assert_eq!(demodulate((vec!{1, 0, 1, 0, 0, 0, 0, 1}).iter()).unwrap().0, Number(-1));
+        assert_eq!(demodulate((vec!{0, 1, 1, 0, 0, 0, 1, 0}).iter()).unwrap().0, Number(2));
+        assert_eq!(demodulate((vec!{1, 0, 1, 0, 0, 0, 1, 0}).iter()).unwrap().0, Number(-2));
+        assert_eq!(demodulate((vec!{0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0}).iter()).unwrap().0, Number(16));
+        assert_eq!(demodulate((vec!{1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0}).iter()).unwrap().0, Number(-16));
+        assert_eq!(demodulate((vec!{0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1}).iter()).unwrap().0, Number(255));
+        assert_eq!(demodulate((vec!{1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1}).iter()).unwrap().0, Number(-255));
+        assert_eq!(demodulate((vec!{0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0}).iter()).unwrap().0, Number(256));
+        assert_eq!(demodulate((vec!{1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0}).iter()).unwrap().0, Number(-256));
     }
 
     #[test]
@@ -260,16 +237,6 @@ mod tests {
         assert!(demodulate((vec!{0, 1, 1, 0, 0, 0, 2, 0}).iter()).is_none());
     }
 
-    // #[quickcheck]
-    // fn i2s_s2i_roundtrip(sign: bool, x: u64) -> bool {
-    //     let sign = match sign {
-    //         true => Plus,
-    //         false => Minus
-    //     };
-    //     let squiggle = modulate(Number(sign, x));
-    //     demodulate(squiggle.iter()).unwrap().0 == Number(sign, x)
-    // }
-
     #[test]
     fn nil() {
         assert_eq!(modulate(Nil), vec!{0, 0});
@@ -282,7 +249,7 @@ mod tests {
         assert_eq!(demodulate((vec!{1, 1, 0, 0, 0, 0}).iter()).unwrap().0, Cons(Box::new(Nil), Box::new(Nil)));
         assert_eq!(
             modulate(Cons(
-                Box::new(Number(Plus, 0)),
+                Box::new(Number(0)),
                 Box::new(Nil)
             )),
             vec!{1, 1, 0, 1, 0, 0, 0}
@@ -290,7 +257,7 @@ mod tests {
         assert_eq!(
             demodulate((vec!{1, 1, 0, 1, 0, 0, 0}).iter()).unwrap().0,
             Cons(
-                Box::new(Number(Plus, 0)),
+                Box::new(Number(0)),
                 Box::new(Nil)
             )
         );
