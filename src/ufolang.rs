@@ -222,9 +222,6 @@ fn apply(f: Rc<Value>, x: Rc<Value>, ctx: &Context) -> Rc<Value> {
         Eq1(ref a) => {
             let a = eval(a.clone(), ctx);
             let x = eval(x, ctx);
-
-            dbg!(&a);
-            dbg!(&x);
             if a.try_as_number().unwrap() == x.try_as_number().unwrap() {
                 Rc::new(K)
             } else {
