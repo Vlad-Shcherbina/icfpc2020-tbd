@@ -14,6 +14,7 @@ canvas.busy {
 	</style>
 	<script type="text/javascript">
 var State = "(2, ((1, (-1, nil)), (0, (nil, nil))))"
+
 var OffsetX = -200
 var OffsetY = -200
 var Colors = [
@@ -85,6 +86,14 @@ function load() {
 		let y = parseInt(document.getElementById('click_y').value)
 		send_click(x, y)
 	})
+
+	document.getElementById('jump_battle_select').addEventListener('click', e => {
+		let new_state = '(5, ((2, (0, (nil, (nil, (nil, (nil, (nil, (54179, nil)))))))), (8, (nil, nil))))'
+		let x = 0
+		let y = 0
+		set_state(new_state)
+		send_click(x, y)
+	})
 }
 	</script>
 </head>
@@ -93,5 +102,6 @@ function load() {
 	<p>state is <span id='state'></span></p>
 	<p>change state: <textarea id='new_state'></textarea><button id='new_state_go'>go</button></p>
 	<p>simulate click: <input type='number' id='click_x' value=0> <input type='number' id='click_y' value=0> <button id='click_go'>go</button></p>
+	<p>shortcuts: <button id='jump_battle_select'>battle selection screen</button></p>
 </body>
 </html>
