@@ -34,6 +34,10 @@ impl Data {
         Data::make_cons(x, Data::make_list2(y, z))
     }
 
+    pub fn make_list4(x: impl Into<Data>, y: impl Into<Data>, z: impl Into<Data>, w: impl Into<Data>) -> Data {
+        Data::make_cons(x, Data::make_list3(y, z, w))
+    }
+
     pub fn to_string(&self) -> String {
         match self {
             Data::Nil => String::from("nil"),
