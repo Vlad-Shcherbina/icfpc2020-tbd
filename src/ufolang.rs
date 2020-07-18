@@ -1,6 +1,6 @@
 use crate::{project_path, tree::Tree};
 use std::{collections::HashMap, rc::Rc, convert::TryFrom};
-use crate::squiggle;
+use crate::squiggle::Data;
 use crate::{webapi::aliens_send, img_matrix::*};
 
 fn ap_to_none(s: &str) -> Option<&str> {
@@ -63,14 +63,14 @@ impl Value {
     }
 }
 
-impl TryFrom<&Value> for squiggle::Data {
+impl TryFrom<&Value> for Data {
     type Error = ();
 
     fn try_from(val: &Value) -> Result<Self, Self::Error> {
         match val {
-            Number(i) => Ok(squiggle::Data::Number(*i)),
-            Nil => Ok(squiggle::Data::Nil),
-            Pair(left, right) => Ok(squiggle::Data::Cons(
+            Number(i) => Ok(Data::Number(*i)),
+            Nil => Ok(Data::Nil),
+            Pair(left, right) => Ok(Data::Cons(
                 Box::new(Self::try_from(left.as_ref())?),
                 Box::new(Self::try_from(right.as_ref())?))),
             _ => Err(())
@@ -78,12 +78,12 @@ impl TryFrom<&Value> for squiggle::Data {
     }
 }
 
-impl From<&squiggle::Data> for Value {
-    fn from(val: &squiggle::Data) -> Self {
+impl From<&Data> for Value {
+    fn from(val: &Data) -> Self {
         match val {
-            squiggle::Data::Nil => Nil,
-            squiggle::Data::Number(value) => Number(*value),
-            squiggle::Data::Cons(left, right) => Value::Pair(
+            Data::Nil => Nil,
+            Data::Number(value) => Number(*value),
+            Data::Cons(left, right) => Value::Pair(
                 Rc::new(Self::from(left.as_ref())),
                 Rc::new(Self::from(right.as_ref())))
         }
@@ -146,25 +146,16 @@ impl Context {
     }
 }
 
-fn eval_draw(value: Rc<Value>) -> ImgMatrix {
-    let mut points: Vec<Coord> = Vec::new();
-    let mut val = value.as_ref();
-    loop {
-        match val {
-            Nil => break,
-            Pair(ref car, ref cdr) => {
-                match car.as_ref() {
-                    Pair(ref car2, ref cdr2) => points.push(Coord {
-                        x: car2.try_as_number().expect("not an int") as usize,
-                        y: cdr2.try_as_number().expect("not an int") as usize
-                    }),
-                    _ => panic!("{:?}", *value)
-                }
-                val = cdr.as_ref();
-            }
-            _ => panic!("{:?}", *value)
-        }
-    }
+fn eval_draw(value: Data) -> ImgMatrix {
+    // let mut points: Vec<Coord> = Vec::new();
+    let points = value.into_vec();
+    let points: Vec<Coord> = points.iter().map(|p| match p {
+        Data::Cons(car, cdr) => Coord {
+            x: car.try_as_number().unwrap() as usize,
+            y: cdr.try_as_number().unwrap() as usize
+        },
+        _ => panic!("{:?}", p)
+    }).collect();
     let max_x = points.iter().map(|it| it.x).max().unwrap();
     let max_y = points.iter().map(|it| it.y).max().unwrap();
     let mut image = ImgMatrix::new(max_y, max_x);
@@ -317,7 +308,7 @@ pub struct Protocol {
 pub struct ProtocolResponse {
     continue_flag: i64,
     new_state: Rc<Value>,
-    data_out: squiggle::Data,
+    data_out: Data,
 }
 
 impl Protocol {
@@ -340,7 +331,7 @@ impl Protocol {
         }
     }
 
-    pub fn invoke(&self, internal_state: Rc<Value>, data_in: &squiggle::Data) -> ProtocolResponse {
+    pub fn invoke(&self, internal_state: Rc<Value>, data_in: &Data) -> ProtocolResponse {
         let data_in = Rc::new(data_in.into());
         let entry_point = self.ctx.defs[self.ctx.name_to_def_idx[self.entry_point]].clone();
         let expr = Rc::new(App(Rc::new(App(entry_point, internal_state)), data_in));
@@ -365,7 +356,7 @@ impl Protocol {
         }
 
         let continue_flag = continue_flag.try_as_number().unwrap();
-        let data_out = squiggle::Data::try_from(data_out.as_ref()).unwrap();
+        let data_out = Data::try_from(data_out.as_ref()).unwrap();
 
         ProtocolResponse {
             continue_flag,
@@ -374,7 +365,7 @@ impl Protocol {
         }
     }
 
-    fn interact(&self, initial_state: Rc<Value>, mut data_in: squiggle::Data) -> InteractResult {
+    fn interact(&self, initial_state: Rc<Value>, mut data_in: Data) -> InteractResult {
         use std::convert::TryInto;
         let mut state = initial_state;
         loop {
@@ -395,8 +386,8 @@ impl Protocol {
 
 #[derive(Debug)]
 struct InteractResult {
-    final_state: squiggle::Data,
-    data_out_to_multipledraw: squiggle::Data,
+    final_state: Data,
+    data_out_to_multipledraw: Data,
 }
 
 

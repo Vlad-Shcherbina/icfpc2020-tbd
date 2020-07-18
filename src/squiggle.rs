@@ -73,7 +73,7 @@ impl Data {
         }
     }
 
-    pub fn to_vec(self) -> Vec<Self> {
+    pub fn into_vec(self) -> Vec<Self> {
         let mut res: Vec<Self> = Vec::new();
         let mut val = self;
         loop {
@@ -87,6 +87,13 @@ impl Data {
             }
         }
         res
+    }
+
+    pub fn try_as_number(&self) -> Option<i64> {
+        match self {
+            Self::Number(x) => Some(*x),
+            _ => None,
+        }
     }
 }
 
