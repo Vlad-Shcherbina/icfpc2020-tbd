@@ -522,5 +522,8 @@ mod tests {
 
         let res = protocol.interact(res.final_state, Data::make_cons(2, 3));
         assert_eq!(res.data_out_to_multipledraw.to_pretty_string(), "[[(2, 3), (0, 0)]]");
+
+        let res = protocol.interact(res.final_state, Data::make_cons(1, 2));
+        assert_eq!(res.data_out_to_multipledraw.to_pretty_string(), "[[(1, 2), (2, 3), (0, 0)]]");
     }
 }
