@@ -1,7 +1,7 @@
 use crate::{project_path, tree::Tree};
 use std::{collections::HashMap, rc::Rc, convert::TryFrom, cell::RefCell};
 use crate::squiggle::Data;
-use crate::{webapi::aliens_send, img_matrix::*};
+use crate::{webapi::Endpoint, img_matrix::*};
 
 fn ap_to_none(s: &str) -> Option<&str> {
     if s == "ap" { None } else { Some(s) }
@@ -396,7 +396,7 @@ impl Protocol {
         }
     }
 
-    pub fn interact(&self, initial_state: Data, mut data_in: Data) -> InteractResult {
+    pub fn interact(&self, initial_state: Data, mut data_in: Data, endpoint: &Endpoint) -> InteractResult {
         let mut state = initial_state;
         loop {
             let resp = self.invoke(&state, &data_in);
@@ -408,7 +408,7 @@ impl Protocol {
             }
             state = resp.new_state;
             eprintln!("sending to aliens: {:?}", resp.data_out);
-            data_in = aliens_send(None, resp.data_out);
+            data_in = endpoint.aliens_send(resp.data_out);
             eprintln!("received from aliens: {:?}", data_in);
         }
     }
@@ -518,7 +518,7 @@ mod tests {
         let protocol = Protocol::from_snippet("\
         main = ap ap c ap ap b b ap ap b ap b ap cons 0 ap ap c ap ap b b cons ap ap c cons nil ap ap c ap ap b cons ap ap c cons nil nil
         ");
-        let res = protocol.interact(Data::Nil, Data::make_cons(2, 3));
+        let res = protocol.interact(Data::Nil, Data::make_cons(2, 3), &Endpoint::NoComms);
         dbg!(&res);
 
         match res.final_state {
@@ -537,14 +537,14 @@ mod tests {
         let protocol = Protocol::from_snippet("\
         main = ap ap b ap b ap ap s ap ap b ap b ap cons 0 ap ap c ap ap b b cons ap ap c cons nil ap ap c cons nil ap c cons
         ");
-        let res = protocol.interact(Data::Nil, Data::make_cons(0, 0));
+        let res = protocol.interact(Data::Nil, Data::make_cons(0, 0), &Endpoint::NoComms);
         assert_eq!(res.final_state.to_pretty_string(), "[(0, 0)]");
         assert_eq!(res.data_out_to_multipledraw.to_pretty_string(), "[[(0, 0)]]");
 
-        let res = protocol.interact(res.final_state, Data::make_cons(2, 3));
+        let res = protocol.interact(res.final_state, Data::make_cons(2, 3), &Endpoint::NoComms);
         assert_eq!(res.data_out_to_multipledraw.to_pretty_string(), "[[(2, 3), (0, 0)]]");
 
-        let res = protocol.interact(res.final_state, Data::make_cons(1, 2));
+        let res = protocol.interact(res.final_state, Data::make_cons(1, 2), &Endpoint::NoComms);
         assert_eq!(res.data_out_to_multipledraw.to_pretty_string(), "[[(1, 2), (2, 3), (0, 0)]]");
     }
 }

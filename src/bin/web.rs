@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use tokio::runtime::Builder;
 use tokio::time::delay_for;
 use std::time::Duration;
-use tbd::png_files::matrices_to_png;
+use tbd::{webapi::Endpoint, png_files::matrices_to_png};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
@@ -48,7 +48,7 @@ fn process_click(click: &ClickParams) -> ClickResponse {
         None => return ClickResponse{state: String::from("error"), pretty_state: String::from("error"), pixels: vec![]}
     };
 
-    let result = protocol.interact(state, Data::make_cons(click.x, click.y));
+    let result = protocol.interact(state, Data::make_cons(click.x, click.y), &Endpoint::Proxy);
     // save_pics(&result);
 
     // let pixels = result.data_out_to_multipledraw.into_vec().iter().map(
@@ -83,6 +83,7 @@ async fn server_main() {
 
     let routes = index.or(click);
 
+    println!("serving at http://127.0.0.1:22009 ...");
     warp::serve(routes)
         .run(([127, 0, 0, 1], 22009))
         .await;
