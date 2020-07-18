@@ -40,6 +40,28 @@ impl Data {
         }
     }
 
+    pub fn to_pretty_string(&self) -> String {
+        if self.is_list() {
+            let mut elements = Vec::new();
+            let mut t = self;
+            while let Data::Cons(head, tail) = t {
+                elements.push(head.to_pretty_string());
+                t = tail.as_ref();
+            }
+            format!("[{}]", elements.join(", "))
+        } else {
+            self.to_string()
+        }
+    }
+
+    pub fn is_list(&self) -> bool {
+        let mut t = self;
+        while let Data::Cons(head, tail) = t {
+            t = tail.as_ref();
+        }
+        if let Data::Nil = t { true } else { false }
+    }
+
     pub fn from_str(s: &str) -> Option<Self> {
         // super hujovo
         if s == "nil" {
