@@ -154,6 +154,9 @@ fn eval_draw(value: Data) -> ImgMatrix {
         pub y: i64,
     }
     let points = value.into_vec();
+    if points.is_empty() {
+        return ImgMatrix::new(10, 10)
+    }
     let points: Vec<Point2d> = points.into_iter().map(|p| match p {
         Data::Cons(car, cdr) => Point2d {
             x: car.try_as_number().unwrap(),
@@ -165,6 +168,7 @@ fn eval_draw(value: Data) -> ImgMatrix {
     let min_y = points.iter().map(|it| it.y).min().unwrap();
     let max_x = points.iter().map(|it| it.x).max().unwrap();
     let max_y = points.iter().map(|it| it.y).max().unwrap();
+
     let width = std::cmp::max(10, max_x - min_x + 1);
     let height = std::cmp::max(10, max_y - min_y + 1);
     let mut image = ImgMatrix::new(width as usize, height as usize);
