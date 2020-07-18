@@ -1,5 +1,5 @@
 use crate::{project_path, tree::Tree};
-use std::{collections::HashMap, rc::Rc, convert::TryFrom};
+use std::{collections::HashMap, rc::Rc, convert::TryFrom, cell::RefCell};
 use crate::squiggle::Data;
 use crate::{webapi::aliens_send, img_matrix::*};
 
@@ -51,6 +51,8 @@ pub enum Value {
     Lt, Lt1(Rc<Value>),
     Div, Div1(Rc<Value>),
     False, False1,
+
+    Thunk(RefCell<Rc<Value>>),
 }
 use Value::*;
 
@@ -181,6 +183,12 @@ fn eval(value: Rc<Value>, ctx: &Context) -> Rc<Value> {
             println!("calling {}...", ctx.names[def_idx]);
             eval(ctx.defs[def_idx].clone(), ctx)
         }
+        Thunk(ref cell) => {
+            let x = Rc::clone(&*cell.borrow());
+            let result = eval(x, ctx);
+            *cell.borrow_mut() = result.clone();
+            result
+        }
         _ => value,
     }
 }
@@ -211,6 +219,9 @@ fn apply(f: Rc<Value>, x: Rc<Value>, ctx: &Context) -> Rc<Value> {
         Eq1(ref a) => {
             let a = eval(a.clone(), ctx);
             let x = eval(x, ctx);
+
+            dbg!(&a);
+            dbg!(&x);
             if a.try_as_number().unwrap() == x.try_as_number().unwrap() {
                 Rc::new(K)
             } else {
@@ -235,8 +246,10 @@ fn apply(f: Rc<Value>, x: Rc<Value>, ctx: &Context) -> Rc<Value> {
             let a = a.clone();
             let b = b.clone();
 
-            let ac = Rc::new(App(a, x.clone()));
-            let bc = Rc::new(App(b, x));
+            let c = Rc::new(Thunk(RefCell::new(x)));
+
+            let ac = Rc::new(App(a, c.clone()));
+            let bc = Rc::new(App(b, c));
             eval(Rc::new(App(ac, bc)), ctx)
         }
 
