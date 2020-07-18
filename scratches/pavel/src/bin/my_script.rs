@@ -83,7 +83,7 @@ fn render_token(t: Token) -> ImgMatrix {
 }
 
 fn main() {
-    let galaxy_path = Path::new("data").join("messages").join("galaxy1.txt");
+    let galaxy_path = tbd::project_path(Path::new("data").join("messages").join("galaxy.txt"));
     let galaxy_file = File::open(galaxy_path).expect("Galaxy.txt not found");
     let mut img = ImgMatrix::new(50, 50);
     let origin_x = 2;
@@ -115,6 +115,6 @@ fn main() {
         current_y += line_height + 1;
         current_x = origin_x;
     }
-    matrix_to_png(&img, Path::new("outputs")
-        .join("galaxy.png"))
+    matrix_to_png(&img, tbd::project_path(Path::new("outputs")
+        .join("galaxy.png")))
 }
