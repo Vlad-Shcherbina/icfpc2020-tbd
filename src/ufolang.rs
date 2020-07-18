@@ -151,6 +151,7 @@ impl Context {
 fn eval_draw(value: Data) -> ImgMatrix {
     // let mut points: Vec<Coord> = Vec::new();
     let points = value.into_vec();
+    dbg!(&points);
     let points: Vec<Coord> = points.into_iter().map(|p| match p {
         Data::Cons(car, cdr) => Coord {
             x: car.try_as_number().unwrap() as usize,
@@ -160,6 +161,8 @@ fn eval_draw(value: Data) -> ImgMatrix {
     }).collect();
     let max_x = points.iter().map(|it| it.x).max().unwrap();
     let max_y = points.iter().map(|it| it.y).max().unwrap();
+    dbg!(max_x);
+    dbg!(max_y);
     let mut image = ImgMatrix::new(max_y, max_x);
     for p in points {
         image[p] = 1;
@@ -167,7 +170,7 @@ fn eval_draw(value: Data) -> ImgMatrix {
     image
 }
 
-fn eval_multidraw(value: Data) -> Vec<ImgMatrix> {
+pub fn eval_multidraw(value: Data) -> Vec<ImgMatrix> {
     value.into_vec().into_iter().map(|it| eval_draw(it)).collect()
 }
 
@@ -387,7 +390,7 @@ impl Protocol {
         }
     }
 
-    fn interact(&self, initial_state: Data, mut data_in: Data) -> InteractResult {
+    pub fn interact(&self, initial_state: Data, mut data_in: Data) -> InteractResult {
         use std::convert::TryInto;
         let mut state = initial_state;
         loop {
@@ -407,9 +410,9 @@ impl Protocol {
 }
 
 #[derive(Debug)]
-struct InteractResult {
-    final_state: Data,
-    data_out_to_multipledraw: Data,
+pub struct InteractResult {
+    pub final_state: Data,
+    pub data_out_to_multipledraw: Data,
 }
 
 
