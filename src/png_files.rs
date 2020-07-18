@@ -75,7 +75,7 @@ pub fn matrix_to_png(matrix: &ImgMatrix, path: impl AsRef<Path>) {
 pub fn matrices_to_png(matrices: &Vec<ImgMatrix>, path: impl AsRef<Path>) {
     create_dir_all(&path).unwrap();
     for (i, m) in matrices.iter().enumerate() {
-        matrix_to_png(m, path.as_ref().join(format!("image{:03}", i)));
+        matrix_to_png(m, path.as_ref().join(format!("image{:03}.png", i)));
     }
 }
 
