@@ -1,5 +1,6 @@
 use crate::tree::Tree;
-use std::{collections::HashMap, rc::Rc};
+use std::{collections::HashMap, rc::Rc, convert::TryFrom};
+use crate::squiggle;
 
 fn ap_to_none(s: &str) -> Option<&str> {
     if s == "ap" { None } else { Some(s) }
@@ -58,6 +59,33 @@ impl Value {
         match self {
             Number(x) => Some(*x),
             _ => None,
+        }
+    }
+}
+
+impl TryFrom<Value> for squiggle::Data {
+    type Error = ();
+
+    fn try_from(val: Value) -> Result<Self, Self::Error> {
+        match val {
+            Number(i) => Ok(squiggle::Data::Number(
+                if i >= 0 {squiggle::Sign::Plus} else {squiggle::Sign::Minus},
+                i.abs() as u64)),
+            Nil => Ok(squiggle::Data::Nil),
+            _ => Err(())
+        }
+    }
+}
+
+impl From<squiggle::Data> for Value {
+    fn from(val: squiggle::Data) -> Self {
+        match val {
+            squiggle::Data::Nil => Nil,
+            squiggle::Data::Number(sign, value) => Number(value as i64 * match sign {
+                squiggle::Sign::Plus => 1,
+                squiggle::Sign::Minus => -1,
+            }),
+            squiggle::Data::Cons(left, right) => Cons, // FIXME
         }
     }
 }
