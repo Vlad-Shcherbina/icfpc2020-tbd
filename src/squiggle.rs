@@ -89,6 +89,19 @@ impl Data {
         res
     }
 
+    pub fn is_list(&self) -> bool {
+        let mut val = self;
+        loop {
+            match &val {
+                Self::Nil => return true,
+                Self::Cons(_, ref cdr) => {
+                    val = &cdr;
+                }
+                Self::Number(_) => return false,
+            }
+        }
+    }
+
     pub fn try_as_number(&self) -> Option<i64> {
         match self {
             Self::Number(x) => Some(*x),
@@ -129,7 +142,7 @@ pub fn modulate_into(data: Data, squiggle: &mut Vec<u8>) {
             squiggle.push(0);
         },
         Data::Number(x) => {
-            if (x >= 0) {
+            if x >= 0 {
                 squiggle.push(0);
                 squiggle.push(1);
             } else {
