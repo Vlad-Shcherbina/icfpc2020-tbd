@@ -72,12 +72,12 @@ pub fn matrix_to_png(matrix: &ImgMatrix, path: impl AsRef<Path>) {
     writer.write_image_data(&image_data).expect("Failed to write");
 }
 
-pub fn matrices_to_png(matrices: impl IntoIterator<Item=ImgMatrix>, path: impl AsRef<Path>) {
-    create_dir_all(path);
-    for (i, m) in &matrices {
-        matrix_to_png(m, path.join(format!("image{:03}", i)));
-    }
-}
+// pub fn matrices_to_png(matrices: impl IntoIterator<Item=ImgMatrix>, path: impl AsRef<Path>) {
+//     create_dir_all(path);
+//     for (i, m) in &matrices {
+//         matrix_to_png(m, path.join(format!("image{:03}", i)));
+//     }
+// }
 
 // Filename without .png
 // pub fn matrix_to_bordered_png(img: &ImgMatrix, pixel_size: usize, filename: &str) {
