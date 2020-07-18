@@ -311,7 +311,7 @@ pub struct Protocol {
 #[derive(Debug)]
 pub struct ProtocolResponse {
     continue_flag: i64,
-    new_state: Rc<Value>,
+    new_state: Data,
     data_out: Data,
 }
 
@@ -335,7 +335,8 @@ impl Protocol {
         }
     }
 
-    pub fn invoke(&self, internal_state: Rc<Value>, data_in: &Data) -> ProtocolResponse {
+    pub fn invoke(&self, internal_state: &Data, data_in: &Data) -> ProtocolResponse {
+        let internal_state = Rc::new(internal_state.into());
         let data_in = Rc::new(data_in.into());
         let entry_point = self.ctx.defs[self.ctx.name_to_def_idx[self.entry_point]].clone();
         let expr = Rc::new(App(Rc::new(App(entry_point, internal_state)), data_in));
@@ -347,7 +348,7 @@ impl Protocol {
             _ => panic!("{:?}", result),
         };
         let (new_state, tail2) = match &*tail {
-            Pair(new_state, tail2) => (new_state.clone(), tail2.clone()),
+            Pair(new_state, tail2) => (new_state, tail2.clone()),
             _ => panic!("{:?}", tail),
         };
         let (data_out, tail3) = match &*tail2 {
@@ -360,6 +361,7 @@ impl Protocol {
         }
 
         let continue_flag = continue_flag.try_as_number().unwrap();
+        let new_state = Data::try_from(new_state.as_ref()).unwrap();
         let data_out = Data::try_from(data_out.as_ref()).unwrap();
 
         ProtocolResponse {
@@ -369,14 +371,14 @@ impl Protocol {
         }
     }
 
-    fn interact(&self, initial_state: Rc<Value>, mut data_in: Data) -> InteractResult {
+    fn interact(&self, initial_state: Data, mut data_in: Data) -> InteractResult {
         use std::convert::TryInto;
         let mut state = initial_state;
         loop {
-            let resp = self.invoke(state, &data_in);
+            let resp = self.invoke(&state, &data_in);
             if resp.continue_flag == 0 {
                 return InteractResult {
-                    final_state: resp.new_state.as_ref().try_into().unwrap(),
+                    final_state: resp.new_state,
                     data_out_to_multipledraw: resp.data_out,
                 }
             }
@@ -466,11 +468,11 @@ mod tests {
         main = ap ap c ap ap b b ap ap b ap b ap cons 0 ap ap c ap ap b b cons ap ap c cons nil ap ap c ap ap b cons ap ap c cons nil nil
         ");
         // x0 = nil, x1 = 42
-        let resp = protocol.invoke(Rc::new(Nil), &42.into());
+        let resp = protocol.invoke(&Data::Nil, &42.into());
         assert_eq!(resp.continue_flag, 0);
 
-        match *resp.new_state {
-            Value::Nil => {},
+        match resp.new_state {
+            Data::Nil => {},
             _ => panic!(),
         }
 
@@ -485,7 +487,7 @@ mod tests {
         let protocol = Protocol::from_snippet("\
         main = ap ap c ap ap b b ap ap b ap b ap cons 0 ap ap c ap ap b b cons ap ap c cons nil ap ap c ap ap b cons ap ap c cons nil nil
         ");
-        let res = protocol.interact(Rc::new(Nil), Data::make_cons(2, 3));
+        let res = protocol.interact(Data::Nil, Data::make_cons(2, 3));
         dbg!(&res);
 
         match res.final_state {
@@ -495,5 +497,20 @@ mod tests {
 
         let expected = Data::make_list1(Data::make_list1(Data::make_cons(2, 3)));
         assert_eq!(res.data_out_to_multipledraw, expected);
+    }
+
+    #[test]
+    fn statefuldraw_interact() {
+        // example from https://message-from-space.readthedocs.io/en/latest/message41.html
+
+        let protocol = Protocol::from_snippet("\
+        main = ap ap b ap b ap ap s ap ap b ap b ap cons 0 ap ap c ap ap b b cons ap ap c cons nil ap ap c cons nil ap c cons
+        ");
+        let res = protocol.interact(Data::Nil, Data::make_cons(0, 0));
+        assert_eq!(res.final_state.to_pretty_string(), "[(0, 0)]");
+        assert_eq!(res.data_out_to_multipledraw.to_pretty_string(), "[[(0, 0)]]");
+
+        let res = protocol.interact(res.final_state, Data::make_cons(2, 3));
+        assert_eq!(res.data_out_to_multipledraw.to_pretty_string(), "[[(2, 3), (0, 0)]]");
     }
 }
