@@ -12,6 +12,27 @@ const WHITE: [u8; 4] = [255, 255, 255, 255];
 
 
 // takes path to an image and turns it into WIDTH x HEIGHT bool matrix
+pub fn borderless_png_to_matrix(path: impl AsRef<Path>) -> ImgMatrix {
+    let decoder = png::Decoder::new(File::open(project_path(path)).unwrap());
+    let (info, mut reader) = decoder.read_info().unwrap();
+    let mut buf = vec![0; info.buffer_size()];
+    reader.next_frame(&mut buf).unwrap();
+
+    let pixel_size = 1;
+
+    let width = info.width as usize / pixel_size;
+    let height = info.height as usize / pixel_size;
+    let mut v: ImgMatrix = ImgMatrix::new(width, height);
+    for x in 0..width {
+        for y in 0..height {
+            let coord = (y * (info.width as usize) + x) * pixel_size * COLOR_SIZE;
+            v[Coord {x, y}] = if buf[coord] == 0 { 0 } else { 1 };
+        }
+    }
+    v
+}
+
+// takes path to an image and turns it into WIDTH x HEIGHT bool matrix
 pub fn bordered_png_to_matrix(path: impl AsRef<Path>) -> ImgMatrix {
     let decoder = png::Decoder::new(File::open(project_path(path)).unwrap());
     let (info, mut reader) = decoder.read_info().unwrap();
