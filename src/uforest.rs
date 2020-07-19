@@ -90,6 +90,14 @@ pub enum Command {
         ship_id: i128,
         vector: Vec2,
     },
+    Detonate {
+        ship_id: i128,
+    },
+    Shoot {
+        ship_id: i128,
+        target: Vec2,
+        mystery: i128
+    },
     // TODO: add more commands, but keep Unknown around just in case
     Unknown(Data),
 }
@@ -142,6 +150,8 @@ impl From<Command> for Data {
         // c.mystery
         match c {
             Command::Accelerate { ship_id, vector } => Data::make_list3(0, ship_id, vector),
+            Command::Detonate { ship_id } => Data::make_list2(1, ship_id),
+            Command::Shoot { ship_id, target , mystery} => Data::make_list4(2, ship_id, target, mystery),
             Command::Unknown(data) => data,
         }
     }
@@ -165,6 +175,29 @@ impl TryFrom<Data> for Command {
                 Command::Accelerate {
                     ship_id,
                     vector,
+                }
+            }
+            1 => {
+                if parts.len() != 2 {
+                    Err(format!("detonate cmd {:?}", parts))?
+                }
+                let ship_id = parts[1].try_as_number().ok_or("cmd ship id not number")?;
+                Command::Detonate {
+                    ship_id,
+                }
+            }
+            2 => {
+                if parts.len() != 4 {
+                    Err(format!("shoot cmd {:?}", parts))?
+                }
+                let ship_id = parts[1].try_as_number().ok_or("cmd ship id not number")?;
+                let target = Vec2::try_from(parts[2].clone())?;
+                let mystery = parts[1].try_as_number().ok_or("cmd mystery not number")?;
+
+                Command::Shoot {
+                    ship_id,
+                    target,
+                    mystery
                 }
             }
             _ => Command::Unknown(data),
