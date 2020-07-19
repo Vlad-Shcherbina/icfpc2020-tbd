@@ -18,7 +18,7 @@ fn main() {
         }
         assert_eq!(gr.stage, Stage::NotStarted);
 
-        let gr = client.start(InitialShipParams {
+        let gr = client.start(ShipParams {
             fuel: 1,
             number2: 1,
             number3: 1,

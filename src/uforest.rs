@@ -13,14 +13,55 @@ pub enum Stage {
     Finished,
 }
 
+#[derive(Debug)]
+pub struct Position {
+    x: i128,
+    y: i128,
+}
+
+#[derive(Debug)]
+pub struct Ship {
+    pub ship_state: ShipState,
+    pub mystery: Data
+}
+
+#[derive(Debug)]
+pub struct ShipState {
+    pub number1: i128,
+    pub number2: i128,
+    pub position: Position,
+    pub mystery3: Data,
+    pub ship_params: ShipParams,
+    pub number3: i128,
+    pub number4: i128,
+    pub number5: i128,
+
+}
+
+#[derive(Debug)]
+pub struct GameSpec {
+    pub timer: i128, // number of max possible steps until game over
+    pub mystery1: Data,
+    pub mystery2: Data,
+    pub mystery3: Data,
+    pub mystery4: Data,
+}
+
+#[derive(Debug)]
+pub struct GameState {
+    pub steps: i128, //number of steps from the start of a run
+    pub mystery1: Data,
+    pub ships_list: Vec<Ship>,
+}
+
 // GameResponse should contain _all_ information from the server response.
 // If some parts are not yet understood, leave them in mystery fields of type Data.
 #[derive(Debug)]
 pub struct GameResponse {
     pub success: i128,  // always 1 ??
     pub stage: Stage,
-    pub unknown_list_a: Data,
-    pub state: Data,
+    pub spec: GameSpec,
+    pub state: GameState,
 }
 
 #[derive(Debug)]
@@ -29,7 +70,7 @@ pub struct JoinRequest {
 }
 
 #[derive(Debug)]
-pub struct InitialShipParams {
+pub struct ShipParams {
     pub fuel: i128,
     pub number2: i128,
     pub number3: i128,
@@ -55,7 +96,7 @@ impl Client {
         self.endpoint.aliens_send(req).try_into().unwrap()
     }
 
-    pub fn start(&self, i: InitialShipParams) -> GameResponse {
+    pub fn start(&self, i: ShipParams) -> GameResponse {
         let i = Data::make_list4(
             i.fuel,
             i.number2,
@@ -132,12 +173,12 @@ impl TryFrom<Data> for GameResponse {
         }
         let success = parts[0].try_as_number().ok_or("success is not a number")?;
         let stage = parts[1].clone().into();
-        let unknown_list_a = parts[2].clone();
-        let state = parts[3].clone();
+        let spec = parts[2].clone().try_into().unwrap();
+        let state = parts[3].clone().try_into().unwrap();
         Ok(GameResponse {
             success,
             stage,
-            unknown_list_a,
+            spec,
             state,
         })
     }
@@ -151,5 +192,158 @@ impl From<Data> for Stage {
             2 => Stage::Finished,
             _ => panic!(),
         }
+    }
+}
+
+impl TryFrom<Data> for GameSpec {
+    type Error = String;
+
+    fn try_from(data: Data) -> Result<Self, Self::Error> {
+        if !data.is_list() {
+            Err("not a list")?
+        }
+        let parts = data.try_into_vec().unwrap();
+        if parts.len() != 5 {
+            Err(format!("{} elements instead of 5", parts.len()))?;
+        }
+        let timer = parts[0].try_as_number().ok_or("timer is not a number")?;
+        let mystery1 = parts[1].clone();
+        let mystery2 = parts[2].clone();
+        let mystery3 = parts[3].clone();
+        let mystery4 = parts[4].clone();
+        Ok(GameSpec {
+            timer,
+            mystery1,
+            mystery2,
+            mystery3,
+            mystery4,
+        })
+    }
+}
+
+impl TryFrom<Data> for GameState {
+    type Error = String;
+
+    fn try_from(data: Data) -> Result<Self, Self::Error> {
+        if !data.is_list() {
+            Err("not a list")?
+        }
+        let parts = data.try_into_vec().unwrap();
+        if parts.len() != 3 {
+            Err(format!("{} elements instead of 3", parts.len()))?;
+        }
+        let steps = parts[0].try_as_number().ok_or("# of steps is not a number")?;
+        let mystery1 = parts[1].clone();
+        let ships_list_data = parts[2].clone().try_into_vec().unwrap();
+
+        let mut ships_list = Vec::new();
+
+        for ls in ships_list_data {
+            ships_list.push(ls.try_into().unwrap());
+        }
+
+        Ok(GameState {
+            steps,
+            mystery1,
+            ships_list
+        })
+    }
+}
+
+impl TryFrom<Data> for Position {
+    type Error = String;
+
+    fn try_from(data: Data) -> Result<Self, Self::Error> {
+        if !data.is_list() {
+            Err("not a list")?
+        }
+        let parts = data.try_into_vec().unwrap();
+        if parts.len() != 2 {
+            Err(format!("{} elements instead of 2", parts.len()))?;
+        }
+        let x = parts[0].try_as_number().unwrap();
+        let y = parts[1].try_as_number().unwrap();
+        Ok(Position {
+            x,
+            y,
+        })
+    }
+}
+
+
+impl TryFrom<Data> for ShipParams {
+    type Error = String;
+
+    fn try_from(data: Data) -> Result<Self, Self::Error> {
+        if !data.is_list() {
+            Err("not a list")?
+        }
+        let parts = data.try_into_vec().unwrap();
+        if parts.len() != 4 {
+            Err(format!("{} elements instead of 4", parts.len()))?;
+        }
+        let fuel = parts[0].try_as_number().unwrap();
+        let number2 = parts[1].try_as_number().unwrap();
+        let number3 = parts[2].try_as_number().unwrap();
+        let number4 = parts[3].try_as_number().unwrap();
+        Ok(ShipParams {
+            fuel,
+            number2,
+            number3,
+            number4,
+        })
+    }
+}
+
+
+impl TryFrom<Data> for Ship {
+    type Error = String;
+
+    fn try_from(data: Data) -> Result<Self, Self::Error> {
+        if !data.is_list() {
+            Err("not a list")?
+        }
+        let parts = data.try_into_vec().unwrap();
+        if parts.len() != 2 {
+            Err(format!("{} elements instead of 2", parts.len()))?;
+        }
+        let ship_state = parts[0].clone().try_into().unwrap();
+        let mystery = parts[1].clone();
+        Ok(Ship {
+            ship_state,
+            mystery,
+        })
+    }
+}
+
+impl TryFrom<Data> for ShipState {
+    type Error = String;
+
+    fn try_from(data: Data) -> Result<Self, Self::Error> {
+        if !data.is_list() {
+            Err("not a list")?
+        }
+        let parts = data.try_into_vec().unwrap();
+        if parts.len() != 8 {
+            Err(format!("{} elements instead of 8", parts.len()))?;
+        }
+        let number1 = parts[0].try_as_number().unwrap();
+        let number2 = parts[1].try_as_number().unwrap();
+        let position = parts[2].clone().try_into().unwrap();
+        let mystery3 = parts[3].clone();
+        let ship_params = parts[4].clone().try_into().unwrap();
+        let number3 = parts[5].try_as_number().unwrap();
+        let number4 = parts[6].try_as_number().unwrap();
+        let number5 = parts[7].try_as_number().unwrap();
+        Ok(ShipState {
+            number1,
+            number2,
+            position,
+            mystery3,
+            ship_params,
+            number3,
+            number4,
+            number5,
+        })
     }
 }
