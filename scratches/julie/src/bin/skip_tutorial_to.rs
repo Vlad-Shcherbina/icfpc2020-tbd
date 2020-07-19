@@ -24,7 +24,7 @@ fn fast_forward_training() -> Data {
         return state;      
     }
     if n == 0 { 
-        print!("Continue? ");
+        println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf);
         println!("Working...");
     }
@@ -38,7 +38,7 @@ fn fast_forward_training() -> Data {
         return state;
     }
     if n == 0 { 
-        print!("Continue? ");
+        println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf);
         println!("Working...");
     }
@@ -56,7 +56,7 @@ fn fast_forward_training() -> Data {
         return state;      
     }
     if n == 0 { 
-        print!("Continue? ");
+        println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf);
         println!("Working...");
     }
@@ -86,7 +86,7 @@ fn fast_forward_training() -> Data {
         return state;      
     }
     if n == 0 { 
-        print!("Continue? ");
+        println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf);
         println!("Working...");
     }
@@ -113,7 +113,7 @@ fn fast_forward_training() -> Data {
         return state;      
     }
     if n == 0 { 
-        print!("Continue? ");
+        println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf);
         println!("Working...");
     }
@@ -152,18 +152,74 @@ fn fast_forward_training() -> Data {
 
 
     state = protocol.interact(state, Data::make_cons(15, 76), &Endpoint::Proxy).final_state;
-    state = protocol.interact(state, Data::make_cons(18, 76), &Endpoint::Proxy).final_state;
+    state = protocol.interact(state, Data::make_cons(8, 76), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
-    // state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
     println!("6:\n{}\n", state.to_string());
     if n == 6 { 
         return state;
     }
         if n == 0 { 
-        print!("Continue? ");
+        println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf);
         println!("Working...");
     }
+
+    state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
+    for i in 0..3 {
+        state = protocol.interact(state, Data::make_cons(16, 0), &Endpoint::Proxy).final_state;
+        state = protocol.interact(state, Data::make_cons(16, 7), &Endpoint::Proxy).final_state;
+        state = protocol.interact(state, Data::make_cons(48, 0), &Endpoint::Proxy).final_state;
+        state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;    
+        if i == 0 {
+            state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;    
+        }
+    }
+    println!("7:\n{}\n", state.to_string());
+    if n == 7 { 
+        return state;
+    }
+        if n == 0 { 
+        println!("Press Enter to continue");
+        std::io::stdin().read_line(&mut buf);
+        println!("Working...");
+    }
+    
+
+    state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
+    for i in 0..4 {
+        state = protocol.interact(state, Data::make_cons(16, 0), &Endpoint::Proxy).final_state;
+        state = protocol.interact(state, Data::make_cons(16, 7), &Endpoint::Proxy).final_state;
+        state = protocol.interact(state, Data::make_cons(48, 0), &Endpoint::Proxy).final_state;
+        state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;    
+    }
+    println!("8:\n{}\n", state.to_string());
+    if n == 8 { 
+        return state;
+    }
+        if n == 0 { 
+        println!("Press Enter to continue");
+        std::io::stdin().read_line(&mut buf);
+        println!("Working...");
+    }
+    
+    state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
+
+    for (x, y) in vec![(41, 0), (38, 0), (30, 14), (16, 15)] {
+        state = protocol.interact(state, Data::make_cons(16, 0), &Endpoint::Proxy).final_state;
+        state = protocol.interact(state, Data::make_cons(16, 7), &Endpoint::Proxy).final_state;
+        state = protocol.interact(state, Data::make_cons(x, y), &Endpoint::Proxy).final_state;
+        state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;         
+    }
+    println!("9:\n{}\n", state.to_string());
+    if n == 9 { 
+        return state;
+    }
+        if n == 0 { 
+        println!("Press Enter to continue");
+        std::io::stdin().read_line(&mut buf);
+        println!("Working...");
+    }
+
 
     state
 }
