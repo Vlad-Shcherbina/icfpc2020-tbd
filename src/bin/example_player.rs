@@ -19,10 +19,10 @@ fn main() {
         assert_eq!(gr.stage, Stage::NotStarted);
 
         let gr = client.start(InitialShipParams {
-            number1: 0,
-            number2: 0,
-            number3: 0,
-            number4: 0,
+            number1: 1,
+            number2: 1,
+            number3: 1,
+            number4: 1,
         });
         dbg!(&gr);
         assert_eq!(gr.stage, Stage::Started);
