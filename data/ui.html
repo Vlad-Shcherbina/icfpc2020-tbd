@@ -13,6 +13,7 @@ canvas.busy {
 	</style>
 	<script type="text/javascript">
 var State = "(2, ((1, (-1, nil)), (0, (nil, nil))))"
+var NoNetworkActivitySince = 0
 
 var OffsetX = -200
 var OffsetY = -200
@@ -33,11 +34,20 @@ function set_state(state, network_history) {
 // TODO: Add shortcuts, interact with Julia's script.
 
 function update_NetworkHistory(network_history_chunk) {
+
   network_history = document.getElementById('network_history')
   network_history_old = document.getElementById('network_history_old')
   if (network_history.firstChild) {
     network_history_old.insertAdjacentElement('afterbegin', network_history.firstChild)
   }
+
+  if(network_history_chunk.length == 0) {
+    NoNetworkActivitySince = NoNetworkActivitySince + 1
+    document.getElementById('steps_since_last_network_activity').innerText = NoNetworkActivitySince
+    return
+  }
+  NoNetworkActivitySince = 0
+
   latest_network_history_chunk_container = document.createElement('div')
   latest_network_history_chunk_container.style = 'border: thick solid #FFF'
   network_history_chunk.map(function(x) {
@@ -49,9 +59,9 @@ function update_NetworkHistory(network_history_chunk) {
     latest_response_container.innerText = "⮜" + x.pretty_response
     latest_network_history_chunk_container.appendChild(latest_request_container)
     latest_network_history_chunk_container.appendChild(latest_response_container)
-    network_chunk_delimiter = document.createElement('hr')
-    latest_network_history_chunk_container.appendChild(network_chunk_delimiter)
   })
+  network_chunk_delimiter = document.createElement('hr')
+  latest_network_history_chunk_container.appendChild(network_chunk_delimiter)
   network_history.appendChild(latest_network_history_chunk_container)
 }
 
@@ -148,7 +158,7 @@ function load() {
     <p>simulate click: <input type='number' id='click_x' value=0> <input type='number' id='click_y' value=0> <button id='click_go'>go</button></p>
     <p>prettified state is <span id='pretty_state'></span></p>
     <p>state is <span id='state'></span></p>
-    <p>network history (lifo) is <div id='network_history'></div><div style='color: grey;' id='network_history_old'></div></p>
+    <p>steps since last network activity: <span id='steps_since_last_network_activity'>0</span> | network history (lifo) is <div id='network_history'></div><div style='color: grey;' id='network_history_old'></div></p>
   </small>
 </body>
 </html>
