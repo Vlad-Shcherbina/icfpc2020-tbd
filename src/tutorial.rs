@@ -17,7 +17,7 @@ pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
     let mut buf = String::new();
     let mut states: Vec<Data> = Vec::new();
     
-    println!("1:\n{}\n", state.to_string());
+    println!("1 time flies:\n{}\n", state.to_string());
     states.push(state.clone());
     if lesson == 1 { 
         return states;      
@@ -28,11 +28,12 @@ pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
         println!("Working...");
     }
 
+
     state = protocol.interact(state, Data::make_cons(20, 0), &Endpoint::Proxy).final_state;
     for _ in 0..8 {
         state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
     }
-    println!("2:\n{}\n", state.to_string());
+    println!("2 exploding:\n{}\n", state.to_string());
     states.push(state.clone());
     if lesson == 2 { 
         return states;
@@ -51,7 +52,7 @@ pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
     state = protocol.interact(state, Data::make_cons(22, 0), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(16, 0), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
-    println!("3:\n{}\n", state.to_string());
+    println!("3 basic navigation:\n{}\n", state.to_string());
     states.push(state.clone());
     if lesson == 3 { 
         return states;
@@ -82,7 +83,7 @@ pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
     state = protocol.interact(state, Data::make_cons(23, 5), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
     
-    println!("4:\n{}\n", state.to_string());
+    println!("4 fuel and acceleration:\n{}\n", state.to_string());
     states.push(state.clone());
     if lesson == 4 { 
         return states;      
@@ -92,6 +93,7 @@ pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
         std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
     }
+
     
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
     let mut v = 0;
@@ -110,7 +112,7 @@ pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
     state = protocol.interact(state, Data::make_cons(34, 0), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(27, 0), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
-    println!("5:\n{}\n", state.to_string());
+    println!("5 temeperature:\n{}\n", state.to_string());
     states.push(state.clone());
     if lesson == 5 { 
         return states;
@@ -128,7 +130,6 @@ pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
     state = protocol.interact(state, Data::make_cons(-5, 4), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
-
 
     let mut y = 2;
     v = 2;
@@ -148,11 +149,10 @@ pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
 
-
     state = protocol.interact(state, Data::make_cons(15, 76), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(8, 76), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
-    println!("6:\n{}\n", state.to_string());
+    println!("6 big guns:\n{}\n", state.to_string());
     states.push(state.clone());
     if lesson == 6 { 
         return states;
@@ -173,7 +173,7 @@ pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
             state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;    
         }
     }
-    println!("7:\n{}\n", state.to_string());
+    println!("7 small guns:\n{}\n", state.to_string());
     states.push(state.clone());
     if lesson == 7 { 
         return states;
@@ -192,7 +192,7 @@ pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
         state = protocol.interact(state, Data::make_cons(48, 0), &Endpoint::Proxy).final_state;
         state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;    
     }
-    println!("8:\n{}\n", state.to_string());
+    println!("8 pre-emptive shooting:\n{}\n", state.to_string());
     states.push(state.clone());
     if lesson == 8 { 
         return states;
@@ -211,7 +211,7 @@ pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
         state = protocol.interact(state, Data::make_cons(x, y), &Endpoint::Proxy).final_state;
         state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;         
     }
-    println!("9:\n{}\n", state.to_string());
+    println!("9 shoot & fly angles:\n{}\n", state.to_string());
     states.push(state.clone());
     if lesson == 9 { 
         return states;
@@ -222,6 +222,7 @@ pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
         println!("Working...");
     }
 
+
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(16, 0), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(16, 7), &Endpoint::Proxy).final_state;
@@ -230,7 +231,7 @@ pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
     state = protocol.interact(state, Data::make_cons(16, -7), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(11, -2), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
-    println!("10:\n{}\n", state.to_string());
+    println!("10 cloning ship:\n{}\n", state.to_string());
     states.push(state.clone());
     if lesson == 10 { 
         return states;
@@ -241,6 +242,7 @@ pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
         println!("Working...");
     }
 
+
     for (x, y) in vec![(0, 0), (0, 16), (7, 16), (13, 8), (13, 8), (13, 8), (13, 8), 
                         (25, 8), (25, 8), (25, 8), (25, 8), (25, 8), (40, 16), (0, 0), 
                         (0, 16), (0, 9), (5, 4), (0, 16), (0, 16), (0, 9), (-5, 4), (0, 0), 
@@ -248,9 +250,30 @@ pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
                         (-11, 20), (7, 23), (0, 23), (0, 0)] {
         state = protocol.interact(state, Data::make_cons(x, y), &Endpoint::Proxy).final_state;
     }
-    println!("11:\n{}\n", state.to_string());
+    println!("11 orbital:\n{}\n", state.to_string());
     states.push(state.clone());
     if lesson == 11 { 
+        return states;
+    }
+    if lesson == 0 { 
+        println!("Press Enter to continue");
+        std::io::stdin().read_line(&mut buf).unwrap();
+        println!("Working...");
+    }
+
+
+    state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
+    for (x, y) in vec![(24, 0), (24, -7), (19, -2), (0, 0), (0, 0), (23, -2), (23, -9), 
+                        (18, -4), (0, 0), (22, -4), (22, -11), (17, -6), (0, 0), (21, -7),
+                        (21, -14), (21, -9)] {
+        state = protocol.interact(state, Data::make_cons(x, y), &Endpoint::Proxy).final_state;
+    }
+    for _ in 4..32 {
+        state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
+    }
+    println!("12 orbital fight:\n{}\n", state.to_string());
+    states.push(state.clone());
+    if lesson == 12 { 
         return states;
     }
     if lesson == 0 { 
