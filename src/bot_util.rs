@@ -33,27 +33,21 @@ pub struct TimePrediction {
 }
 
 // predicts time to collide to the star or to leave the frame without thrust
-pub fn predict_collisions(state: &GameState, role: &Role) -> TimePrediction {
-    let ship: Vec<&Ship> = ships_by_role(state, role.clone()).collect();
-    assert!(ship.len() == 1);
-    let ship = ship[0];
-    let r = state.field.as_ref().unwrap().planet_radius;
-    let mut position = ship.ship_state.position.clone();
-    let mut velocity = ship.ship_state.velocity.clone();
-
+pub fn predict_collisions(mut pos: Vec2, mut vel: Vec2, planet_radius: i128, field_radius: i128) -> TimePrediction {
+    let turn_limit = 256;
     let mut count = 1;
     loop {
-        let g = get_gravity(position);
-        velocity = velocity + g;
-        position = position + velocity;
-        if position.x.abs() <= r && position.y.abs() <= r {
+        let g = get_gravity(pos);
+        vel = vel + g;
+        pos = pos + vel;
+        if pos.x.abs() <= planet_radius && pos.y.abs() <= planet_radius {
             break TimePrediction { collision: Some(count), fly_off: None };
         }
-        if position.x.abs() <= r && position.y.abs() <= r {
+        if pos.x.abs() >= field_radius || pos.y.abs() >= field_radius {
             break TimePrediction { collision: None, fly_off: Some(count) };
         }
         count += 1;
-        if count >= 256 { 
+        if count >= turn_limit { 
             break TimePrediction { collision: None, fly_off: None };
         };
     }
