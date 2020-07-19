@@ -9,12 +9,10 @@ canvas {
 }
 canvas.busy {
 	pointer-events: none;
-	mask-image: linear-gradient(rgba(0, 0, 0, 1.0), transparent);;
 }
 	</style>
 	<script type="text/javascript">
 var State = "(2, ((1, (-1, nil)), (0, (nil, nil))))"
-var NetworkHistory = []
 
 var OffsetX = -200
 var OffsetY = -200
@@ -30,21 +28,37 @@ function set_state(state, network_history) {
     update_NetworkHistory(network_history)
   }
 	document.getElementById('state').innerText = State
-  console.log(NetworkHistory)
-	document.getElementById('network_history').innerText = NetworkHistory.join("\n")
 }
 
+// TODO: Change log from text to HTML
+// TODO: Add shortcuts, interact with Julia's script.
+
 function update_NetworkHistory(network_history_chunk) {
+  network_history = document.getElementById('network_history')
+  network_history_old = document.getElementById('network_history_old')
+  if (network_history.firstChild) {
+    network_history_old.insertAdjacentElement('afterbegin', network_history.firstChild)
+  }
+  latest_network_history_chunk_container = document.createElement('div')
+  latest_network_history_chunk_container.style = 'border: thick solid #FFF'
   network_history_chunk.map(function(x) {
-    NetworkHistory.unshift("<--- " + x.pretty_response)
-    NetworkHistory.unshift("---> " + x.pretty_request)
-    NetworkHistory.unshift("---")
+    latest_request_container = document.createElement('div')
+    latest_request_container.style = 'background-color: #DFFFFF'
+    latest_request_container.innerText = "⮞" + x.pretty_request
+    latest_response_container = document.createElement('div')
+    latest_response_container.style = 'background-color: #FFDFEF'
+    latest_response_container.innerText = "⮜" + x.pretty_response
+    latest_network_history_chunk_container.appendChild(latest_request_container)
+    latest_network_history_chunk_container.appendChild(latest_response_container)
+    network_chunk_delimiter = document.createElement('hr')
+    latest_network_history_chunk_container.appendChild(network_chunk_delimiter)
   })
-  NetworkHistory.unshift("....waiting for transmission...")
+  network_history.appendChild(latest_network_history_chunk_container)
 }
 
 function send_click(x, y) {
 	document.getElementById('canvas').classList.add('busy')
+  document.getElementById('busy_working').innerText = '👾🤖👽🧠👾REQUEST IS BEING MADE👾🤖👽🧠👾'
 	fetch('/click', {
 		method: 'POST',
 		headers: {
@@ -59,6 +73,7 @@ function send_click(x, y) {
 
 			draw_pixels(pixels)
 			document.getElementById('canvas').classList.remove('busy')
+      document.getElementById('busy_working').innerText = ''
 		})
 }
 
@@ -128,12 +143,13 @@ function load() {
 <body onload="load()">
 	<canvas id='canvas' style='display: block; float: left' width=400 height=400></canvas>
   <small style='display: block; font-size: xx-small;'>
-    <p>shortcuts: <button id='jump_battle_select'>battle selection screen</button> | mouse: <strong id="mouse_tracker"></strong></p>
+    <p><strong style='background-color: red; color: #08FF00;' id='busy_working'></strong>mouse: <strong id="mouse_tracker"></strong></p>
+    <p>shortcuts: <button id='jump_battle_select'>battle selection screen</button></p>
     <p>change state: <textarea id='new_state'></textarea><button id='new_state_go'>go</button></p>
     <p>simulate click: <input type='number' id='click_x' value=0> <input type='number' id='click_y' value=0> <button id='click_go'>go</button></p>
     <p>prettified state is <span id='pretty_state'></span></p>
     <p>state is <span id='state'></span></p>
-    <p>network history is <span id='network_history'></span></p>
+    <p>network history (lifo) is <div id='network_history'></div><div style='color: grey;' id='network_history_old'></div></p>
   </small>
 </body>
 </html>
