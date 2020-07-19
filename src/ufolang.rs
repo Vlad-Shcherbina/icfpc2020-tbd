@@ -397,6 +397,7 @@ impl Protocol {
     }
 
     pub fn interact(&self, initial_state: Data, mut data_in: Data, endpoint: &Endpoint) -> InteractResult {
+        let mut network_history = Vec::new();
         let mut state = initial_state;
         loop {
             let resp = self.invoke(&state, &data_in);
@@ -404,12 +405,19 @@ impl Protocol {
                 return InteractResult {
                     final_state: resp.new_state,
                     data_out_to_multipledraw: resp.data_out,
+                    network_history,
                 }
             }
             state = resp.new_state;
-            eprintln!("sending to aliens: {:?}", resp.data_out);
-            data_in = endpoint.aliens_send(resp.data_out);
-            eprintln!("received from aliens: {:?}", data_in);
+            let request = resp.data_out;
+            eprintln!("sending to aliens: {:?}", request);
+            let response = endpoint.aliens_send(request.clone());
+            eprintln!("received from aliens: {:?}", response);
+            data_in = response.clone();
+            network_history.push(RequestResponse {
+                request,
+                response,
+            });
         }
     }
 }
@@ -418,6 +426,13 @@ impl Protocol {
 pub struct InteractResult {
     pub final_state: Data,
     pub data_out_to_multipledraw: Data,
+    pub network_history: Vec<RequestResponse>,
+}
+
+#[derive(Debug)]
+pub struct RequestResponse {
+    pub request: Data,
+    pub response: Data,
 }
 
 

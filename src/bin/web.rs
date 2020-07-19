@@ -25,11 +25,18 @@ fn data_try_to_coords(value: &Data) -> Option<(i128, i128)> {
     }
 }
 
+#[derive(Serialize, Deserialize)]
+struct RequestResponse {
+    pretty_request: String,
+    pretty_response: String,
+}
+
 #[derive(Deserialize, Serialize)]
 struct ClickResponse {
     state: String,
     pretty_state: String,
-    pixels: Vec<Vec<(i128, i128)>>
+    pixels: Vec<Vec<(i128, i128)>>,
+    network_history: Vec<RequestResponse>,
 }
 
 fn save_pics(result: &InteractResult) {
@@ -45,7 +52,12 @@ fn process_click(click: &ClickParams) -> ClickResponse {
     let protocol = Protocol::load_galaxy();
     let state = match Data::from_str(&click.state) {
         Some(v) => v,
-        None => return ClickResponse{state: String::from("error"), pretty_state: String::from("error"), pixels: vec![]}
+        None => return ClickResponse{
+            state: String::from("error"),
+            pretty_state: String::from("error"),
+            pixels: vec![],
+            network_history: vec![],
+        }
     };
 
     let result = protocol.interact(state, Data::make_cons(click.x, click.y), &Endpoint::Proxy);
@@ -62,7 +74,13 @@ fn process_click(click: &ClickParams) -> ClickResponse {
     ClickResponse {
         state: result.final_state.to_string(),
         pretty_state: result.final_state.to_pretty_string(),
-        pixels: pixels
+        pixels: pixels,
+        network_history: result.network_history.iter().map(|rr| {
+            RequestResponse {
+                pretty_request: rr.request.to_pretty_string(),
+                pretty_response: rr.response.to_pretty_string(),
+            }
+        }).collect(),
     }
 }
 
