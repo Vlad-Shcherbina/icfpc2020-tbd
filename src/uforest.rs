@@ -30,7 +30,7 @@ pub struct JoinRequest {
 
 #[derive(Debug)]
 pub struct InitialShipParams {
-    pub number1: i128,
+    pub fuel: i128,
     pub number2: i128,
     pub number3: i128,
     pub number4: i128,
@@ -54,7 +54,7 @@ impl Client {
 
     pub fn start(&self, i: InitialShipParams) -> GameResponse {
         let i = Data::make_list4(
-            i.number1,
+            i.fuel,
             i.number2,
             i.number3,
             i.number4,
