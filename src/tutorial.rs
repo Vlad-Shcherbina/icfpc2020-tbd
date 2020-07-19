@@ -157,7 +157,7 @@ pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
     if lesson == 6 { 
         return states;
     }
-        if lesson == 0 { 
+    if lesson == 0 { 
         println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
@@ -197,7 +197,7 @@ pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
     if lesson == 8 { 
         return states;
     }
-        if lesson == 0 { 
+    if lesson == 0 { 
         println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
@@ -216,26 +216,44 @@ pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
     if lesson == 9 { 
         return states;
     }
-        if lesson == 0 { 
+    if lesson == 0 { 
         println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
     }
 
-    state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;         
+    state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(16, 0), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(16, 7), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(48, 17), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(16, 0), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(16, -7), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(11, -2), &Endpoint::Proxy).final_state;
-    state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;         
+    state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
     println!("10:\n{}\n", state.to_string());
     states.push(state.clone());
     if lesson == 10 { 
         return states;
     }
-        if lesson == 0 { 
+    if lesson == 0 { 
+        println!("Press Enter to continue");
+        std::io::stdin().read_line(&mut buf).unwrap();
+        println!("Working...");
+    }
+
+    for (x, y) in vec![(0, 0), (0, 16), (7, 16), (13, 8), (13, 8), (13, 8), (13, 8), 
+                        (25, 8), (25, 8), (25, 8), (25, 8), (25, 8), (40, 16), (0, 0), 
+                        (0, 16), (0, 9), (5, 4), (0, 16), (0, 16), (0, 9), (-5, 4), (0, 0), 
+                        (1, 17), (1, 10), (-4, 5), (0, 0), (0, 0), (0, 0), (-4, 20), 
+                        (-11, 20), (7, 23), (0, 23), (0, 0)] {
+        state = protocol.interact(state, Data::make_cons(x, y), &Endpoint::Proxy).final_state;
+    }
+    println!("11:\n{}\n", state.to_string());
+    states.push(state.clone());
+    if lesson == 11 { 
+        return states;
+    }
+    if lesson == 0 { 
         println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");

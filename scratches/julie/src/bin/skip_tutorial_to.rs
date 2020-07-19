@@ -7,7 +7,7 @@ fn ff() {
     tutorial::fast_forward_training(lesson, &protocol);
 }
 
-
+ 
 fn main() {
     std::thread::Builder::new().stack_size(100 * 1024 * 1024)
         .spawn(ff).unwrap()
