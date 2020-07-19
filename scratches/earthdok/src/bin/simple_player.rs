@@ -29,10 +29,8 @@ impl Ai for ExampleAi {
             .unwrap()
             .ship_state;
         
-        let gravity = get_gravity(ship_state.position);
-        // TODO: NEGATE
         let command = Command::Accelerate{ship_id: ship_state.ship_id,
-                                                   vector: gravity.negate()};
+                                                   vector: get_gravity(ship_state.position)};
         Commands(vec![command])
     }
 }   
