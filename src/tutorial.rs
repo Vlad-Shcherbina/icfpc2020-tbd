@@ -12,19 +12,17 @@ fn main_simple() {
     matrices_to_png(&matrices, project_path("outputs/galaxyXX"));
 }
 
-pub fn fast_forward_training() -> Data {
-    let args: Vec<String> = std::env::args().collect();
-    let n: i32 = if args.len() > 1 { args[1].parse::<i32>().unwrap() } else { -1 };
+pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
     let mut state = Data::from_str("(5, ((2, (0, (nil, (nil, (nil, (nil, (nil, (54179, nil)))))))), (9, (nil, nil))))").unwrap();
     let mut buf = String::new();
-
-    let protocol = Protocol::load_galaxy();
+    let mut states: Vec<Data> = Vec::new();
     
     println!("1:\n{}\n", state.to_string());
-    if n == 1 { 
-        return state;      
+    states.push(state.clone());
+    if lesson == 1 { 
+        return states;      
     }
-    if n == 0 { 
+    if lesson == 0 { 
         println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
@@ -35,10 +33,11 @@ pub fn fast_forward_training() -> Data {
         state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
     }
     println!("2:\n{}\n", state.to_string());
-    if n == 3 { 
-        return state;
+    states.push(state.clone());
+    if lesson == 2 { 
+        return states;
     }
-    if n == 0 { 
+    if lesson == 0 { 
         println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
@@ -53,10 +52,11 @@ pub fn fast_forward_training() -> Data {
     state = protocol.interact(state, Data::make_cons(16, 0), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
     println!("3:\n{}\n", state.to_string());
-    if n == 3 { 
-        return state;      
+    states.push(state.clone());
+    if lesson == 3 { 
+        return states;
     }
-    if n == 0 { 
+    if lesson == 0 { 
         println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
@@ -83,10 +83,11 @@ pub fn fast_forward_training() -> Data {
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
     
     println!("4:\n{}\n", state.to_string());
-    if n == 4 { 
-        return state;      
+    states.push(state.clone());
+    if lesson == 4 { 
+        return states;      
     }
-    if n == 0 { 
+    if lesson == 0 { 
         println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
@@ -110,10 +111,11 @@ pub fn fast_forward_training() -> Data {
     state = protocol.interact(state, Data::make_cons(27, 0), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
     println!("5:\n{}\n", state.to_string());
-    if n == 5 { 
-        return state;      
+    states.push(state.clone());
+    if lesson == 5 { 
+        return states;
     }
-    if n == 0 { 
+    if lesson == 0 { 
         println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
@@ -151,10 +153,11 @@ pub fn fast_forward_training() -> Data {
     state = protocol.interact(state, Data::make_cons(8, 76), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
     println!("6:\n{}\n", state.to_string());
-    if n == 6 { 
-        return state;
+    states.push(state.clone());
+    if lesson == 6 { 
+        return states;
     }
-        if n == 0 { 
+        if lesson == 0 { 
         println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
@@ -171,10 +174,11 @@ pub fn fast_forward_training() -> Data {
         }
     }
     println!("7:\n{}\n", state.to_string());
-    if n == 7 { 
-        return state;
+    states.push(state.clone());
+    if lesson == 7 { 
+        return states;
     }
-        if n == 0 { 
+    if lesson == 0 { 
         println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
@@ -189,10 +193,11 @@ pub fn fast_forward_training() -> Data {
         state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;    
     }
     println!("8:\n{}\n", state.to_string());
-    if n == 8 { 
-        return state;
+    states.push(state.clone());
+    if lesson == 8 { 
+        return states;
     }
-        if n == 0 { 
+        if lesson == 0 { 
         println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
@@ -207,10 +212,11 @@ pub fn fast_forward_training() -> Data {
         state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;         
     }
     println!("9:\n{}\n", state.to_string());
-    if n == 9 { 
-        return state;
+    states.push(state.clone());
+    if lesson == 9 { 
+        return states;
     }
-        if n == 0 { 
+        if lesson == 0 { 
         println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
@@ -225,14 +231,15 @@ pub fn fast_forward_training() -> Data {
     state = protocol.interact(state, Data::make_cons(11, -2), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;         
     println!("10:\n{}\n", state.to_string());
-    if n == 10 { 
-        return state;
+    states.push(state.clone());
+    if lesson == 10 { 
+        return states;
     }
-        if n == 0 { 
+        if lesson == 0 { 
         println!("Press Enter to continue");
         std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
     }
 
-    state
+    states
 }
