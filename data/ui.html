@@ -140,6 +140,11 @@ function load() {
 		set_state(new_state)
 	})
 
+	document.getElementById('import_state').addEventListener('click', e => {
+    document.getElementById('new_state').innerText = document.getElementById('state').innerText
+		//set_state(new_state)
+	})
+
 	document.getElementById('click_go').addEventListener('click', e => {
 		let x = parseInt(document.getElementById('click_x').value)
 		let y = parseInt(document.getElementById('click_y').value)
@@ -161,7 +166,7 @@ function load() {
   <small style='display: block; font-size: xx-small;'>
     <p><strong style='background-color: red; color: #08FF00;' id='busy_working'></strong>mouse: <strong id="mouse_tracker"></strong></p>
     <p>shortcuts: <button id='jump_battle_select'>battle selection screen</button></p>
-    <p>change state: <textarea id='new_state'></textarea><button id='new_state_go'>go</button></p>
+    <p>change state: <textarea id='new_state'></textarea><button id='new_state_go'>go</button><button id='import_state'>import</button></p>
     <p>simulate click: <input type='number' id='click_x' value=0> <input type='number' id='click_y' value=0> <button id='click_go'>go</button></p>
     <p>prettified state is <span id='pretty_state'></span></p>
     <p>state is <span id='state'></span></p>
