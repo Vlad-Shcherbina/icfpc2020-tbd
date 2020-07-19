@@ -8,6 +8,9 @@ fn main() {
 
     let gr = client.join(JoinRequest { mystery: Data::Nil });
     dbg!(&gr);
+    if gr.stage == Stage::Finished {
+        return;
+    }
 
     let gr = client.start(ShipParams {
         fuel: 1,
@@ -16,9 +19,15 @@ fn main() {
         number4: 1,
     });
     dbg!(&gr);
+    if gr.stage == Stage::Finished {
+        return;
+    }
 
     loop {
         let gr = client.commands(Commands(vec![]));
         dbg!(&gr);
+        if gr.stage == Stage::Finished {
+            return;
+        }
     }
 }
