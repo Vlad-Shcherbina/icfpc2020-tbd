@@ -32,6 +32,19 @@ pub struct TimePrediction {
     pub fly_off: Option<i128>,
 }
 
+impl TimePrediction {
+    pub fn time(&self) -> i128 {
+        let mut m = -1;
+        if let Some(a) = self.collision {
+            if m == -1 || m > a { m = a; }
+        }
+        if let Some(a) = self.fly_off {
+            if m == -1 || m > a { m = a; }
+        }
+        m
+    }
+}
+
 // predicts time to collide to the star or to leave the frame without thrust
 pub fn predict_collisions(mut pos: Vec2, mut vel: Vec2, planet_radius: i128, field_radius: i128) -> TimePrediction {
     let turn_limit = 256;
