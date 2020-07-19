@@ -33,8 +33,8 @@ pub struct ShipState {
     pub position: Vec2,
     pub velocity: Vec2,
     pub ship_params: ShipParams,
-    pub number3: i128,
-    pub number4: i128,
+    pub heat: i128,
+    pub heat_capacity: i128,
     pub number5: i128,
 
 }
@@ -408,8 +408,8 @@ impl TryFrom<Data> for ShipState {
         let position = parts[2].clone().try_into()?;
         let velocity = parts[3].clone().try_into()?;
         let ship_params = parts[4].clone().try_into()?;
-        let number3 = parts[5].try_as_number().ok_or("shipstate.number3 not a number")?;
-        let number4 = parts[6].try_as_number().ok_or("shipstate.number4 not a number")?;
+        let heat = parts[5].try_as_number().ok_or("shipstate.heat not a number")?;
+        let heat_capacity = parts[6].try_as_number().ok_or("shipstate.heat_capacity not a number")?;
         let number5 = parts[7].try_as_number().ok_or("shipstate.number5 not a number")?;
         Ok(ShipState {
             role,
@@ -417,8 +417,8 @@ impl TryFrom<Data> for ShipState {
             position,
             velocity,
             ship_params,
-            number3,
-            number4,
+            heat,
+            heat_capacity,
             number5,
         })
     }
