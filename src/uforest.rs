@@ -27,8 +27,8 @@ pub struct Ship {
 
 #[derive(Debug)]
 pub struct ShipState {
-    pub number1: i128,
-    pub number2: i128,
+    pub role: i128,
+    pub ship_id: i128,
     pub position: Vec2,
     pub mystery3: Data,
     pub ship_params: ShipParams,
@@ -41,7 +41,7 @@ pub struct ShipState {
 #[derive(Debug)]
 pub struct GameSpec {
     pub timer: i128, // number of max possible steps until game over
-    pub mystery1: Data,
+    pub role: i128,
     pub mystery2: Data,
     pub mystery3: Data,
     pub mystery4: Data,
@@ -232,13 +232,13 @@ impl TryFrom<Data> for GameSpec {
             Err(format!("{} elements instead of 5", parts.len()))?;
         }
         let timer = parts[0].try_as_number().ok_or("timer is not a number")?;
-        let mystery1 = parts[1].clone();
+        let role = parts[1].try_as_number().ok_or("role is not a number")?;
         let mystery2 = parts[2].clone();
         let mystery3 = parts[3].clone();
         let mystery4 = parts[4].clone();
         Ok(GameSpec {
             timer,
-            mystery1,
+            role,
             mystery2,
             mystery3,
             mystery4,
@@ -350,8 +350,8 @@ impl TryFrom<Data> for ShipState {
         if parts.len() != 8 {
             Err(format!("{} elements instead of 8", parts.len()))?;
         }
-        let number1 = parts[0].try_as_number().ok_or("shipstate.number1 not a number")?;
-        let number2 = parts[1].try_as_number().ok_or("shipstate.number2 not a number")?;
+        let role = parts[0].try_as_number().ok_or("shipstate.role not a number")?;
+        let ship_id = parts[1].try_as_number().ok_or("shipstate.ship_id not a number")?;
         let position = parts[2].clone().try_into()?;
         let mystery3 = parts[3].clone();
         let ship_params = parts[4].clone().try_into()?;
@@ -359,8 +359,8 @@ impl TryFrom<Data> for ShipState {
         let number4 = parts[6].try_as_number().ok_or("shipstate.number4 not a number")?;
         let number5 = parts[7].try_as_number().ok_or("shipstate.number5 not a number")?;
         Ok(ShipState {
-            number1,
-            number2,
+            role,
+            ship_id,
             position,
             mystery3,
             ship_params,
