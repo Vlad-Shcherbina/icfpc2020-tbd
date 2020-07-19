@@ -127,7 +127,8 @@ function client_x_y_to_galaxy_coordinates(canvas, e) {
 }
 
 function log_mouse_position(x, y) {
-  document.getElementById('mouse_tracker').innerText = "[" + x + ", " + y + "]"
+	document.getElementById('mouse_tracker').innerText =
+	document.getElementById('canvas').title = "[" + x + ", " + y + "]"
 }
 
 function load() {
