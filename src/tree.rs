@@ -107,20 +107,20 @@ impl VecTree<&str> {
                 let mut result = String::new();
                 for (i, q) in vector.into_iter().enumerate() {
                     if i > 0 {
-                        result.push_str(", ");
+                        result.push_str(" ");
                     }
                     result.push_str(&q.to_string(true))
                 }
-                result = format!("[{}]", result);
+                result = format!("(build_list {})", result);
                 result
             }
             VecTree::Branch(vector) => {
-                if vector.len() == 2 && VecTree::Leaf("neg") == vector[0] {
+                /*if vector.len() == 2 && VecTree::Leaf("neg") == vector[0] {
                     match vector[1] {
                         VecTree::Leaf(number) => return format!("-{}", number),
                         _ => {}
                     }
-                }
+                }*/
                 let mut result = String::new();
                 for (i, q) in vector.into_iter().enumerate() {
                     if i > 0 {
