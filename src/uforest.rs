@@ -13,8 +13,8 @@ pub enum Stage {
     Finished,
 }
 
-#[derive(Debug)]
-pub struct Position {
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Vec2 {
     x: i128,
     y: i128,
 }
@@ -29,7 +29,7 @@ pub struct Ship {
 pub struct ShipState {
     pub number1: i128,
     pub number2: i128,
-    pub position: Position,
+    pub position: Vec2,
     pub mystery3: Data,
     pub ship_params: ShipParams,
     pub number3: i128,
@@ -78,8 +78,13 @@ pub struct ShipParams {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Command {
-    pub mystery: Data,
+pub enum Command {
+    Accelerate {
+        ship_id: i128,
+        vector: Vec2,
+    },
+    // TODO: add more commands, but keep Unknown around just in case
+    Unknown(Data),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -127,7 +132,11 @@ impl Client {
 
 impl From<Command> for Data {
     fn from(c: Command) -> Self {
-        c.mystery
+        // c.mystery
+        match c {
+            Command::Accelerate { ship_id, vector } => Data::make_list3(0, ship_id, vector),
+            Command::Unknown(data) => data,
+        }
     }
 }
 
@@ -136,7 +145,23 @@ impl TryFrom<Data> for Command {
 
     // Never panic, handle all errors!
     fn try_from(data: Data) -> Result<Self, Self::Error> {
-        Ok(Command { mystery: data })
+        let parts = data.clone().try_into_vec().ok_or("command is not a list")?;
+        let kind = parts.first().ok_or("command is empty list")?
+            .try_as_number().ok_or("command kind is not number")?;
+        Ok(match kind {
+            0 => {
+                if parts.len() != 3 {
+                    Err(format!("accelerate cmd {:?}", parts))?
+                }
+                let ship_id = parts[1].try_as_number().ok_or("cmd ship id not number")?;
+                let vector = Vec2::try_from(parts[2].clone())?;
+                Command::Accelerate {
+                    ship_id,
+                    vector,
+                }
+            }
+            _ => Command::Unknown(data),
+        })
     }
 }
 
@@ -250,12 +275,18 @@ impl TryFrom<Data> for GameState {
     }
 }
 
-impl TryFrom<Data> for Position {
+impl From<Vec2> for Data {
+    fn from(v: Vec2) -> Data {
+        Data::make_cons(v.x, v.y)
+    }
+}
+
+impl TryFrom<Data> for Vec2 {
     type Error = String;
 
     fn try_from(data: Data) -> Result<Self, Self::Error> {
         let parts = data.try_to_coords().ok_or("not a pair of numbers")?;
-        Ok(Position {
+        Ok(Vec2 {
             x : parts.0,
             y : parts.1,
         })
