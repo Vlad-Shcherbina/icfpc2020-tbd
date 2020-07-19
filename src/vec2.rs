@@ -3,8 +3,8 @@ use std::convert::TryFrom;
 
 #[derive(Clone, Copy, PartialEq)]
 pub struct Vec2 {
-    x: i128,
-    y: i128,
+    pub x: i128,
+    pub y: i128,
 }
 
 impl From<Vec2> for Data {
@@ -35,5 +35,11 @@ impl std::ops::Add for Vec2 {
             x: self.x + rhs.x,
             y: self.y + rhs.y,
         }
+    }
+}
+
+impl Vec2 {
+    pub fn negate(&self) -> Vec2 {
+        Vec2 { x: -self.x, y: -self.y }
     }
 }
