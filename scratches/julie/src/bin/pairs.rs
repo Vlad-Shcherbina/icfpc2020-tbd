@@ -1,6 +1,5 @@
 use tbd::ufolang::Protocol;
-use tbd::{squiggle::Data, ufolang::{eval_multidraw, InteractResult}, project_path, png_files::matrices_to_png, webapi::Endpoint};
-use std::io::BufRead;
+use tbd::{squiggle::Data, ufolang::{eval_multidraw }, project_path, png_files::matrices_to_png, webapi::Endpoint};
 
 #[allow(unused)]
 fn main_simple() {
@@ -52,7 +51,6 @@ fn click_all_pairs() {
     let matrices = eval_multidraw(result.data_out_to_multipledraw);
     matrices_to_png(&matrices, project_path("outputs/galaxyXX"));
 }
-
 
 
 #[allow(unused)]

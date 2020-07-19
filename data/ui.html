@@ -9,11 +9,12 @@ canvas {
 }
 canvas.busy {
 	pointer-events: none;
-	mask-image: linear-gradient(rgba(0, 0, 0, 1.0), transparent);;
+	opacity: 0.9;
 }
 	</style>
 	<script type="text/javascript">
 var State = "(2, ((1, (-1, nil)), (0, (nil, nil))))"
+var NetworkHistory = []
 
 var OffsetX = -200
 var OffsetY = -200
@@ -23,9 +24,23 @@ var Colors = [
 	'rgb(255, 255, 0)', 'rgb(255, 0, 255)', 'rgb(0, 255, 255)'
 ]
 
-function set_state(state) {
+function set_state(state, network_history) {
 	State = state
+  if (network_history) {
+    update_NetworkHistory(network_history)
+  }
 	document.getElementById('state').innerText = State
+  console.log(NetworkHistory)
+	document.getElementById('network_history').innerText = NetworkHistory.join("\n")
+}
+
+function update_NetworkHistory(network_history_chunk) {
+  network_history_chunk.map(function(x) {
+    NetworkHistory.unshift("<--- " + x.pretty_response)
+    NetworkHistory.unshift("---> " + x.pretty_request)
+    NetworkHistory.unshift("---")
+  })
+  NetworkHistory.unshift("....waiting for transmission...")
 }
 
 function send_click(x, y) {
@@ -38,8 +53,8 @@ function send_click(x, y) {
 		body: JSON.stringify({x, y, state: State}),
 	})
 		.then(response => response.json())
-		.then(({pixels, state, pretty_state}) => {
-			set_state(state)
+		.then(({pixels, state, pretty_state, network_history}) => {
+			set_state(state, network_history)
 			document.getElementById('pretty_state').innerText = pretty_state
 
 			draw_pixels(pixels)
@@ -66,16 +81,28 @@ function draw_pixels(pixels) {
 	}
 }
 
+function client_x_y_to_galaxy_coordinates(canvas, e) {
+  const rect = canvas.getBoundingClientRect()
+  return [ Math.round(e.clientX - rect.left + OffsetX),
+           Math.round(e.clientY - rect.top + OffsetY) ]
+}
+
+function log_mouse_position(x, y) {
+  document.getElementById('mouse_tracker').innerText = "[" + x + ", " + y + "]"
+}
+
 function load() {
 	send_click(-2, 4)
 
 	const canvas = document.getElementById('canvas')
 	canvas.addEventListener('click', e => {
-		const rect = canvas.getBoundingClientRect()
-	    const x = e.clientX - rect.left + OffsetX
-	    const y = e.clientY - rect.top + OffsetY
-	    send_click(Math.round(x), Math.round(y))
+    [ x, y ] = client_x_y_to_galaxy_coordinates(canvas, e)
+    send_click(x, y)
 	})
+  canvas.addEventListener('mousemove', e => {
+    [ x, y ] = client_x_y_to_galaxy_coordinates(canvas, e)
+    log_mouse_position(x, y)
+  })
 
 	document.getElementById('new_state_go').addEventListener('click', e => {
 		let new_state = document.getElementById('new_state').value
@@ -99,11 +126,14 @@ function load() {
 	</script>
 </head>
 <body onload="load()">
-	<canvas id='canvas' width=400 height=400></canvas>
-	<p>shortcuts: <button id='jump_battle_select'>battle selection screen</button></p>
-	<p>change state: <textarea id='new_state'></textarea><button id='new_state_go'>go</button></p>
-	<p>simulate click: <input type='number' id='click_x' value=0> <input type='number' id='click_y' value=0> <button id='click_go'>go</button></p>
-	<p>prettified state is <span id='pretty_state'></span></p>
-	<p>state is <span id='state'></span></p>
+	<canvas id='canvas' style='display: block; float: left' width=400 height=400></canvas>
+  <small style='display: block; font-size: xx-small;'>
+    <p>shortcuts: <button id='jump_battle_select'>battle selection screen</button> | mouse: <strong id="mouse_tracker"></strong></p>
+    <p>change state: <textarea id='new_state'></textarea><button id='new_state_go'>go</button></p>
+    <p>simulate click: <input type='number' id='click_x' value=0> <input type='number' id='click_y' value=0> <button id='click_go'>go</button></p>
+    <p>prettified state is <span id='pretty_state'></span></p>
+    <p>state is <span id='state'></span></p>
+    <p>network history is <span id='network_history'></span></p>
+  </small>
 </body>
 </html>
