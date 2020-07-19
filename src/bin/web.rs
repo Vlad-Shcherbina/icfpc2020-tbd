@@ -73,8 +73,8 @@ fn process_click(click: &ClickParams) -> ClickResponse {
     //     |x| x.into_vec().iter().map(|y| data_try_to_coords(y).unwrap()).collect()
     // ).collect();
 
-    let pixels = result.data_out_to_multipledraw.into_vec();
-    let pixels: Vec<Vec<_>> = pixels.into_iter().map(|x| x.into_vec()).collect();
+    let pixels = result.data_out_to_multipledraw.try_into_vec().unwrap();
+    let pixels: Vec<Vec<_>> = pixels.into_iter().map(|x| x.try_into_vec().unwrap()).collect();
     let pixels = pixels.iter().map(|x| x.iter().map(|y| data_try_to_coords(y).unwrap()).collect()).collect();
 
     ClickResponse {
@@ -83,8 +83,7 @@ fn process_click(click: &ClickParams) -> ClickResponse {
         pixels: pixels,
         network_history: result.network_history.iter().map(|rr| {
             let mut response_as_game_response = String::new();
-            if rr.response.is_list() {
-                let parts = rr.response.clone().into_vec();
+            if let Some(parts) = rr.response.clone().try_into_vec() {
                 if parts.len() == 4 && parts[0].try_as_number().is_some() {
                     response_as_game_response = match GameResponse::try_from(rr.response.clone()) {
                         Ok(gr) => format!("{:#?}", &gr),

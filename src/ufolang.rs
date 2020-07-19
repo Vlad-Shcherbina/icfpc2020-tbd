@@ -154,7 +154,7 @@ fn eval_draw(value: Data) -> ImgMatrix {
         pub x: i128,
         pub y: i128,
     }
-    let points = value.into_vec();
+    let points = value.try_into_vec().unwrap();
     if points.is_empty() {
         return ImgMatrix::new(1, 1)
     }
@@ -181,7 +181,7 @@ fn eval_draw(value: Data) -> ImgMatrix {
 }
 
 pub fn eval_multidraw(value: Data) -> Vec<ImgMatrix> {
-    value.into_vec().into_iter().map(|it| eval_draw(it)).collect()
+    value.try_into_vec().unwrap().into_iter().map(|it| eval_draw(it)).collect()
 }
 
 // never returns App, so eval() is idempotent

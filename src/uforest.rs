@@ -88,10 +88,7 @@ impl TryFrom<Data> for GameResponse {
     // on every response (not only game responses).
     // Handle all errors properly.
     fn try_from(data: Data) -> Result<Self, Self::Error> {
-        if !data.is_list() {
-            Err("not a list")?
-        }
-        let parts = data.into_vec();
+        let parts = data.try_into_vec().ok_or("not a list")?;
         if parts.len() != 4 {
             Err(format!("{} elements instead of 4", parts.len()))?;
         }

@@ -105,7 +105,10 @@ impl Data {
         }
     }
 
-    pub fn into_vec(self) -> Vec<Self> {
+    pub fn try_into_vec(self) -> Option<Vec<Self>> {
+        if !self.is_list() {
+            return None;
+        }
         let mut res: Vec<Self> = Vec::new();
         let mut val = self;
         loop {
@@ -118,7 +121,7 @@ impl Data {
                 _ => panic!("{:?}", val)
             }
         }
-        res
+        Some(res)
     }
 
     pub fn try_as_number(&self) -> Option<i128> {
