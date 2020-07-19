@@ -33,13 +33,23 @@ def parse_str(s):
     assert next(it, None) is None
     return res
 
-print(parse_str('110110000111011111100001001111110101000000'))
-print(parse_str('110110000111011111100001001111110100110000'))
+s = '''122 410
+203 203
+77 329
+ 456 201
+ 384 192
+ 34 160
+ 437 497
+ 428 107'''
 
-n1 = 0b00010011111101010000
-n2 = 0b00010011111101001100
-print(n1 - n2)
-print(n2 * 10 / 4 / 60 / 60)
+def b8(x):
+    s = '{:09b}'.format(int(x))
+    print(s[0:3], s[3:6], s[6:9], sep='\n')
+    print()
 
-print((86400 - 81744) / 60)
+for line in s.split('\n'):
+    a, b = line.split()
+    b8(a)
+    b8(b)
+    print('---------')
 
