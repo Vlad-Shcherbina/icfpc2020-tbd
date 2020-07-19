@@ -13,6 +13,8 @@ pub enum Stage {
     Finished,
 }
 
+// GameResponse should contain _all_ information from the server response.
+// If some parts are not yet understood, leave them in mystery fields of type Data.
 #[derive(Debug)]
 pub struct GameResponse {
     pub success: i128,  // always 1 ??
