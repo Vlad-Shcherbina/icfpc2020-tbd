@@ -27,7 +27,7 @@ fn main1() {
         println!();
         println!("Click where?");
         let line = lines.next().unwrap().unwrap();
-        let mut it = line.split_whitespace();
+        let _it = line.split_whitespace();
         let x: i128 = 0; //it.next().unwrap().parse().unwrap();
         let y: i128 = 0; //it.next().unwrap().parse().unwrap();
 

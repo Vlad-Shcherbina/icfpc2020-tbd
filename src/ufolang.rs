@@ -93,6 +93,7 @@ impl From<&Data> for Value {
 }
 
 struct Context {
+    #[allow(dead_code)]
     names: Vec<String>,
     defs: Vec<Rc<Value>>,
     name_to_def_idx: HashMap<String, usize>,

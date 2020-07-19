@@ -39,6 +39,7 @@ struct ClickResponse {
     network_history: Vec<RequestResponse>,
 }
 
+#[allow(dead_code)]
 fn save_pics(result: &InteractResult) {
     let matrices = eval_multidraw(result.data_out_to_multipledraw.clone());
     let mut hasher = DefaultHasher::new();

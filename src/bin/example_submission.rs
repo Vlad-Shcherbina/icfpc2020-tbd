@@ -1,7 +1,7 @@
 // THIS IS A LOW-LEVEL EXAMPLE.
 // SEE example_player.rs INSTEAD.
 
-use tbd::{webapi::Endpoint, ufolang::Protocol, squiggle::Data};
+use tbd::{webapi::Endpoint, squiggle::Data};
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
