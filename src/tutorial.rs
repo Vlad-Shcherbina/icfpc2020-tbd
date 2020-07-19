@@ -186,7 +186,7 @@ pub fn fast_forward_training(lesson: i32, protocol: &Protocol) -> Vec<Data> {
     
 
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
-    for i in 0..4 {
+    for _i in 0..4 {
         state = protocol.interact(state, Data::make_cons(16, 0), &Endpoint::Proxy).final_state;
         state = protocol.interact(state, Data::make_cons(16, 7), &Endpoint::Proxy).final_state;
         state = protocol.interact(state, Data::make_cons(48, 0), &Endpoint::Proxy).final_state;

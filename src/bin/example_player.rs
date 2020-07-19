@@ -11,7 +11,7 @@ impl Ai for ExampleAi {
         JoinRequest { mystery: Data::Nil }
     }
 
-    fn initial_ship_params(&mut self, spec: &GameSpec) -> ShipParams {
+    fn initial_ship_params(&mut self, _spec: &GameSpec) -> ShipParams {
         ShipParams {
             fuel: 1,
             number2: 1,
@@ -20,7 +20,7 @@ impl Ai for ExampleAi {
         }
     }
 
-    fn choose_commands(&mut self, spec: &GameSpec, state: &GameState) -> Commands {
+    fn choose_commands(&mut self, _spec: &GameSpec, _state: &GameState) -> Commands {
         Commands(vec![])
     }
 }
