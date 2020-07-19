@@ -61,7 +61,7 @@ pub struct GameResponse {
     pub success: i128,  // always 1 ??
     pub stage: Stage,
     pub spec: GameSpec,
-    pub state: Option<GameState>,
+    pub state: Option<GameState>,  // can only be None if stage == NotStarted
 }
 
 #[derive(Debug)]
