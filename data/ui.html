@@ -47,6 +47,7 @@ function update_NetworkHistory(network_history_chunk) {
     return
   }
   NoNetworkActivitySince = 0
+  document.getElementById('steps_since_last_network_activity').innerText = NoNetworkActivitySince
 
   latest_network_history_chunk_container = document.createElement('div')
   latest_network_history_chunk_container.style = 'border: thick solid #FFF'
