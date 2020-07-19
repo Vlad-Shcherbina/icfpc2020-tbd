@@ -28,7 +28,7 @@ fn main() {
         assert_eq!(gr.stage, Stage::Started);
 
         loop {
-            let gr = client.commands(Commands { mystery: Data::Nil });
+            let gr = client.commands(Commands(vec![]));
             dbg!(&gr);
             match gr.stage {
                 Stage::NotStarted => panic!(),
@@ -38,7 +38,7 @@ fn main() {
         }
 
         // try to send another request just to see what happens
-        let gr = client.commands(Commands { mystery: Data::Nil });
+        let gr = client.commands(Commands(vec![]));
         dbg!(&gr);
     }
 }

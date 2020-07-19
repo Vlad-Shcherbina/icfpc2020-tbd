@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use tokio::runtime::Builder;
 use tokio::time::delay_for;
 use std::time::Duration;
-use tbd::{webapi::Endpoint, png_files::matrices_to_png, uforest::GameResponse};
+use tbd::{webapi::Endpoint, png_files::matrices_to_png, uforest::{Commands, GameResponse}};
 use std::collections::hash_map::DefaultHasher;
 use std::{convert::TryFrom, hash::{Hash, Hasher}};
 
@@ -34,6 +34,8 @@ struct RequestResponse {
     //  - empty string for non-game responses or
     //  - pretty multiline representation or
     //  - error message
+
+    request_as_commands: String,  // same idea
 }
 
 #[derive(Deserialize, Serialize)]
@@ -91,10 +93,30 @@ fn process_click(click: &ClickParams) -> ClickResponse {
                     };
                 }
             }
+            let mut request_as_commands = String::new();
+            if let Some(parts) = rr.request.clone().try_into_vec() {
+                if parts.len() == 3 &&
+                   parts[0].try_as_number() == Some(4) &&
+                   parts[1].try_as_number().is_some() {
+                    request_as_commands = match Commands::try_from(parts[2].clone()) {
+                        Ok(c) => {
+                            let data = Data::from(c.clone());
+                            if data == parts[2] {
+                                format!("{:#?}", c)
+                            } else {
+                                format!("Commands parse-serialize round-trip failed\n{:?}\ngo to uforest.rs and fix it\n{}",
+                                    data, "!".repeat(256))
+                            }
+                        }
+                        Err(e) => format!("can't parse as Commands: {}", e),
+                    };
+                }
+            }
             RequestResponse {
                 pretty_request: rr.request.to_pretty_string(),
                 pretty_response: rr.response.to_pretty_string(),
                 response_as_game_response,
+                request_as_commands,
             }
         }).collect(),
     }

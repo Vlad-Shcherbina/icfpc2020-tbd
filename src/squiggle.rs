@@ -1,3 +1,5 @@
+use std::iter::FromIterator;
+
 #[derive(PartialEq, Clone, Hash)]
 pub enum Data {
     Nil,
@@ -129,6 +131,17 @@ impl Data {
             Self::Number(x) => Some(*x),
             _ => None,
         }
+    }
+}
+
+impl FromIterator<Data> for Data {
+    fn from_iter<T: IntoIterator<Item = Data>>(iter: T) -> Self {
+        let xs: Vec<Data> = iter.into_iter().collect();
+        let mut result = Data::Nil;
+        for x in xs.into_iter().rev() {
+            result = Data::Cons(Box::new(x), Box::new(result));
+        }
+        result
     }
 }
 

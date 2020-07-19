@@ -54,7 +54,14 @@ function update_NetworkHistory(network_history_chunk) {
   network_history_chunk.map(function(x) {
     latest_request_container = document.createElement('div')
     latest_request_container.style = 'background-color: #DFFFFF'
-    latest_request_container.innerText = "⮞ " + x.pretty_request
+		latest_request_container.innerText = "⮞ " + x.pretty_request
+    latest_game_request = document.createElement('pre')
+    //latest_game_request.style = 'font-size: xx-small;'
+    if (x.request_as_commands) {
+      latest_game_request.innerText = x.request_as_commands
+      latest_request_container.appendChild(latest_game_request)
+		}
+
     latest_response_container = document.createElement('div')
     latest_response_container.style = 'background-color: #FFDFEF'
     latest_response_container.innerText = "⮜ " + x.pretty_response
@@ -63,7 +70,8 @@ function update_NetworkHistory(network_history_chunk) {
     if (x.response_as_game_response) {
       latest_game_response.innerText = x.response_as_game_response
       latest_response_container.appendChild(latest_game_response)
-    }
+		}
+		
     latest_network_history_chunk_container.appendChild(latest_request_container)
     latest_network_history_chunk_container.appendChild(latest_response_container)
   })

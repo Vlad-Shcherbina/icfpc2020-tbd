@@ -36,10 +36,13 @@ pub struct InitialShipParams {
     pub number4: i128,
 }
 
-#[derive(Debug)]
-pub struct Commands {
+#[derive(Debug, Clone, PartialEq)]
+pub struct Command {
     pub mystery: Data,
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Commands(pub Vec<Command>);
 
 pub struct Client {
     pub endpoint: Endpoint,
@@ -64,7 +67,7 @@ impl Client {
     }
 
     pub fn commands(&self, c: Commands) -> GameResponse {
-        let req = Data::make_list3(4, self.player_key, c.mystery);
+        let req = Data::make_list3(4, self.player_key, Data::from(c));
         self.endpoint.aliens_send(req).try_into().unwrap()
     }
 
@@ -81,10 +84,45 @@ impl Client {
     }
 }
 
+impl From<Command> for Data {
+    fn from(c: Command) -> Self {
+        c.mystery
+    }
+}
+
+impl TryFrom<Data> for Command {
+    type Error = String;
+
+    // Never panic, handle all errors!
+    fn try_from(data: Data) -> Result<Self, Self::Error> {
+        Ok(Command { mystery: data })
+    }
+}
+
+impl From<Commands> for Data {
+    fn from(c: Commands) -> Self {
+        c.0.into_iter().map(Data::from).collect()
+    }
+}
+
+impl TryFrom<Data> for Commands {
+    type Error = String;
+    // This function shouldn't panic because the web UI calls it
+    // on every request (not only on command requests).
+    // Handle all errors properly.
+    fn try_from(data: Data) -> Result<Self, Self::Error> {
+        let commands: Result<Vec<_>, _> = data
+            .try_into_vec().ok_or("not a vec")?
+            .into_iter()
+            .map(Command::try_from).collect();
+        commands.map(Commands)
+    }
+}
+
 impl TryFrom<Data> for GameResponse {
     type Error = String;
 
-    // This function shouldn't panic because it called in the web UI
+    // This function shouldn't panic because the web UI call is
     // on every response (not only game responses).
     // Handle all errors properly.
     fn try_from(data: Data) -> Result<Self, Self::Error> {
