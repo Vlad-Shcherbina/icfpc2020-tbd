@@ -48,9 +48,15 @@ pub struct GameSpec {
 }
 
 #[derive(Debug)]
+pub struct Field {
+    pub planet_radius: i128,
+    pub field_radius: i128,
+}
+
+#[derive(Debug)]
 pub struct GameState {
     pub steps: i128, //number of steps from the start of a run
-    pub mystery1: Data,
+    pub field: Option<Field>,
     pub ships_list: Vec<Ship>,
 }
 
@@ -258,7 +264,7 @@ impl TryFrom<Data> for GameState {
             Err(format!("{} elements instead of 3", parts.len()))?;
         }
         let steps = parts[0].try_as_number().ok_or("# of steps is not a number")?;
-        let mystery1 = parts[1].clone();
+        let field = parts[1].clone().try_into()?;
         let ships_list_data = parts[2].clone().try_into_vec().ok_or("not a list")?;
 
         let mut ships_list = Vec::new();
@@ -269,7 +275,7 @@ impl TryFrom<Data> for GameState {
 
         Ok(GameState {
             steps,
-            mystery1,
+            field: field,
             ships_list
         })
     }
@@ -318,6 +324,25 @@ impl TryFrom<Data> for ShipParams {
     }
 }
 
+impl TryFrom<Data> for Option<Field> {
+    type Error = String;
+
+    fn try_from(data: Data) -> Result<Self, Self::Error> {
+        if !data.is_list() {
+            Err("not a list")?
+        }
+        let parts = data.try_into_vec().ok_or("not a list")?;
+        if parts.len() == 0 {
+            return Ok(None)
+        }
+        if parts.len() != 2 {
+            Err(format!("{} elements instead of 2", parts.len()))?;
+        }
+        let planet_radius = parts[0].try_as_number().ok_or("Field.planet_radius not a number")?;
+        let field_radius = parts[1].try_as_number().ok_or("Field.field_radius not a number")?;
+        return Ok(Some(Field { planet_radius, field_radius }))
+    }
+}
 
 impl TryFrom<Data> for Ship {
     type Error = String;
