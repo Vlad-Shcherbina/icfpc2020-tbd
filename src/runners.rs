@@ -28,12 +28,12 @@ fn run_with_client(client: Client, mut ai: impl Ai) {
     }
 }
 
-pub fn  run_in_submission(mut ai: impl Ai) {
+pub fn  run_in_submission(ai: impl Ai) {
     let client = Client::from_submission_argv();
     run_with_client(client, ai);
 }
 
-pub fn run_local(player_key: i128, mut ai: impl Ai) {
+pub fn run_local(player_key: i128, ai: impl Ai) {
     let client = Client::from_player_key(player_key);
     run_with_client(client, ai);
 }

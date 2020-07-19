@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 use std::{path::{Path, PathBuf}};
 
 pub mod png_files;

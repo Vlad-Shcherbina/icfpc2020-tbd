@@ -40,7 +40,7 @@ fn main1() {
 
         println!("{}", function);
 
-        writeln!(fout, "{} = {}", function, reduce_line(body));
+        writeln!(fout, "{} = {}", function, reduce_line(body)).unwrap();
     }
     println!("see outputs/galaxy_2.lambda");
 }
