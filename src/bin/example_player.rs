@@ -15,7 +15,7 @@ impl Ai for ExampleAi {
         ShipParams {
             fuel: 1,
             laser: 1,
-            bars: 1,
+            cooling: 1,
             hull: 1,
         }
     }

@@ -80,7 +80,7 @@ pub struct JoinRequest {
 pub struct ShipParams {
     pub fuel: i128,
     pub laser: i128,
-    pub bars: i128,
+    pub cooling: i128,
     pub hull: i128,
 }
 
@@ -96,7 +96,7 @@ pub enum Command {
     Shoot {
         ship_id: i128,
         target: Vec2,
-        mystery: i128
+        power: i128
     },
     // TODO: add more commands, but keep Unknown around just in case
     Unknown(Data),
@@ -120,7 +120,7 @@ impl Client {
         let i = Data::make_list4(
             i.fuel,
             i.laser,
-            i.bars,
+            i.cooling,
             i.hull,
         );
         let req = Data::make_list3(3, self.player_key, i);
@@ -151,7 +151,7 @@ impl From<Command> for Data {
         match c {
             Command::Accelerate { ship_id, vector } => Data::make_list3(0, ship_id, vector),
             Command::Detonate { ship_id } => Data::make_list2(1, ship_id),
-            Command::Shoot { ship_id, target , mystery} => Data::make_list4(2, ship_id, target, mystery),
+            Command::Shoot { ship_id, target , power} => Data::make_list4(2, ship_id, target, power),
             Command::Unknown(data) => data,
         }
     }
@@ -192,12 +192,12 @@ impl TryFrom<Data> for Command {
                 }
                 let ship_id = parts[1].try_as_number().ok_or("cmd ship id not number")?;
                 let target = Vec2::try_from(parts[2].clone())?;
-                let mystery = parts[3].try_as_number().ok_or("cmd mystery not number")?;
+                let power = parts[3].try_as_number().ok_or("cmd power not number")?;
 
                 Command::Shoot {
                     ship_id,
                     target,
-                    mystery
+                    power
                 }
             }
             _ => Command::Unknown(data),
@@ -341,12 +341,12 @@ impl TryFrom<Data> for ShipParams {
         }
         let fuel = parts[0].try_as_number().ok_or("fuel is not a number")?;
         let laser = parts[1].try_as_number().ok_or("laser is not a number")?;
-        let bars = parts[2].try_as_number().ok_or("bars is not a number")?;
+        let cooling = parts[2].try_as_number().ok_or("cooling is not a number")?;
         let hull = parts[3].try_as_number().ok_or("hull is not a number")?;
         Ok(ShipParams {
             fuel,
             laser,
-            bars,
+            cooling,
             hull,
         })
     }
