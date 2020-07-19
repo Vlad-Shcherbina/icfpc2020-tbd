@@ -5,17 +5,10 @@ use tbd::parse_image::{ parse_image };
 
 use std::path::{Path};
 
-// optional: add number of the message to parse as a command line argument
+// optional: add filename w/o .png from data
 
-fn main() {
-    let mut filename = "message2.png".to_string();
-    let args: Vec<String> = std::env::args().collect();
-    if args.len() > 1 {
-        filename = format!("message{}.png", args[1]);
-    }
-    let v = pngs::bordered_png_to_matrix(Path::new("data")
-        .join("messages")
-        .join(filename));
+fn read_some_file(path: &std::path::Path) {
+    let v = pngs::borderless_png_to_matrix(path);
     let mut unidentified: Vec<ImgMatrix> = Vec::new();
     let operations = read_operations();
 
@@ -31,4 +24,13 @@ fn main() {
         println!("\n?{}", i);
         print!("{}", m);
     }
+}
+
+fn main() {
+    let args: Vec<String> = std::env::args().collect();
+    let filename = if args.len() > 1 { format!("{}.png", &args[1]) } else { "canvas.png".to_string() };
+    let pth = Path::new("data")
+        .join("screens")
+        .join(filename);
+    read_some_file(&pth);
 }

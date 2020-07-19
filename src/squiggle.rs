@@ -1,4 +1,4 @@
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, Hash)]
 pub enum Data {
     Nil,
     Number(i128),

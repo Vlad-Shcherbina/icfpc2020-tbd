@@ -14,6 +14,7 @@ canvas.busy {
 	</style>
 	<script type="text/javascript">
 var State = "(2, ((1, (-1, nil)), (0, (nil, nil))))"
+
 var OffsetX = -200
 var OffsetY = -200
 var Colors = [
@@ -21,6 +22,11 @@ var Colors = [
 	'rgb(255, 255, 255)',
 	'rgb(255, 255, 0)', 'rgb(255, 0, 255)', 'rgb(0, 255, 255)'
 ]
+
+function set_state(state) {
+	State = state
+	document.getElementById('state').innerText = State
+}
 
 function send_click(x, y) {
 	document.getElementById('canvas').classList.add('busy')
@@ -32,9 +38,9 @@ function send_click(x, y) {
 		body: JSON.stringify({x, y, state: State}),
 	})
 		.then(response => response.json())
-		.then(({pixels, state}) => {
-			State = state
-			document.getElementById('state').innerText = State
+		.then(({pixels, state, pretty_state}) => {
+			set_state(state)
+			document.getElementById('pretty_state').innerText = pretty_state
 
 			draw_pixels(pixels)
 			document.getElementById('canvas').classList.remove('busy')
@@ -66,15 +72,38 @@ function load() {
 	const canvas = document.getElementById('canvas')
 	canvas.addEventListener('click', e => {
 		const rect = canvas.getBoundingClientRect()
-	    const x = event.clientX - rect.left + OffsetX
-	    const y = event.clientY - rect.top + OffsetY
+	    const x = e.clientX - rect.left + OffsetX
+	    const y = e.clientY - rect.top + OffsetY
 	    send_click(Math.round(x), Math.round(y))
+	})
+
+	document.getElementById('new_state_go').addEventListener('click', e => {
+		let new_state = document.getElementById('new_state').value
+		set_state(new_state)
+	})
+
+	document.getElementById('click_go').addEventListener('click', e => {
+		let x = parseInt(document.getElementById('click_x').value)
+		let y = parseInt(document.getElementById('click_y').value)
+		send_click(x, y)
+	})
+
+	document.getElementById('jump_battle_select').addEventListener('click', e => {
+		let new_state = '(5, ((2, (0, (nil, (nil, (nil, (nil, (nil, (54179, nil)))))))), (9, (nil, nil))))'
+		let x = 0
+		let y = 0
+		set_state(new_state)
+		send_click(x, y)
 	})
 }
 	</script>
 </head>
 <body onload="load()">
 	<canvas id='canvas' width=400 height=400></canvas>
+	<p>shortcuts: <button id='jump_battle_select'>battle selection screen</button></p>
+	<p>change state: <textarea id='new_state'></textarea><button id='new_state_go'>go</button></p>
+	<p>simulate click: <input type='number' id='click_x' value=0> <input type='number' id='click_y' value=0> <button id='click_go'>go</button></p>
+	<p>prettified state is <span id='pretty_state'></span></p>
 	<p>state is <span id='state'></span></p>
 </body>
 </html>

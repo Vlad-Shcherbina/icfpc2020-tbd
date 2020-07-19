@@ -21,6 +21,7 @@ the source repository).
 '''
 
 import os
+from os import makedirs
 import sys
 import time
 import shutil
@@ -99,7 +100,7 @@ def main():
     (sub_repo / 'build.sh').write_text('')
     (sub_repo / 'run.sh').write_text('''\
 #!/bin/sh
-RUST_BACKTRACE=1 ./a.out "$@"
+RUST_BACKTRACE=1 icfpc2020-tbd/a.out "$@"
 ''')
 
     provenance = f'### Binary\ncargo build -p {package} --bin {binary} --release\n'
@@ -115,9 +116,16 @@ RUST_BACKTRACE=1 ./a.out "$@"
         cwd=project_root, universal_newlines=True)
     (sub_repo / 'provenance.txt').write_text(provenance)
 
+    # we put it inside the subdirectory called 'icfpc2020-tbd',
+    # to ensure that project_path() works
+    sub_dir = sub_repo / 'icfpc2020-tbd'
+    sub_dir.mkdir(exist_ok=True)
     shutil.copy(
         project_root / 'cache/target/release' / binary,
-        sub_repo / 'a.out')
+        sub_dir / 'a.out')
+
+    # not needed on the server unless we want to run headless galaxy or something
+    #shutil.copytree(project_root / 'data', sub_dir / 'data')
 
     subprocess.check_call(['git', 'add', '.'], cwd=sub_repo, env=ssh_env)
     subprocess.check_call(

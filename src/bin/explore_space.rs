@@ -1,5 +1,5 @@
 use tbd::ufolang::Protocol;
-use tbd::{squiggle::Data, ufolang::{eval_multidraw, Value::*}, project_path, png_files::matrices_to_png};
+use tbd::{squiggle::Data, ufolang::{eval_multidraw, Value::*}, project_path, png_files::matrices_to_png, webapi::Endpoint};
 use std::rc::Rc;
 use std::io::BufRead;
 use std::collections::HashSet;
@@ -12,7 +12,7 @@ fn explore(protocol: &Protocol, seen: &mut HashSet<String>, state: Data) {
     println!("i am in {:#?}", state);
     for x in -10..10 {
         for y in -10..10 {
-            let result = protocol.interact(state.clone(), Data::make_cons(x, y));
+            let result = protocol.interact(state.clone(), Data::make_cons(x, y), &Endpoint::Proxy);
             let result_state_str = result.final_state.to_string();
             if !seen.contains(&result_state_str) {
                 println!("{} -> {} {} -> {}", state_str, x, y, result_state_str);

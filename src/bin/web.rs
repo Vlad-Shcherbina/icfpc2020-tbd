@@ -1,5 +1,5 @@
 use tbd::project_path;
-use tbd::ufolang::Protocol;
+use tbd::ufolang::{Protocol, eval_multidraw, InteractResult};
 use tbd::squiggle::Data;
 
 use warp::Filter;
@@ -7,6 +7,9 @@ use serde::{Deserialize, Serialize};
 use tokio::runtime::Builder;
 use tokio::time::delay_for;
 use std::time::Duration;
+use tbd::{webapi::Endpoint, png_files::matrices_to_png};
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 
 #[derive(Deserialize, Serialize)]
 struct ClickParams {
@@ -25,17 +28,28 @@ fn data_try_to_coords(value: &Data) -> Option<(i128, i128)> {
 #[derive(Deserialize, Serialize)]
 struct ClickResponse {
     state: String,
+    pretty_state: String,
     pixels: Vec<Vec<(i128, i128)>>
+}
+
+fn save_pics(result: &InteractResult) {
+    let matrices = eval_multidraw(result.data_out_to_multipledraw.clone());
+    let mut hasher = DefaultHasher::new();
+    result.final_state.hash(&mut hasher);
+    let step_dir = format!("outputs/galaxy--{:x}", hasher.finish());
+    matrices_to_png(&matrices, project_path(&step_dir));
+    std::fs::write(project_path(&step_dir).join("state.txt"), result.final_state.to_string()).unwrap();
 }
 
 fn process_click(click: &ClickParams) -> ClickResponse {
     let protocol = Protocol::load_galaxy();
     let state = match Data::from_str(&click.state) {
         Some(v) => v,
-        None => return ClickResponse{state: String::from("error"), pixels: vec![]}
+        None => return ClickResponse{state: String::from("error"), pretty_state: String::from("error"), pixels: vec![]}
     };
 
-    let result = protocol.interact(state, Data::make_cons(click.x, click.y));
+    let result = protocol.interact(state, Data::make_cons(click.x, click.y), &Endpoint::Proxy);
+    // save_pics(&result);
 
     // let pixels = result.data_out_to_multipledraw.into_vec().iter().map(
     //     |x| x.into_vec().iter().map(|y| data_try_to_coords(y).unwrap()).collect()
@@ -47,6 +61,7 @@ fn process_click(click: &ClickParams) -> ClickResponse {
 
     ClickResponse {
         state: result.final_state.to_string(),
+        pretty_state: result.final_state.to_pretty_string(),
         pixels: pixels
     }
 }
@@ -68,6 +83,7 @@ async fn server_main() {
 
     let routes = index.or(click);
 
+    println!("serving at http://127.0.0.1:22009 ...");
     warp::serve(routes)
         .run(([127, 0, 0, 1], 22009))
         .await;

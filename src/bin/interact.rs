@@ -1,5 +1,5 @@
 use std::io::{self, Write};
-use tbd::{squiggle::*, webapi::aliens_send};
+use tbd::{squiggle::*, webapi::Endpoint};
 
 fn main() {
     loop {
@@ -18,7 +18,7 @@ fn main() {
             }
         };
 
-        let response = aliens_send(data);
+        let response = Endpoint::Proxy.aliens_send(data);
         println!("{}", response.to_string());
     }
 }
