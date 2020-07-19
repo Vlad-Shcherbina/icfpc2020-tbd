@@ -25,7 +25,7 @@ fn fast_forward_training() -> Data {
     }
     if n == 0 { 
         println!("Press Enter to continue");
-        std::io::stdin().read_line(&mut buf);
+        std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
     }
 
@@ -39,7 +39,7 @@ fn fast_forward_training() -> Data {
     }
     if n == 0 { 
         println!("Press Enter to continue");
-        std::io::stdin().read_line(&mut buf);
+        std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
     }
 
@@ -57,7 +57,7 @@ fn fast_forward_training() -> Data {
     }
     if n == 0 { 
         println!("Press Enter to continue");
-        std::io::stdin().read_line(&mut buf);
+        std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
     }
 
@@ -87,7 +87,7 @@ fn fast_forward_training() -> Data {
     }
     if n == 0 { 
         println!("Press Enter to continue");
-        std::io::stdin().read_line(&mut buf);
+        std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
     }
     
@@ -114,7 +114,7 @@ fn fast_forward_training() -> Data {
     }
     if n == 0 { 
         println!("Press Enter to continue");
-        std::io::stdin().read_line(&mut buf);
+        std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
     }
 
@@ -126,16 +126,11 @@ fn fast_forward_training() -> Data {
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
     state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;
 
-    // x = 8
-    // v = 10
-    // let mut y = 22
-    // 3
 
     let mut y = 2;
     v = 2;
     x = 2;
     for _ in 1..6 {
-        println!("{} {}", x, y);
         state = protocol.interact(state, Data::make_cons(x, 16 + y), &Endpoint::Proxy).final_state;
         state = protocol.interact(state, Data::make_cons(x, 10 + y), &Endpoint::Proxy).final_state;
         state = protocol.interact(state, Data::make_cons(x, 4 + y), &Endpoint::Proxy).final_state;
@@ -160,7 +155,7 @@ fn fast_forward_training() -> Data {
     }
         if n == 0 { 
         println!("Press Enter to continue");
-        std::io::stdin().read_line(&mut buf);
+        std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
     }
 
@@ -180,7 +175,7 @@ fn fast_forward_training() -> Data {
     }
         if n == 0 { 
         println!("Press Enter to continue");
-        std::io::stdin().read_line(&mut buf);
+        std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
     }
     
@@ -198,7 +193,7 @@ fn fast_forward_training() -> Data {
     }
         if n == 0 { 
         println!("Press Enter to continue");
-        std::io::stdin().read_line(&mut buf);
+        std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
     }
     
@@ -216,10 +211,27 @@ fn fast_forward_training() -> Data {
     }
         if n == 0 { 
         println!("Press Enter to continue");
-        std::io::stdin().read_line(&mut buf);
+        std::io::stdin().read_line(&mut buf).unwrap();
         println!("Working...");
     }
 
+    state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;         
+    state = protocol.interact(state, Data::make_cons(16, 0), &Endpoint::Proxy).final_state;
+    state = protocol.interact(state, Data::make_cons(16, 7), &Endpoint::Proxy).final_state;
+    state = protocol.interact(state, Data::make_cons(48, 17), &Endpoint::Proxy).final_state;
+    state = protocol.interact(state, Data::make_cons(16, 0), &Endpoint::Proxy).final_state;
+    state = protocol.interact(state, Data::make_cons(16, -7), &Endpoint::Proxy).final_state;
+    state = protocol.interact(state, Data::make_cons(11, -2), &Endpoint::Proxy).final_state;
+    state = protocol.interact(state, Data::make_cons(0, 0), &Endpoint::Proxy).final_state;         
+    println!("10:\n{}\n", state.to_string());
+    if n == 10 { 
+        return state;
+    }
+        if n == 0 { 
+        println!("Press Enter to continue");
+        std::io::stdin().read_line(&mut buf).unwrap();
+        println!("Working...");
+    }
 
     state
 }
