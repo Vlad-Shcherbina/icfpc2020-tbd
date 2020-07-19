@@ -82,6 +82,9 @@ impl Client {
 impl TryFrom<Data> for GameResponse {
     type Error = String;
 
+    // This function shouldn't panic because it called in the web UI
+    // on every response (not only game responses).
+    // Handle all errors properly.
     fn try_from(data: Data) -> Result<Self, Self::Error> {
         if !data.is_list() {
             Err("not a list")?

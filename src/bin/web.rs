@@ -7,9 +7,9 @@ use serde::{Deserialize, Serialize};
 use tokio::runtime::Builder;
 use tokio::time::delay_for;
 use std::time::Duration;
-use tbd::{webapi::Endpoint, png_files::matrices_to_png};
+use tbd::{webapi::Endpoint, png_files::matrices_to_png, uforest::GameResponse};
 use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
+use std::{convert::TryFrom, hash::{Hash, Hasher}};
 
 #[derive(Deserialize, Serialize)]
 struct ClickParams {
@@ -29,6 +29,11 @@ fn data_try_to_coords(value: &Data) -> Option<(i128, i128)> {
 struct RequestResponse {
     pretty_request: String,
     pretty_response: String,
+
+    response_as_game_response: String,
+    //  - empty string for non-game responses or
+    //  - pretty multiline representation or
+    //  - error message
 }
 
 #[derive(Deserialize, Serialize)]
@@ -77,9 +82,20 @@ fn process_click(click: &ClickParams) -> ClickResponse {
         pretty_state: result.final_state.to_pretty_string(),
         pixels: pixels,
         network_history: result.network_history.iter().map(|rr| {
+            let mut response_as_game_response = String::new();
+            if rr.response.is_list() {
+                let parts = rr.response.clone().into_vec();
+                if parts.len() == 4 && parts[0].try_as_number().is_some() {
+                    response_as_game_response = match GameResponse::try_from(rr.response.clone()) {
+                        Ok(gr) => format!("{:#?}", &gr),
+                        Err(e) => format!("can't parse as GameResponse: {}", e),
+                    };
+                }
+            }
             RequestResponse {
                 pretty_request: rr.request.to_pretty_string(),
                 pretty_response: rr.response.to_pretty_string(),
+                response_as_game_response,
             }
         }).collect(),
     }
