@@ -81,7 +81,16 @@ fn find_all_pairs() {
             state = result.final_state;
             // state_to_draw = result.data_out_to_multipledraw;
 
-            let pair = state.clone().into_vec()[1].clone().into_vec()[4].clone().into_vec();
+            let pair = state
+                    .clone()
+                    .try_into_vec()
+                    .unwrap()[1]
+                    .clone()
+                    .try_into_vec()
+                    .unwrap()[4]
+                    .clone()
+                    .try_into_vec()
+                    .unwrap();
             println!("{}, {}, {:?}", i, j, &pair);
             if pair.len() > 0 {
                 assert!(pair.len() == 2);
