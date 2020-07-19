@@ -33,6 +33,7 @@ pub struct TimePrediction {
 }
 
 impl TimePrediction {
+    // gives total nearest time to disaster of any king, -1 if none expected
     pub fn time(&self) -> i128 {
         let mut m = -1;
         if let Some(a) = self.collision {

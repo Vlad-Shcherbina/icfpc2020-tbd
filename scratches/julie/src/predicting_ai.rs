@@ -25,41 +25,48 @@ impl Ai for PredictingAi {
         assert!(me.len() == 1);
         let me = me[0];
 
-        let pos = me.ship_state.position;
-        let vel = me.ship_state.velocity;
-        let r_planet = spec.field.as_ref().unwrap().planet_radius;
-        let r_field = spec.field.as_ref().unwrap().field_radius;
-        let mut acc: Vec2 = Vec2 {x: 0, y: 0 };
-        let mut max = 0;
-        println!("\nTurn: {}", state.steps);
-        println!("Position: {:?}, velocity: {:?}", &pos, &vel);
-        println!("Fuel: {}", me.ship_state.ship_params.fuel);
-        println!("Prediction: {}", utils::predict_collisions(pos, vel, r_planet, r_field).time());
-
-        if me.ship_state.ship_params.fuel == 0 { return Commands(vec![]); }
-        if me.ship_state.heat + 8 - me.ship_state.ship_params.cooling > me.ship_state.heat_capacity {
-            return Commands(vec![]);
+        match choose_acceleration(me, spec) {
+            Some(a) => Commands(vec![Command::Accelerate { ship_id: me.ship_state.ship_id, vector: a }]),
+            None    => Commands(vec![])
         }
-
-        for x in -1..2 {
-            for y in -1..2 {
-                let delta = Vec2{x, y};
-                let m = utils::predict_collisions(pos, vel + delta, r_planet, r_field).time();
-                if m == -1 || m > max {
-                    acc = delta.negate();
-                    max = m;
-                }
-                if max == -1 { break; }
-            }
-            if max == -1 { break; }
-        }
-        println!("Decision: {:?}, estimated as {}", &acc, max);
-        if !(acc.x == 0 && acc.y == 0) {
-            return Commands(vec![Command::Accelerate { ship_id: me.ship_state.ship_id, vector: acc}]);
-        }
-
-        Commands(vec![])
     }
 }
 
 // See example_player.rs
+
+
+// gives best acceleration, in the right direction and ready to be used in Command,
+// None if no action is possible or profitable
+pub fn choose_acceleration(me: &Ship, spec: &GameSpec) -> Option<Vec2> {
+    let pos = me.ship_state.position;
+    let vel = me.ship_state.velocity;
+    let r_planet = spec.field.as_ref().unwrap().planet_radius;
+    let r_field = spec.field.as_ref().unwrap().field_radius;
+    let mut acc: Vec2 = Vec2 {x: 0, y: 0 };
+    let mut max = 0;
+    // println!("\nTurn: {}", state.steps);
+    // println!("Position: {:?}, velocity: {:?}", &pos, &vel);
+    // println!("Fuel: {}", me.ship_state.ship_params.fuel);
+    // println!("Prediction: {}", utils::predict_collisions(pos, vel, r_planet, r_field).time());
+
+    if me.ship_state.ship_params.fuel == 0 { return None; }
+    if me.ship_state.heat + 8 - me.ship_state.ship_params.cooling > me.ship_state.heat_capacity {
+        return None;
+    }
+
+    for x in -1..2 {
+        for y in -1..2 {
+            let delta = Vec2{x, y};
+            let m = utils::predict_collisions(pos, vel + delta, r_planet, r_field).time();
+            if m == -1 || m > max {
+                acc = delta.negate();
+                max = m;
+            }
+            if max == -1 { break; }
+        }
+        if max == -1 { break; }
+    }
+    // println!("Decision: {:?}, estimated as {}", &acc, max);
+    if acc.x == 0 && acc.y == 0 { return None; }
+    Some(acc)
+}
