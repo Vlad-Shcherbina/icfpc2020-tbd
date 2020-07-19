@@ -1,6 +1,7 @@
 use crate::webapi::Endpoint;
 
 pub use crate::squiggle::Data;
+pub use crate::vec2::Vec2;
 use std::convert::{TryInto, TryFrom};
 
 // as our understanding of the game API improves this stuff
@@ -17,12 +18,6 @@ pub enum Stage {
 pub enum Role {
     Attacker,
     Defender,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct Vec2 {
-    x: i128,
-    y: i128,
 }
 
 #[derive(Debug)]
@@ -296,25 +291,6 @@ impl TryFrom<Data> for GameState {
         })
     }
 }
-
-impl From<Vec2> for Data {
-    fn from(v: Vec2) -> Data {
-        Data::make_cons(v.x, v.y)
-    }
-}
-
-impl TryFrom<Data> for Vec2 {
-    type Error = String;
-
-    fn try_from(data: Data) -> Result<Self, Self::Error> {
-        let parts = data.try_to_coords().ok_or("not a pair of numbers")?;
-        Ok(Vec2 {
-            x : parts.0,
-            y : parts.1,
-        })
-    }
-}
-
 
 impl TryFrom<Data> for ShipParams {
     type Error = String;
