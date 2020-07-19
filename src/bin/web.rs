@@ -97,8 +97,8 @@ fn process_click(click: &ClickParams) -> ClickResponse {
                             if data == parts[2] {
                                 format!("{:#?}", c)
                             } else {
-                                format!("Commands parse-serialize round-trip failed\n{:?}\ngo to uforest.rs and fix it\n{}",
-                                    data, "!".repeat(256))
+                                format!("Commands parse-serialize round-trip failed\n{:?}\n{:?}\ngo to uforest.rs and fix it\n{}",
+                                    data, parts[2], "!".repeat(256))
                             }
                         }
                         Err(e) => format!("can't parse as Commands: {}", e),

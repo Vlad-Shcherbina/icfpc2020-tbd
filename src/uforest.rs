@@ -192,7 +192,7 @@ impl TryFrom<Data> for Command {
                 }
                 let ship_id = parts[1].try_as_number().ok_or("cmd ship id not number")?;
                 let target = Vec2::try_from(parts[2].clone())?;
-                let mystery = parts[1].try_as_number().ok_or("cmd mystery not number")?;
+                let mystery = parts[3].try_as_number().ok_or("cmd mystery not number")?;
 
                 Command::Shoot {
                     ship_id,
