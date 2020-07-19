@@ -45,7 +45,7 @@ pub struct GameSpec {
     pub role: Role,
     pub mystery2: Data,
     pub field: Option<Field>,
-    pub mystery4: Data,
+    pub defender_params: Option<ShipParams>, // a field which only the attacker gets
 }
 
 #[derive(Debug)]
@@ -293,13 +293,13 @@ impl TryFrom<Data> for GameSpec {
         let role = parts[1].clone().try_into()?;
         let mystery2 = parts[2].clone();
         let field = parts[3].clone().try_into()?;
-        let mystery4 = parts[4].clone();
+        let defender_params = if parts[4] == Data::Nil { None } else { Some(parts[4].clone().try_into()?) };
         Ok(GameSpec {
             timer,
             role,
             mystery2,
             field,
-            mystery4,
+            defender_params,
         })
     }
 }
