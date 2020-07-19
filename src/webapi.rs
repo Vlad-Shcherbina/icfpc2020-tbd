@@ -14,11 +14,10 @@ pub enum Endpoint {
 
 impl Endpoint {
     pub fn aliens_send(&self, data: Data) -> Data {
+        eprintln!("sending {:?}", data);
         let modulated = modulate(data);
         // convert to string
         let modulated = modulated.iter().map(|&x| x.to_string()).collect::<Vec<_>>().join("");
-
-        eprintln!("sending {}", modulated);
 
         let response = match self {
             Endpoint::NoComms => panic!(),
@@ -42,9 +41,10 @@ impl Endpoint {
 
         let response = response.into_string().expect("valid response");
 
-        eprintln!("got response {}", response);
         let response = bytes_to_squiggle(response.as_bytes()).expect("response is 01");
         let demodulated = demodulate(response.iter());
-        demodulated.expect("valid demodulate").0
+        let result = demodulated.expect("valid demodulate").0;
+        eprintln!("got response {:?}", result);
+        result
     }
 }

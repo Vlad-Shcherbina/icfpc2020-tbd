@@ -9,6 +9,7 @@ canvas {
 }
 canvas.busy {
 	pointer-events: none;
+	opacity: 0.9;
 }
 	</style>
 	<script type="text/javascript">
@@ -30,7 +31,6 @@ function set_state(state, network_history) {
 	document.getElementById('state').innerText = State
 }
 
-// TODO: Change log from text to HTML
 // TODO: Add shortcuts, interact with Julia's script.
 
 function update_NetworkHistory(network_history_chunk) {
