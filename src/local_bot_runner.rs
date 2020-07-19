@@ -1,11 +1,12 @@
-use tbd::webapi::Endpoint;
-use tbd::squiggle::Data;
+use crate::webapi::Endpoint;
+use crate::squiggle::Data;
 use std::process::Command;
-use tbd::project_path;
-use tbd::ai_interface::ExampleAi;
+use crate::project_path;
+use crate::ai_interface::{ExampleAi, Ai};
 use std::time::Duration;
+use crate::runners::run_local;
 
-fn get_player_keys() -> Result<(i128, i128), String> {
+pub fn get_player_keys() -> Result<(i128, i128), String> {
     let responce = Endpoint::Proxy.aliens_send(Data::make_list2(Data::Number(1),
                                                                 Data::Number(0)));
     let responce = responce.try_into_vec().ok_or("Vec expected")?;
@@ -17,13 +18,13 @@ fn get_player_keys() -> Result<(i128, i128), String> {
     Ok((first_key, second_key))
 }
 
-fn main() {
+pub fn run_bots(ai1: impl Ai + 'static, ai2: impl Ai + 'static) {
     let keys = get_player_keys().expect("Can't obtain player keys");
     let firs_bot = std::thread::spawn(move || {
-        tbd::runners::run_local(keys.0, ExampleAi {});
+        run_local(keys.0, ai1);
     });
     let second_bot = std::thread::spawn(move || {
-        tbd::runners::run_local(keys.1, ExampleAi {});
+        run_local(keys.1, ai2);
     });
     firs_bot.join().unwrap();
     second_bot.join().unwrap();
