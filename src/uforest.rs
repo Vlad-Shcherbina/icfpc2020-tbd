@@ -227,12 +227,15 @@ impl From<Data> for Stage {
     }
 }
 
-impl From<Data> for Role {
-    fn from(data: Data) -> Self {
-        match data.try_as_number().unwrap() {
-            0 => Role::Attacker,
-            1 => Role::Defender,
-            _ => panic!(),
+impl TryFrom<Data> for Role {
+    type Error = String;
+
+    fn try_from(data: Data) -> Result<Self, Self::Error> {
+        let role = data.try_as_number().ok_or("role not well-defined")?;
+        match role {
+            0 => Ok(Role::Attacker),
+            1 => Ok(Role::Defender),
+            _ => Err("role not attacker or defender")?,
         }
     }
 }
@@ -249,7 +252,7 @@ impl TryFrom<Data> for GameSpec {
             Err(format!("{} elements instead of 5", parts.len()))?;
         }
         let timer = parts[0].try_as_number().ok_or("timer is not a number")?;
-        let role = parts[1].clone().into();
+        let role = parts[1].clone().try_into()?;
         let mystery2 = parts[2].clone();
         let mystery3 = parts[3].clone();
         let mystery4 = parts[4].clone();
@@ -367,7 +370,7 @@ impl TryFrom<Data> for ShipState {
         if parts.len() != 8 {
             Err(format!("{} elements instead of 8", parts.len()))?;
         }
-        let role = parts[0].clone().into();
+        let role = parts[0].clone().try_into()?;
         let ship_id = parts[1].try_as_number().ok_or("shipstate.ship_id not a number")?;
         let position = parts[2].clone().try_into()?;
         let velocity = parts[3].clone().try_into()?;
