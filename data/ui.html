@@ -66,16 +66,28 @@ function draw_pixels(pixels) {
 	}
 }
 
+function client_x_y_to_galaxy_coordinates(canvas, e) {
+  const rect = canvas.getBoundingClientRect()
+  return [ Math.round(e.clientX - rect.left + OffsetX),
+           Math.round(e.clientY - rect.top + OffsetY) ]
+}
+
+function log_mouse_position(x, y) {
+  document.getElementById('mouse_tracker').innerText = "[" + x + ", " + y + "]"
+}
+
 function load() {
 	send_click(-2, 4)
 
 	const canvas = document.getElementById('canvas')
 	canvas.addEventListener('click', e => {
-		const rect = canvas.getBoundingClientRect()
-	    const x = e.clientX - rect.left + OffsetX
-	    const y = e.clientY - rect.top + OffsetY
-	    send_click(Math.round(x), Math.round(y))
+    [ x, y ] = client_x_y_to_galaxy_coordinates(canvas, e)
+    send_click(x, y)
 	})
+  canvas.addEventListener('mousemove', e => {
+    [ x, y ] = client_x_y_to_galaxy_coordinates(canvas, e)
+    log_mouse_position(x, y)
+  })
 
 	document.getElementById('new_state_go').addEventListener('click', e => {
 		let new_state = document.getElementById('new_state').value
@@ -100,7 +112,7 @@ function load() {
 </head>
 <body onload="load()">
 	<canvas id='canvas' width=400 height=400></canvas>
-	<p>shortcuts: <button id='jump_battle_select'>battle selection screen</button></p>
+	<p>shortcuts: <button id='jump_battle_select'>battle selection screen</button> | mouse: <strong id="mouse_tracker"></strong></p>
 	<p>change state: <textarea id='new_state'></textarea><button id='new_state_go'>go</button></p>
 	<p>simulate click: <input type='number' id='click_x' value=0> <input type='number' id='click_y' value=0> <button id='click_go'>go</button></p>
 	<p>prettified state is <span id='pretty_state'></span></p>
