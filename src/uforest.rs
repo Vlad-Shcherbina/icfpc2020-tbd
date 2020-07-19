@@ -143,6 +143,11 @@ impl Client {
         let player_key: i128 = player_key.parse().unwrap();
         Client { endpoint, player_key }
     }
+
+    pub fn from_player_key(player_key: i128) -> Self {
+        let endpoint = Endpoint::Proxy;
+        Client { endpoint, player_key }
+    }
 }
 
 impl From<Command> for Data {
