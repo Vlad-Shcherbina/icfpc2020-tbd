@@ -30,4 +30,9 @@ pub fn run_bots(ai1: impl Ai + 'static, ai2: impl Ai + 'static) {
     second_bot.join().unwrap();
     println!("Use this state if you want to see replay");
     println!("(5, ((4, ({}, (nil, (nil, (nil, (nil, ((36, 0), (24324, nil)))))))), (9, (nil, nil))))", keys.0);
+    println!("Paste it in galaxy pad");
+    println!("Close player_key input");
+    println!("Click galaxy");
+    println!("Step replay by galaxy clicking");
+
 }
