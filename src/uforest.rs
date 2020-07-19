@@ -14,6 +14,12 @@ pub enum Stage {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Role {
+    Attacker,
+    Defender,
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct Vec2 {
     x: i128,
     y: i128,
@@ -22,15 +28,15 @@ pub struct Vec2 {
 #[derive(Debug)]
 pub struct Ship {
     pub ship_state: ShipState,
-    pub mystery: Data
+    pub commands_list: Data,
 }
 
 #[derive(Debug)]
 pub struct ShipState {
-    pub role: i128,
+    pub role: Role,
     pub ship_id: i128,
     pub position: Vec2,
-    pub mystery3: Data,
+    pub velocity: Vec2,
     pub ship_params: ShipParams,
     pub number3: i128,
     pub number4: i128,
@@ -41,7 +47,7 @@ pub struct ShipState {
 #[derive(Debug)]
 pub struct GameSpec {
     pub timer: i128, // number of max possible steps until game over
-    pub role: i128,
+    pub role: Role,
     pub mystery2: Data,
     pub mystery3: Data,
     pub mystery4: Data,
@@ -78,9 +84,9 @@ pub struct JoinRequest {
 #[derive(Debug)]
 pub struct ShipParams {
     pub fuel: i128,
-    pub number2: i128,
-    pub number3: i128,
-    pub number4: i128,
+    pub laser: i128,
+    pub bars: i128,
+    pub hull: i128,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -110,9 +116,9 @@ impl Client {
     pub fn start(&self, i: ShipParams) -> GameResponse {
         let i = Data::make_list4(
             i.fuel,
-            i.number2,
-            i.number3,
-            i.number4,
+            i.laser,
+            i.bars,
+            i.hull,
         );
         let req = Data::make_list3(3, self.player_key, i);
         self.endpoint.aliens_send(req).try_into().unwrap()
@@ -226,6 +232,16 @@ impl From<Data> for Stage {
     }
 }
 
+impl From<Data> for Role {
+    fn from(data: Data) -> Self {
+        match data.try_as_number().unwrap() {
+            0 => Role::Attacker,
+            1 => Role::Defender,
+            _ => panic!(),
+        }
+    }
+}
+
 impl TryFrom<Data> for GameSpec {
     type Error = String;
 
@@ -238,7 +254,7 @@ impl TryFrom<Data> for GameSpec {
             Err(format!("{} elements instead of 5", parts.len()))?;
         }
         let timer = parts[0].try_as_number().ok_or("timer is not a number")?;
-        let role = parts[1].try_as_number().ok_or("role is not a number")?;
+        let role = parts[1].clone().into();
         let mystery2 = parts[2].clone();
         let mystery3 = parts[3].clone();
         let mystery4 = parts[4].clone();
@@ -312,14 +328,14 @@ impl TryFrom<Data> for ShipParams {
             Err(format!("{} elements instead of 4", parts.len()))?;
         }
         let fuel = parts[0].try_as_number().ok_or("fuel is not a number")?;
-        let number2 = parts[1].try_as_number().ok_or("ship param is not a number")?;
-        let number3 = parts[2].try_as_number().ok_or("ship param is not a number")?;
-        let number4 = parts[3].try_as_number().ok_or("ship param is not a number")?;
+        let laser = parts[1].try_as_number().ok_or("laser is not a number")?;
+        let bars = parts[2].try_as_number().ok_or("bars is not a number")?;
+        let hull = parts[3].try_as_number().ok_or("hull is not a number")?;
         Ok(ShipParams {
             fuel,
-            number2,
-            number3,
-            number4,
+            laser,
+            bars,
+            hull,
         })
     }
 }
@@ -356,10 +372,10 @@ impl TryFrom<Data> for Ship {
             Err(format!("{} elements instead of 2", parts.len()))?;
         }
         let ship_state = parts[0].clone().try_into()?;
-        let mystery = parts[1].clone();
+        let commands_list = parts[1].clone();
         Ok(Ship {
             ship_state,
-            mystery,
+            commands_list,
         })
     }
 }
@@ -375,10 +391,10 @@ impl TryFrom<Data> for ShipState {
         if parts.len() != 8 {
             Err(format!("{} elements instead of 8", parts.len()))?;
         }
-        let role = parts[0].try_as_number().ok_or("shipstate.role not a number")?;
+        let role = parts[0].clone().into();
         let ship_id = parts[1].try_as_number().ok_or("shipstate.ship_id not a number")?;
         let position = parts[2].clone().try_into()?;
-        let mystery3 = parts[3].clone();
+        let velocity = parts[3].clone().try_into()?;
         let ship_params = parts[4].clone().try_into()?;
         let number3 = parts[5].try_as_number().ok_or("shipstate.number3 not a number")?;
         let number4 = parts[6].try_as_number().ok_or("shipstate.number4 not a number")?;
@@ -387,7 +403,7 @@ impl TryFrom<Data> for ShipState {
             role,
             ship_id,
             position,
-            mystery3,
+            velocity,
             ship_params,
             number3,
             number4,

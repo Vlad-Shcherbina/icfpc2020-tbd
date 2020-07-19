@@ -14,9 +14,9 @@ impl Ai for ExampleAi {
     fn initial_ship_params(&mut self, _spec: &GameSpec) -> ShipParams {
         ShipParams {
             fuel: 1,
-            number2: 1,
-            number3: 1,
-            number4: 1,
+            laser: 1,
+            bars: 1,
+            hull: 1,
         }
     }
 
