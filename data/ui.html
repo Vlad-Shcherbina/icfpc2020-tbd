@@ -58,6 +58,12 @@ function update_NetworkHistory(network_history_chunk) {
     latest_response_container = document.createElement('div')
     latest_response_container.style = 'background-color: #FFDFEF'
     latest_response_container.innerText = "⮜" + x.pretty_response
+    latest_game_response = document.createElement('pre')
+    //latest_game_response.style = 'font-size: xx-small;'
+    if (x.response_as_game_response) {
+      latest_game_response.innerText = x.response_as_game_response
+      latest_response_container.appendChild(latest_game_response)
+    }
     latest_network_history_chunk_container.appendChild(latest_request_container)
     latest_network_history_chunk_container.appendChild(latest_response_container)
   })
