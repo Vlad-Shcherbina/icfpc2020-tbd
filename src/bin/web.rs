@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use tokio::runtime::Builder;
 use tokio::time::delay_for;
 use std::time::Duration;
-use tbd::{webapi::Endpoint, png_files::matrices_to_png, uforest::{Commands, GameResponse}};
+use tbd::{webapi::Endpoint, png_files::matrices_to_png, uforest::{Commands, GameResponse}, tutorial::fast_forward_training};
 use std::collections::hash_map::DefaultHasher;
 use std::{convert::TryFrom, hash::{Hash, Hasher}};
 
@@ -47,6 +47,18 @@ fn save_pics(result: &InteractResult) {
     let step_dir = format!("outputs/galaxy--{:x}", hasher.finish());
     matrices_to_png(&matrices, project_path(&step_dir));
     std::fs::write(project_path(&step_dir).join("state.txt"), result.final_state.to_string()).unwrap();
+}
+
+fn process_skip_to_tutorial(number: i32) -> ClickResponse {
+    let protocol = Protocol::load_galaxy();
+    let mut states = fast_forward_training(number, &protocol);
+    let state = states.pop().unwrap().to_string();
+    process_click(&ClickParams {
+        // keep in sync with skip_to_tutorial in ui.html
+        x: if number == 1 { 20 } else { 0 },
+        y: 0,
+        state,
+    })
 }
 
 fn process_click(click: &ClickParams) -> ClickResponse {
@@ -130,7 +142,14 @@ async fn server_main() {
             warp::reply::json(&process_click(&click))
         });
 
-    let routes = index.or(click);
+    let skip_to_tutorial = warp::post()
+        .and(warp::path("skip_to_tutorial"))
+        .and(warp::body::json())
+        .map(|number: i32| {
+            warp::reply::json(&process_skip_to_tutorial(number))
+        });
+
+    let routes = index.or(click).or(skip_to_tutorial);
 
     println!("serving at http://127.0.0.1:22009 ...");
     warp::serve(routes)

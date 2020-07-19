@@ -9,6 +9,7 @@ canvas {
 }
 canvas.busy {
 	pointer-events: none;
+  opacity: 0.97;
 }
 textarea {
   font-size: 7px;
@@ -189,6 +190,40 @@ function load() {
 		set_state(new_state)
 		send_click(x, y)
 	})
+
+  async function skip_to_tutorial(number) {
+    window.scrollTo(0, 0);
+
+    document.getElementById('canvas').classList.add('busy');
+    document.getElementById('busy_working').innerText = 'skipping to a tutorial...';
+
+    // keep in sync with the code in web.rs fn process_click
+    let x = number === 1 ? 20 : 0;
+    let y = 0;
+
+    let resp = await fetch('/skip_to_tutorial', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: '' + number,
+    });
+    let click_response = await resp.json();
+		let {pixels, state, pretty_state, network_history} = click_response;
+
+    // copy-pasted from send_click:
+    set_state(state, network_history)
+    document.getElementById('pretty_state').innerText = pretty_state
+    document.getElementById('click_log').value =  "(" + x + ", " + y + ")\n" + document.getElementById('click_log').value
+
+    draw_pixels(pixels)
+    document.getElementById('canvas').classList.remove('busy')
+    document.getElementById('busy_working').innerText = ''
+  }
+
+  for (let i = 1; i <= 12; i++) {
+    document.getElementById('tut' + i).onclick = e => skip_to_tutorial(i);
+  }
 }
 	</script>
 </head>
@@ -197,11 +232,47 @@ function load() {
   <small style='display: block; font-size: xx-small;'>
     <p><strong style='background-color: red; color: #08FF00; font-size:4px;' id='busy_working'></strong>mouse: <strong id="mouse_tracker"></strong></p>
     <p>shortcuts: <button id='jump_battle_select'>battle selection screen</button></p>
-    <p>change state: <textarea id='new_state'></textarea><button id='new_state_go'>go</button><button id='import_state'>import</button></p>
-    <p>simulate click: <input type='number' id='click_x' value=0> <input type='number' id='click_y' value=0> <button id='click_go'>go</button><textarea id='click_log'></textarea></p>
+    <p>change state:
+      <textarea id='new_state'></textarea>
+      <button id='new_state_go'>go</button>
+      <button id='import_state'>import</button>
+    </p>
+    <p>simulate click:
+      <input type='number' id='click_x' value=0>
+      <input type='number' id='click_y' value=0>
+      <button id='click_go'>go</button>
+      <textarea id='click_log'></textarea>
+    </p>
     <p>prettified state is <span id='pretty_state'></span></p>
     <p>state is <span id='state'></span></p>
-    <p>steps since last network activity: <span id='steps_since_last_network_activity'>0</span> | network history (lifo) is <div id='network_history'></div><div style='color: grey;' id='network_history_old'></div></p>
+    <p>steps since last network activity:
+      <span id='steps_since_last_network_activity'>0</span> |
+      network history (lifo) is
+      <div id='network_history'></div>
+      <div style='color: grey;' id='network_history_old'></div>
+    </p>
+
+    <br><br><br>
+    <hr>
+    <h4>Tutorials</h4>
+    <p>
+      Jumping to tutorial N takes approximately 5 * (N - 1) seconds,
+      so be prepared for a long-running request.
+      And don't click these buttons when you don't need a tutorial,
+      to avoid burdening the server.
+      <br><button id = 'tut1'>1. Time flies</button>
+      <br><button id = 'tut2'>2. Exploding</button>
+      <br><button id = 'tut3'>3. Basic navigation</button>
+      <br><button id = 'tut4'>4. Fuel and acceleration</button>
+      <br><button id = 'tut5'>5. Temperature</button>
+      <br><button id = 'tut6'>6. Big guns</button>
+      <br><button id = 'tut7'>7. Small guns</button>
+      <br><button id = 'tut8'>8. Leading a target</button>
+      <br><button id = 'tut9'>9. Shoot & flight angles</button>
+      <br><button id = 'tut10'>10. Cloning</button>
+      <br><button id = 'tut11'>11. Orbital</button>
+      <br><button id = 'tut12'>12. Orbital combat</button>
+    </p>
   </small>
 </body>
 </html>
