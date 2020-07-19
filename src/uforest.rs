@@ -1,6 +1,7 @@
 use crate::webapi::Endpoint;
 
 pub use crate::squiggle::Data;
+use std::convert::{TryInto, TryFrom};
 
 // as our understanding of the game API improves this stuff
 // well become more and more statically typed
@@ -46,7 +47,7 @@ pub struct Client {
 impl Client {
     pub fn join(&self, j: JoinRequest) -> GameResponse {
         let req = Data::make_list3(2, self.player_key, j.mystery);
-        self.endpoint.aliens_send(req).into()
+        self.endpoint.aliens_send(req).try_into().unwrap()
     }
 
     pub fn start(&self, i: InitialShipParams) -> GameResponse {
@@ -57,12 +58,12 @@ impl Client {
             i.number4,
         );
         let req = Data::make_list3(3, self.player_key, i);
-        self.endpoint.aliens_send(req).into()
+        self.endpoint.aliens_send(req).try_into().unwrap()
     }
 
     pub fn commands(&self, c: Commands) -> GameResponse {
         let req = Data::make_list3(4, self.player_key, c.mystery);
-        self.endpoint.aliens_send(req).into()
+        self.endpoint.aliens_send(req).try_into().unwrap()
     }
 
     pub fn from_submission_argv() -> Self {
@@ -78,21 +79,27 @@ impl Client {
     }
 }
 
-impl From<Data> for GameResponse {
-    fn from(data: Data) -> Self {
+impl TryFrom<Data> for GameResponse {
+    type Error = String;
+
+    fn try_from(data: Data) -> Result<Self, Self::Error> {
+        if !data.is_list() {
+            Err("not a list")?
+        }
         let parts = data.into_vec();
-        assert_eq!(parts.len(), 4);
-        let success = parts[0].try_as_number().unwrap();
-        assert_eq!(success, 1);
+        if parts.len() != 4 {
+            Err(format!("{} elements instead of 4", parts.len()))?;
+        }
+        let success = parts[0].try_as_number().ok_or("success is not a number")?;
         let stage = parts[1].clone().into();
         let unknown_list_a = parts[2].clone();
         let state = parts[3].clone();
-        GameResponse {
+        Ok(GameResponse {
             success,
             stage,
             unknown_list_a,
             state,
-        }
+        })
     }
 }
 
