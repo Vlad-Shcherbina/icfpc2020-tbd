@@ -19,25 +19,34 @@ impl Endpoint {
         // convert to string
         let modulated = modulated.iter().map(|&x| x.to_string()).collect::<Vec<_>>().join("");
 
-        let response = match self {
-            Endpoint::NoComms => panic!(),
-            Endpoint::Proxy => {
-                ureq::post(&format!("{}/aliens/send", API_PROXY))
-                    .query("apiKey", API_KEY)
-                    .send_string(&modulated)
-            }
-            Endpoint::SubmissionServer { server_url } => {
-                ureq::post(&format!("{}/aliens/send", server_url))
-                    .send_string(&modulated)
+        let mut retry_delays = vec![0.5, 2.0, 8.0].into_iter();
+        let response = loop {
+            let response = match self {
+                Endpoint::NoComms => panic!(),
+                Endpoint::Proxy => {
+                    ureq::post(&format!("{}/aliens/send", API_PROXY))
+                        .query("apiKey", API_KEY)
+                        .send_string(&modulated)
+                }
+                Endpoint::SubmissionServer { server_url } => {
+                    ureq::post(&format!("{}/aliens/send", server_url))
+                        .send_string(&modulated)
+                }
+            };
+
+            if response.ok() {
+                break response;
+            } else {
+                eprintln!("got status {} {}", response.status(), response.status_text());
+                if let Some(delay) = retry_delays.next() {
+                    eprintln!("retrying in {} s...", delay);
+                    std::thread::sleep(std::time::Duration::from_secs_f64(delay));
+                } else {
+                    eprintln!("is api key correct?");
+                    panic!();
+                }
             }
         };
-
-        if !response.ok() {
-            // TODO: if there is rate limiting, do something about it.
-            eprintln!("got status {} {}", response.status(), response.status_text());
-            eprintln!("is api key correct?");
-            panic!();
-        }
 
         let response = response.into_string().expect("valid response");
 
