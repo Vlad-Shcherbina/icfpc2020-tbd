@@ -36,11 +36,11 @@ function set_state(state, network_history) {
 
 function update_NetworkHistory(network_history_chunk) {
   network_history_chunk.map(function(x) {
-    NetworkHistory.unshift("🢀 " + x.pretty_response)
-    NetworkHistory.unshift("🢂 " + x.pretty_request)
-    NetworkHistory.unshift("- - -")
+    NetworkHistory.unshift("<--- " + x.pretty_response)
+    NetworkHistory.unshift("---> " + x.pretty_request)
+    NetworkHistory.unshift("---")
   })
-  NetworkHistory.unshift("🢔 🢖 🢕 🢗")
+  NetworkHistory.unshift("....waiting for transmission...")
 }
 
 function send_click(x, y) {
