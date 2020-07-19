@@ -44,7 +44,7 @@ pub struct GameSpec {
     pub timer: i128, // number of max possible steps until game over
     pub role: Role,
     pub mystery2: Data,
-    pub mystery3: Data,
+    pub field: Option<Field>,
     pub mystery4: Data,
 }
 
@@ -287,13 +287,13 @@ impl TryFrom<Data> for GameSpec {
         let timer = parts[0].try_as_number().ok_or("timer is not a number")?;
         let role = parts[1].clone().try_into()?;
         let mystery2 = parts[2].clone();
-        let mystery3 = parts[3].clone();
+        let field = parts[3].clone().try_into()?;
         let mystery4 = parts[4].clone();
         Ok(GameSpec {
             timer,
             role,
             mystery2,
-            mystery3,
+            field,
             mystery4,
         })
     }
