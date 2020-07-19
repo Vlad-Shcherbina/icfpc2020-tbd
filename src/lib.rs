@@ -10,6 +10,9 @@ pub mod webapi;
 pub mod ufolang;
 pub mod uforest;
 pub mod tutorial;
+pub mod ai_interface;
+pub mod runners;
+pub mod vec2;
 
 pub fn hello() {
     println!("hello");

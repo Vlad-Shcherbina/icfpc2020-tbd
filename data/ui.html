@@ -10,6 +10,9 @@ canvas {
 canvas.busy {
 	pointer-events: none;
 }
+textarea {
+  font-size: 7px;
+}
 	</style>
 	<script type="text/javascript">
 var State = "(2, ((1, (-1, nil)), (0, (nil, nil))))"
@@ -46,12 +49,14 @@ function update_NetworkHistory(network_history_chunk) {
     document.getElementById('steps_since_last_network_activity').innerText = NoNetworkActivitySince
     return
   }
+
   NoNetworkActivitySince = 0
   document.getElementById('steps_since_last_network_activity').innerText = NoNetworkActivitySince
 
   latest_network_history_chunk_container = document.createElement('div')
   latest_network_history_chunk_container.style = 'border: thick solid #FFF'
   network_history_chunk.map(function(x) {
+
     latest_request_container = document.createElement('div')
     latest_request_container.style = 'background-color: #DFFFFF'
 		latest_request_container.innerText = "⮞ " + x.pretty_request
@@ -65,13 +70,29 @@ function update_NetworkHistory(network_history_chunk) {
     latest_response_container = document.createElement('div')
     latest_response_container.style = 'background-color: #FFDFEF'
     latest_response_container.innerText = "⮜ " + x.pretty_response
+
+    latest_game_response_container = document.createElement('div')
+
+    latest_game_response_hide = document.createElement('button')
+    latest_game_response_hide.style = 'display: block; float: right; width: 10px; height: 10px;'
+    latest_game_response_hide.onclick = function () {
+      if (this.parentElement.children[1].style.display == 'none') {
+        this.parentElement.children[1].style.display = 'block'
+      } else {
+        this.parentElement.children[1].style.display = 'none'
+      }
+    }
+
     latest_game_response = document.createElement('pre')
-    //latest_game_response.style = 'font-size: xx-small;'
+
+
     if (x.response_as_game_response) {
       latest_game_response.innerText = x.response_as_game_response
-      latest_response_container.appendChild(latest_game_response)
+      latest_game_response_container.appendChild(latest_game_response_hide)
+      latest_game_response_container.appendChild(latest_game_response)
+      latest_response_container.appendChild(latest_game_response_container)
 		}
-		
+
     latest_network_history_chunk_container.appendChild(latest_request_container)
     latest_network_history_chunk_container.appendChild(latest_response_container)
   })
@@ -94,6 +115,7 @@ function send_click(x, y) {
 		.then(({pixels, state, pretty_state, network_history}) => {
 			set_state(state, network_history)
 			document.getElementById('pretty_state').innerText = pretty_state
+      document.getElementById('click_log').value = "(" + x + ", " + y + ")\n" + document.getElementById('click_log').value
 
 			draw_pixels(pixels)
 			document.getElementById('canvas').classList.remove('busy')
@@ -176,7 +198,7 @@ function load() {
     <p><strong style='background-color: red; color: #08FF00; font-size:4px;' id='busy_working'></strong>mouse: <strong id="mouse_tracker"></strong></p>
     <p>shortcuts: <button id='jump_battle_select'>battle selection screen</button></p>
     <p>change state: <textarea id='new_state'></textarea><button id='new_state_go'>go</button><button id='import_state'>import</button></p>
-    <p>simulate click: <input type='number' id='click_x' value=0> <input type='number' id='click_y' value=0> <button id='click_go'>go</button></p>
+    <p>simulate click: <input type='number' id='click_x' value=0> <input type='number' id='click_y' value=0> <button id='click_go'>go</button><textarea id='click_log'></textarea></p>
     <p>prettified state is <span id='pretty_state'></span></p>
     <p>state is <span id='state'></span></p>
     <p>steps since last network activity: <span id='steps_since_last_network_activity'>0</span> | network history (lifo) is <div id='network_history'></div><div style='color: grey;' id='network_history_old'></div></p>

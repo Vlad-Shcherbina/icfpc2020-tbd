@@ -1,6 +1,7 @@
 use crate::webapi::Endpoint;
 
 pub use crate::squiggle::Data;
+pub use crate::vec2::Vec2;
 use std::convert::{TryInto, TryFrom};
 
 // as our understanding of the game API improves this stuff
@@ -13,24 +14,24 @@ pub enum Stage {
     Finished,
 }
 
-#[derive(Debug)]
-pub struct Position {
-    x: i128,
-    y: i128,
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Role {
+    Attacker,
+    Defender,
 }
 
 #[derive(Debug)]
 pub struct Ship {
     pub ship_state: ShipState,
-    pub mystery: Data
+    pub commands_list: Data,
 }
 
 #[derive(Debug)]
 pub struct ShipState {
-    pub number1: i128,
-    pub number2: i128,
-    pub position: Position,
-    pub mystery3: Data,
+    pub role: Role,
+    pub ship_id: i128,
+    pub position: Vec2,
+    pub velocity: Vec2,
     pub ship_params: ShipParams,
     pub number3: i128,
     pub number4: i128,
@@ -41,16 +42,22 @@ pub struct ShipState {
 #[derive(Debug)]
 pub struct GameSpec {
     pub timer: i128, // number of max possible steps until game over
-    pub mystery1: Data,
+    pub role: Role,
     pub mystery2: Data,
     pub mystery3: Data,
     pub mystery4: Data,
 }
 
 #[derive(Debug)]
+pub struct Field {
+    pub planet_radius: i128,
+    pub field_radius: i128,
+}
+
+#[derive(Debug)]
 pub struct GameState {
     pub steps: i128, //number of steps from the start of a run
-    pub mystery1: Data,
+    pub field: Option<Field>,
     pub ships_list: Vec<Ship>,
 }
 
@@ -61,7 +68,7 @@ pub struct GameResponse {
     pub success: i128,  // always 1 ??
     pub stage: Stage,
     pub spec: GameSpec,
-    pub state: Option<GameState>,
+    pub state: Option<GameState>,  // can only be None if stage == NotStarted
 }
 
 #[derive(Debug)]
@@ -72,14 +79,27 @@ pub struct JoinRequest {
 #[derive(Debug)]
 pub struct ShipParams {
     pub fuel: i128,
-    pub number2: i128,
-    pub number3: i128,
-    pub number4: i128,
+    pub laser: i128,
+    pub bars: i128,
+    pub hull: i128,
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Command {
-    pub mystery: Data,
+pub enum Command {
+    Accelerate {
+        ship_id: i128,
+        vector: Vec2,
+    },
+    Detonate {
+        ship_id: i128,
+    },
+    Shoot {
+        ship_id: i128,
+        target: Vec2,
+        mystery: i128
+    },
+    // TODO: add more commands, but keep Unknown around just in case
+    Unknown(Data),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -99,9 +119,9 @@ impl Client {
     pub fn start(&self, i: ShipParams) -> GameResponse {
         let i = Data::make_list4(
             i.fuel,
-            i.number2,
-            i.number3,
-            i.number4,
+            i.laser,
+            i.bars,
+            i.hull,
         );
         let req = Data::make_list3(3, self.player_key, i);
         self.endpoint.aliens_send(req).try_into().unwrap()
@@ -127,7 +147,13 @@ impl Client {
 
 impl From<Command> for Data {
     fn from(c: Command) -> Self {
-        c.mystery
+        // c.mystery
+        match c {
+            Command::Accelerate { ship_id, vector } => Data::make_list3(0, ship_id, vector),
+            Command::Detonate { ship_id } => Data::make_list2(1, ship_id),
+            Command::Shoot { ship_id, target , mystery} => Data::make_list4(2, ship_id, target, mystery),
+            Command::Unknown(data) => data,
+        }
     }
 }
 
@@ -136,7 +162,46 @@ impl TryFrom<Data> for Command {
 
     // Never panic, handle all errors!
     fn try_from(data: Data) -> Result<Self, Self::Error> {
-        Ok(Command { mystery: data })
+        let parts = data.clone().try_into_vec().ok_or("command is not a list")?;
+        let kind = parts.first().ok_or("command is empty list")?
+            .try_as_number().ok_or("command kind is not number")?;
+        Ok(match kind {
+            0 => {
+                if parts.len() != 3 {
+                    Err(format!("accelerate cmd {:?}", parts))?
+                }
+                let ship_id = parts[1].try_as_number().ok_or("cmd ship id not number")?;
+                let vector = Vec2::try_from(parts[2].clone())?;
+                Command::Accelerate {
+                    ship_id,
+                    vector,
+                }
+            }
+            1 => {
+                if parts.len() != 2 {
+                    Err(format!("detonate cmd {:?}", parts))?
+                }
+                let ship_id = parts[1].try_as_number().ok_or("cmd ship id not number")?;
+                Command::Detonate {
+                    ship_id,
+                }
+            }
+            2 => {
+                if parts.len() != 4 {
+                    Err(format!("shoot cmd {:?}", parts))?
+                }
+                let ship_id = parts[1].try_as_number().ok_or("cmd ship id not number")?;
+                let target = Vec2::try_from(parts[2].clone())?;
+                let mystery = parts[1].try_as_number().ok_or("cmd mystery not number")?;
+
+                Command::Shoot {
+                    ship_id,
+                    target,
+                    mystery
+                }
+            }
+            _ => Command::Unknown(data),
+        })
     }
 }
 
@@ -195,6 +260,19 @@ impl From<Data> for Stage {
     }
 }
 
+impl TryFrom<Data> for Role {
+    type Error = String;
+
+    fn try_from(data: Data) -> Result<Self, Self::Error> {
+        let role = data.try_as_number().ok_or("role not well-defined")?;
+        match role {
+            0 => Ok(Role::Attacker),
+            1 => Ok(Role::Defender),
+            _ => Err("role not attacker or defender")?,
+        }
+    }
+}
+
 impl TryFrom<Data> for GameSpec {
     type Error = String;
 
@@ -207,13 +285,13 @@ impl TryFrom<Data> for GameSpec {
             Err(format!("{} elements instead of 5", parts.len()))?;
         }
         let timer = parts[0].try_as_number().ok_or("timer is not a number")?;
-        let mystery1 = parts[1].clone();
+        let role = parts[1].clone().try_into()?;
         let mystery2 = parts[2].clone();
         let mystery3 = parts[3].clone();
         let mystery4 = parts[4].clone();
         Ok(GameSpec {
             timer,
-            mystery1,
+            role,
             mystery2,
             mystery3,
             mystery4,
@@ -233,7 +311,7 @@ impl TryFrom<Data> for GameState {
             Err(format!("{} elements instead of 3", parts.len()))?;
         }
         let steps = parts[0].try_as_number().ok_or("# of steps is not a number")?;
-        let mystery1 = parts[1].clone();
+        let field = parts[1].clone().try_into()?;
         let ships_list_data = parts[2].clone().try_into_vec().ok_or("not a list")?;
 
         let mut ships_list = Vec::new();
@@ -244,24 +322,11 @@ impl TryFrom<Data> for GameState {
 
         Ok(GameState {
             steps,
-            mystery1,
+            field: field,
             ships_list
         })
     }
 }
-
-impl TryFrom<Data> for Position {
-    type Error = String;
-
-    fn try_from(data: Data) -> Result<Self, Self::Error> {
-        let parts = data.try_to_coords().ok_or("not a pair of numbers")?;
-        Ok(Position {
-            x : parts.0,
-            y : parts.1,
-        })
-    }
-}
-
 
 impl TryFrom<Data> for ShipParams {
     type Error = String;
@@ -275,18 +340,37 @@ impl TryFrom<Data> for ShipParams {
             Err(format!("{} elements instead of 4", parts.len()))?;
         }
         let fuel = parts[0].try_as_number().ok_or("fuel is not a number")?;
-        let number2 = parts[1].try_as_number().ok_or("ship param is not a number")?;
-        let number3 = parts[2].try_as_number().ok_or("ship param is not a number")?;
-        let number4 = parts[3].try_as_number().ok_or("ship param is not a number")?;
+        let laser = parts[1].try_as_number().ok_or("laser is not a number")?;
+        let bars = parts[2].try_as_number().ok_or("bars is not a number")?;
+        let hull = parts[3].try_as_number().ok_or("hull is not a number")?;
         Ok(ShipParams {
             fuel,
-            number2,
-            number3,
-            number4,
+            laser,
+            bars,
+            hull,
         })
     }
 }
 
+impl TryFrom<Data> for Option<Field> {
+    type Error = String;
+
+    fn try_from(data: Data) -> Result<Self, Self::Error> {
+        if !data.is_list() {
+            Err("not a list")?
+        }
+        let parts = data.try_into_vec().ok_or("not a list")?;
+        if parts.len() == 0 {
+            return Ok(None)
+        }
+        if parts.len() != 2 {
+            Err(format!("{} elements instead of 2", parts.len()))?;
+        }
+        let planet_radius = parts[0].try_as_number().ok_or("Field.planet_radius not a number")?;
+        let field_radius = parts[1].try_as_number().ok_or("Field.field_radius not a number")?;
+        return Ok(Some(Field { planet_radius, field_radius }))
+    }
+}
 
 impl TryFrom<Data> for Ship {
     type Error = String;
@@ -300,10 +384,10 @@ impl TryFrom<Data> for Ship {
             Err(format!("{} elements instead of 2", parts.len()))?;
         }
         let ship_state = parts[0].clone().try_into()?;
-        let mystery = parts[1].clone();
+        let commands_list = parts[1].clone();
         Ok(Ship {
             ship_state,
-            mystery,
+            commands_list,
         })
     }
 }
@@ -319,19 +403,19 @@ impl TryFrom<Data> for ShipState {
         if parts.len() != 8 {
             Err(format!("{} elements instead of 8", parts.len()))?;
         }
-        let number1 = parts[0].try_as_number().ok_or("shipstate.number1 not a number")?;
-        let number2 = parts[1].try_as_number().ok_or("shipstate.number2 not a number")?;
+        let role = parts[0].clone().try_into()?;
+        let ship_id = parts[1].try_as_number().ok_or("shipstate.ship_id not a number")?;
         let position = parts[2].clone().try_into()?;
-        let mystery3 = parts[3].clone();
+        let velocity = parts[3].clone().try_into()?;
         let ship_params = parts[4].clone().try_into()?;
         let number3 = parts[5].try_as_number().ok_or("shipstate.number3 not a number")?;
         let number4 = parts[6].try_as_number().ok_or("shipstate.number4 not a number")?;
         let number5 = parts[7].try_as_number().ok_or("shipstate.number5 not a number")?;
         Ok(ShipState {
-            number1,
-            number2,
+            role,
+            ship_id,
             position,
-            mystery3,
+            velocity,
             ship_params,
             number3,
             number4,
