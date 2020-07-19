@@ -126,6 +126,15 @@ impl Data {
         Some(res)
     }
 
+    pub fn try_to_coords(&self) -> Option<(i128, i128)> {
+    match self {
+        Data::Cons(a, b) => Some((a.try_as_number()?, b.try_as_number()?)),
+        _ => None
+    }
+}
+
+
+
     pub fn try_as_number(&self) -> Option<i128> {
         match self {
             Self::Number(x) => Some(*x),

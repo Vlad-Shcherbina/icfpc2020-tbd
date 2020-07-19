@@ -61,7 +61,7 @@ pub struct GameResponse {
     pub success: i128,  // always 1 ??
     pub stage: Stage,
     pub spec: GameSpec,
-    pub state: GameState,
+    pub state: Option<GameState>,
 }
 
 #[derive(Debug)]
@@ -173,8 +173,8 @@ impl TryFrom<Data> for GameResponse {
         }
         let success = parts[0].try_as_number().ok_or("success is not a number")?;
         let stage = parts[1].clone().into();
-        let spec = parts[2].clone().try_into().unwrap();
-        let state = parts[3].clone().try_into().unwrap();
+        let spec = parts[2].clone().try_into()?;
+        let state = if parts[3] == Data::Nil { None } else { Some(parts[3].clone().try_into()?) };
         Ok(GameResponse {
             success,
             stage,
@@ -202,7 +202,7 @@ impl TryFrom<Data> for GameSpec {
         if !data.is_list() {
             Err("not a list")?
         }
-        let parts = data.try_into_vec().unwrap();
+        let parts = data.try_into_vec().ok_or("not a list")?;
         if parts.len() != 5 {
             Err(format!("{} elements instead of 5", parts.len()))?;
         }
@@ -226,20 +226,20 @@ impl TryFrom<Data> for GameState {
 
     fn try_from(data: Data) -> Result<Self, Self::Error> {
         if !data.is_list() {
-            Err("not a list")?
+            Err("not a game state")?
         }
-        let parts = data.try_into_vec().unwrap();
+        let parts = data.try_into_vec().ok_or("not a game state")?;
         if parts.len() != 3 {
             Err(format!("{} elements instead of 3", parts.len()))?;
         }
         let steps = parts[0].try_as_number().ok_or("# of steps is not a number")?;
         let mystery1 = parts[1].clone();
-        let ships_list_data = parts[2].clone().try_into_vec().unwrap();
+        let ships_list_data = parts[2].clone().try_into_vec().ok_or("not a list")?;
 
         let mut ships_list = Vec::new();
 
         for ls in ships_list_data {
-            ships_list.push(ls.try_into().unwrap());
+            ships_list.push(ls.try_into()?);
         }
 
         Ok(GameState {
@@ -254,18 +254,10 @@ impl TryFrom<Data> for Position {
     type Error = String;
 
     fn try_from(data: Data) -> Result<Self, Self::Error> {
-        if !data.is_list() {
-            Err("not a list")?
-        }
-        let parts = data.try_into_vec().unwrap();
-        if parts.len() != 2 {
-            Err(format!("{} elements instead of 2", parts.len()))?;
-        }
-        let x = parts[0].try_as_number().unwrap();
-        let y = parts[1].try_as_number().unwrap();
+        let parts = data.try_to_coords().ok_or("not a pair of numbers")?;
         Ok(Position {
-            x,
-            y,
+            x : parts.0,
+            y : parts.1,
         })
     }
 }
@@ -278,14 +270,14 @@ impl TryFrom<Data> for ShipParams {
         if !data.is_list() {
             Err("not a list")?
         }
-        let parts = data.try_into_vec().unwrap();
+        let parts = data.try_into_vec().ok_or("not a list")?;
         if parts.len() != 4 {
             Err(format!("{} elements instead of 4", parts.len()))?;
         }
-        let fuel = parts[0].try_as_number().unwrap();
-        let number2 = parts[1].try_as_number().unwrap();
-        let number3 = parts[2].try_as_number().unwrap();
-        let number4 = parts[3].try_as_number().unwrap();
+        let fuel = parts[0].try_as_number().ok_or("fuel is not a number")?;
+        let number2 = parts[1].try_as_number().ok_or("ship param is not a number")?;
+        let number3 = parts[2].try_as_number().ok_or("ship param is not a number")?;
+        let number4 = parts[3].try_as_number().ok_or("ship param is not a number")?;
         Ok(ShipParams {
             fuel,
             number2,
@@ -303,11 +295,11 @@ impl TryFrom<Data> for Ship {
         if !data.is_list() {
             Err("not a list")?
         }
-        let parts = data.try_into_vec().unwrap();
+        let parts = data.try_into_vec().ok_or("not a list")?;
         if parts.len() != 2 {
             Err(format!("{} elements instead of 2", parts.len()))?;
         }
-        let ship_state = parts[0].clone().try_into().unwrap();
+        let ship_state = parts[0].clone().try_into()?;
         let mystery = parts[1].clone();
         Ok(Ship {
             ship_state,
@@ -323,18 +315,18 @@ impl TryFrom<Data> for ShipState {
         if !data.is_list() {
             Err("not a list")?
         }
-        let parts = data.try_into_vec().unwrap();
+        let parts = data.try_into_vec().ok_or("not a list")?;
         if parts.len() != 8 {
             Err(format!("{} elements instead of 8", parts.len()))?;
         }
-        let number1 = parts[0].try_as_number().unwrap();
-        let number2 = parts[1].try_as_number().unwrap();
-        let position = parts[2].clone().try_into().unwrap();
+        let number1 = parts[0].try_as_number().ok_or("shipstate.number1 not a number")?;
+        let number2 = parts[1].try_as_number().ok_or("shipstate.number2 not a number")?;
+        let position = parts[2].clone().try_into()?;
         let mystery3 = parts[3].clone();
-        let ship_params = parts[4].clone().try_into().unwrap();
-        let number3 = parts[5].try_as_number().unwrap();
-        let number4 = parts[6].try_as_number().unwrap();
-        let number5 = parts[7].try_as_number().unwrap();
+        let ship_params = parts[4].clone().try_into()?;
+        let number3 = parts[5].try_as_number().ok_or("shipstate.number3 not a number")?;
+        let number4 = parts[6].try_as_number().ok_or("shipstate.number4 not a number")?;
+        let number5 = parts[7].try_as_number().ok_or("shipstate.number5 not a number")?;
         Ok(ShipState {
             number1,
             number2,

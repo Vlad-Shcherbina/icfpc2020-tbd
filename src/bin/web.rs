@@ -18,13 +18,6 @@ struct ClickParams {
     state: String
 }
 
-fn data_try_to_coords(value: &Data) -> Option<(i128, i128)> {
-    match value {
-        Data::Cons(a, b) => Some((a.try_as_number()?, b.try_as_number()?)),
-        _ => None
-    }
-}
-
 #[derive(Serialize, Deserialize)]
 struct RequestResponse {
     pretty_request: String,
@@ -72,12 +65,12 @@ fn process_click(click: &ClickParams) -> ClickResponse {
     // save_pics(&result);
 
     // let pixels = result.data_out_to_multipledraw.into_vec().iter().map(
-    //     |x| x.into_vec().iter().map(|y| data_try_to_coords(y).unwrap()).collect()
+    //     |x| x.into_vec().iter().map(|y| y.try_to_coords().unwrap()).collect()
     // ).collect();
 
     let pixels = result.data_out_to_multipledraw.try_into_vec().unwrap();
     let pixels: Vec<Vec<_>> = pixels.into_iter().map(|x| x.try_into_vec().unwrap()).collect();
-    let pixels = pixels.iter().map(|x| x.iter().map(|y| data_try_to_coords(y).unwrap()).collect()).collect();
+    let pixels = pixels.iter().map(|x| x.iter().map(|y| y.try_to_coords().unwrap()).collect()).collect();
 
     ClickResponse {
         state: result.final_state.to_string(),
