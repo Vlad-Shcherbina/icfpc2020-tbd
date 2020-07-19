@@ -2,7 +2,7 @@
 // Feel free to copy this and create your own bot.
 
 use tbd::ai_interface::Ai;
-use tbd::uforest::*;
+use tbd::{bot_util::*, uforest::*};
 
 pub struct ExampleAi {}
 
@@ -43,29 +43,6 @@ impl Ai for ExampleAi {
 
         Commands(vec![thrust])
     }
-}
-
-fn get_gravity(pos: Vec2) -> Vec2 {
-    // TODO: what happens at abs(x) == abs(y)??
-    Vec2 {
-        x: if pos.x.abs() >= pos.y.abs() {
-            -pos.x.signum()
-        } else {
-            0
-        },
-        y: if pos.y.abs() >= pos.x.abs() {
-            -pos.y.signum()
-        } else {
-            0
-        },
-    }
-}
-
-fn ships_by_role(state: &GameState, role: Role) -> impl Iterator<Item = &Ship> {
-    state
-        .ships_list
-        .iter()
-        .filter(move |&ship| ship.ship_state.role == role)
 }
 
 fn main() {

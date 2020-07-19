@@ -5,9 +5,9 @@ use tbd::uforest::*;
 use tbd::ai_interface::Ai;
 use tbd::uforest::Command::Accelerate;
 
-pub struct ExampleAi {}
+pub struct MyAi {}
 
-impl Ai for ExampleAi {
+impl Ai for MyAi {
     fn choose_join_request(&mut self) -> JoinRequest {
         JoinRequest { mystery: Data::Nil }
     }
@@ -16,7 +16,7 @@ impl Ai for ExampleAi {
         ShipParams {
             fuel: 1,
             laser: 1,
-            bars: 1,
+            cooling: 1,
             hull: 1,
         }
     }

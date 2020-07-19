@@ -13,6 +13,7 @@ pub mod tutorial;
 pub mod ai_interface;
 pub mod runners;
 pub mod vec2;
+pub mod bot_util;
 
 pub fn hello() {
     println!("hello");
