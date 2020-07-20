@@ -66,18 +66,13 @@ fn atk_score(trajectory: &[Vec2], field: &Field) -> i128 {
     let mut min = 1000000;
     let mut max = -1000000;
     for (i, &p) in trajectory.iter().enumerate() {
-        if i < 50 {
-            let err = field.planet_radius + 3 - p.norm();
-            if err > 0 {
-                return -10000;
-            }
-            let err = p.norm() - field.field_radius + 3;
-            if err > 0 {
-                return -10000;
-            }
+        let err = field.planet_radius + 3 - p.norm();
+        if err > 0 {
+            return -10000;
         }
-        if p.norm() >= field.field_radius - 3 {
-            return -5000;
+        let err = p.norm() - field.field_radius + 3;
+        if err > 0 {
+            return -10000;
         }
 
         min = min.min(p.norm());
