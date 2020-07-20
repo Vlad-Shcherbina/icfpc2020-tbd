@@ -5,5 +5,3 @@ edition = "2018"
 
 [dependencies]
 tbd = { path = "../.."}
-quickcheck = "0.9"
-quickcheck_macros = "0.9"

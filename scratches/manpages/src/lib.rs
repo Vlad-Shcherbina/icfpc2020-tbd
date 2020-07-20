@@ -1,7 +1,7 @@
-pub mod alien_lisp;
+use std::convert::TryInto;
+pub mod simple_ai;
 
-#[cfg(test)]
-extern crate quickcheck;
-#[cfg(test)]
-#[macro_use(quickcheck)]
-extern crate quickcheck_macros;
+
+fn squiggle_from_string(s: &str) -> Vec<u8> {
+    s.chars().map(|c| c.to_digit(10).unwrap().try_into().unwrap()).collect()
+}
