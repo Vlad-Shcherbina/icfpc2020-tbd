@@ -42,27 +42,6 @@ fn predict(mut pos: Vec2, mut vel: Vec2, mut control: i128) -> Vec<Vec2> {
 
 fn def_score(trajectory: &[Vec2], field: &Field) -> i128 {
     let mut min = 1000000;
-    for (i, &p) in trajectory.iter().enumerate() {
-        if i < 50 {
-            let err = field.planet_radius + 3 - p.norm();
-            if err > 0 {
-                return -1000 * err;
-            }
-            let err = p.norm() - field.field_radius + 3;
-            if err > 0 {
-                return -1000 * err;
-            }
-        }
-        if p.norm() >= field.field_radius - 3 {
-            return -500;
-        }
-        min = min.min(p.norm());
-    }
-    return min
-}
-
-fn atk_score(trajectory: &[Vec2], field: &Field) -> i128 {
-    let mut min = 1000000;
     let mut max = -1000000;
     for (i, &p) in trajectory.iter().enumerate() {
         if i < 50 {
@@ -78,28 +57,57 @@ fn atk_score(trajectory: &[Vec2], field: &Field) -> i128 {
         if p.norm() >= field.field_radius - 3 {
             return -500;
         }
+        min = min.min(p.norm());
+        max = max.max(p.norm());
+    }
+    // defender wants to be on the largest possible orbit
+    return min
+}
+
+fn atk_score(trajectory: &[Vec2], field: &Field) -> i128 {
+    let mut min = 1000000;
+    let mut max = -1000000;
+    for (i, &p) in trajectory.iter().enumerate() {
+        if i < 50 {
+            let err = field.planet_radius + 3 - p.norm();
+            if err > 0 {
+                return -10000;
+            }
+            let err = p.norm() - field.field_radius + 3;
+            if err > 0 {
+                return -10000;
+            }
+        }
+        if p.norm() >= field.field_radius - 3 {
+            return -5000;
+        }
 
         min = min.min(p.norm());
         max = max.max(p.norm());
     }
+    // attacker wants to be on the most eccentric orbit to have
+    // more opportunities for approaching defender
     return (max - min) / 2
 }
 
 impl Ai for Bee {
     fn initial_ship_params(&mut self, spec: &GameSpec) -> ShipParams {
-        let max_cost = spec.bounds.max_cost;
-        let laser = 0;
-        let hull = 4;
-        let cooling = match spec.role {
-            Role::Defender => 30,
-            Role::Attacker => 8,
+        let mut params = match spec.role {
+            Role::Defender => ShipParams {
+                fuel: 0,
+                laser: 0,
+                cooling: 30,
+                hull: 1,
+            },
+            Role::Attacker => ShipParams {
+                fuel: 0,
+                laser: 0,
+                cooling: 8,
+                hull: 1,
+            }
         };
-        ShipParams {
-            fuel: max_cost - hull * HULL_COST - cooling * COOLING_COST - laser * LASER_COST,
-            laser,
-            cooling,
-            hull,
-        }
+        compute_fuel_from_params(&mut params, spec).unwrap();
+        params
     }
 
     fn choose_commands(&mut self, spec: &GameSpec, state: &GameState) -> Commands {
@@ -114,9 +122,11 @@ impl Ai for Bee {
                 Role::Attacker => atk_score,
                 Role::Defender => def_score,
             };
+
+            let fuel_value = (100 / (ship.ship_state.ship_params.fuel + 1)) + 1;
             let control = (-30..=30).max_by_key(|&control| {
                 score(&predict(pos, vel, control), field)
-                - control.abs()  // penalty for wasting fuel
+                - fuel_value * control.abs()  // penalty for wasting fuel
             }).unwrap();
 
             let a = ccw(pos);
