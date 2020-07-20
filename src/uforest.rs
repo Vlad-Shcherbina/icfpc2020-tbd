@@ -133,6 +133,7 @@ impl Client {
     }
 
     pub fn from_submission_argv() -> Self {
+        assert!(crate::is_running_in_submission());
         let args: Vec<String> = std::env::args().collect();
         assert_eq!(args.len(), 3);
         let server_url = args[1].clone();

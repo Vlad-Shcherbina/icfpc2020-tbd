@@ -4,7 +4,7 @@
 use tbd::uforest::*;
 use tbd::ai_interface::Ai;
 use tbd::uforest::Command::Accelerate;
-use tbd::local_bot_runner::run_bots;
+use tbd::runners::{run_in_submission, run_bots_local};
 
 pub struct MyAi {}
 
@@ -45,5 +45,9 @@ impl Ai for MyAi {
 }
 
 fn main() {
-    run_bots(MyAi {}, MyAi {});
+    if tbd::is_running_in_submission() {
+        run_in_submission(MyAi {});
+    } else {
+        run_bots_local(MyAi {}, MyAi {});
+    }
 }

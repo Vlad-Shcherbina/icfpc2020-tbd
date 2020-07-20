@@ -16,10 +16,13 @@ pub mod ai_interface;
 pub mod runners;
 pub mod vec2;
 pub mod bot_util;
-pub mod local_bot_runner;
 
 pub fn hello() {
     println!("hello");
+}
+
+pub fn is_running_in_submission() -> bool {
+    std::env::args().count() == 3
 }
 
 fn project_root() -> PathBuf {
