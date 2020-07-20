@@ -58,6 +58,26 @@ impl TimePrediction {
     }
 }
 
+pub fn on_same_orbit(ship1: &Ship, ship2: &Ship) -> bool {
+    ship1.ship_state.position == ship2.ship_state.position &&
+    ship1.ship_state.velocity == ship2.ship_state.velocity
+}
+
+// is a ship on the exact same orbit as any other ships from the list?
+// O(n^2) is not great
+pub fn detect_exact_overlap(gamestate: &GameState) -> bool {
+    let ships = &gamestate.ships_list;
+    for fs in ships{
+        for ship in ships{
+            if ship.ship_state.ship_id > fs.ship_state.ship_id &&
+                on_same_orbit(ship, fs) {
+                    return true
+            }
+        }
+    }
+    false
+}
+
 // predicts time to collide to the star or to leave the frame without thrust
 pub fn predict_collisions(mut pos: Vec2, mut vel: Vec2, field: &Field) -> TimePrediction {
     let turn_limit = 256;
