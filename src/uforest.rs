@@ -83,7 +83,7 @@ pub struct JoinRequest {
     pub mystery: Data,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ShipParams {
     pub fuel: i128,
     pub laser: i128,
@@ -104,6 +104,10 @@ pub enum Command {
         ship_id: i128,
         target: Vec2,
         power: i128
+    },
+    Fork {
+        ship_id: i128, // ship to fork
+        new_ship_params: ShipParams,
     },
     // TODO: add more commands, but keep Unknown around just in case
     Unknown(Data),
@@ -130,6 +134,9 @@ pub enum AppliedCommand {
         power: i128,
         number2: i128,
         number3: i128
+    },
+    Fork {
+        new_ship_params: ShipParams,
     },
     // TODO: add more commands, but keep Unknown around just in case
     Unknown(Data),
@@ -191,6 +198,7 @@ impl From<Command> for Data {
             Command::Accelerate { ship_id, vector } => Data::make_list3(0, ship_id, vector),
             Command::Detonate { ship_id } => Data::make_list2(1, ship_id),
             Command::Shoot { ship_id, target , power} => Data::make_list4(2, ship_id, target, power),
+            Command::Fork { ship_id, new_ship_params} => Data::make_list3(3, ship_id, new_ship_params),
             Command::Unknown(data) => data,
         }
     }
@@ -239,6 +247,18 @@ impl TryFrom<Data> for Command {
                     power
                 }
             }
+            3 => {
+                if parts.len() != 3 {
+                    Err(format!("fork cmd {:?}", parts))?
+                }
+                let ship_id = parts[1].try_as_number().ok_or("cmd ship id not number")?;
+                let new_ship_params = parts[2].clone().try_into()?;
+
+                Command::Fork {
+                    ship_id,
+                    new_ship_params
+                }
+            }
             _ => Command::Unknown(data),
         })
     }
@@ -251,6 +271,7 @@ impl From<AppliedCommand> for Data {
             AppliedCommand::Accelerate { vector } => Data::make_list2(0, vector),
             AppliedCommand::Detonate { number1, blast_radius } => Data::make_list3(1, number1, blast_radius),
             AppliedCommand::Shoot { target, power, number2, number3 } => Data::make_list5(2, target, power, number2, number3 ),
+            AppliedCommand::Fork { new_ship_params } => Data::make_list2(3, new_ship_params),
             AppliedCommand::Unknown(data) => data,
         }
     }
@@ -299,6 +320,16 @@ impl TryFrom<Data> for AppliedCommand {
                     power,
                     number2,
                     number3,
+                }
+            }
+            3 => {
+                if parts.len() != 2 {
+                    Err(format!("fork cmd {:?}", parts))?
+                }
+                let new_ship_params = parts[1].clone().try_into()?;
+
+                AppliedCommand::Fork {
+                    new_ship_params
                 }
             }
             _ => AppliedCommand::Unknown(data),
@@ -445,6 +476,12 @@ impl TryFrom<Data> for GameState {
             field: field,
             ships_list
         })
+    }
+}
+
+impl From<ShipParams> for Data {
+    fn from(p: ShipParams) -> Self {
+        Data::make_list4(p.fuel, p.laser, p.cooling, p.hull)
     }
 }
 
