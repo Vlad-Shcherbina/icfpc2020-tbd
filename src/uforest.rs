@@ -20,7 +20,7 @@ pub enum Role {
     Defender,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Ship {
     pub ship_state: ShipState,
     pub commands_list: AppliedCommands,
@@ -39,7 +39,7 @@ pub struct ShipState {
 
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct GameSpec {
     pub timer: i128, // number of max possible steps until game over
     pub role: Role,
@@ -48,20 +48,20 @@ pub struct GameSpec {
     pub defender_params: Option<ShipParams>, // a field which only the attacker gets
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Field {
     pub planet_radius: i128,
     pub field_radius: i128,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Bounds {
     pub max_cost: i128,
     pub max_thrust: i128,
     pub heat_capacity: i128,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct GameState {
     pub steps: i128, //number of steps from the start of a run
     pub field: Option<Field>,
@@ -70,7 +70,7 @@ pub struct GameState {
 
 // GameResponse should contain _all_ information from the server response.
 // If some parts are not yet understood, leave them in mystery fields of type Data.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct GameResponse {
     pub success: i128,  // always 1 ??
     pub stage: Stage,
@@ -78,7 +78,7 @@ pub struct GameResponse {
     pub state: Option<GameState>,  // can only be None if stage == NotStarted
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct JoinRequest {
     pub upgrades: Data,
 }
