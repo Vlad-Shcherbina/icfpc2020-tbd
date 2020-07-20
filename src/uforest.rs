@@ -43,7 +43,7 @@ pub struct ShipState {
 pub struct GameSpec {
     pub timer: i128, // number of max possible steps until game over
     pub role: Role,
-    pub mystery2: Data,
+    pub bounds: Bounds,
     pub field: Option<Field>,
     pub defender_params: Option<ShipParams>, // a field which only the attacker gets
 }
@@ -52,6 +52,13 @@ pub struct GameSpec {
 pub struct Field {
     pub planet_radius: i128,
     pub field_radius: i128,
+}
+
+#[derive(Debug)]
+pub struct Bounds {
+    pub max_cost: i128,
+    pub number1: i128,
+    pub number2: i128,
 }
 
 #[derive(Debug)]
@@ -399,13 +406,13 @@ impl TryFrom<Data> for GameSpec {
         }
         let timer = parts[0].try_as_number().ok_or("timer is not a number")?;
         let role = parts[1].clone().try_into()?;
-        let mystery2 = parts[2].clone();
+        let bounds = parts[2].clone().try_into()?;
         let field = parts[3].clone().try_into()?;
         let defender_params = if parts[4] == Data::Nil { None } else { Some(parts[4].clone().try_into()?) };
         Ok(GameSpec {
             timer,
             role,
-            mystery2,
+            bounds,
             field,
             defender_params,
         })
@@ -461,6 +468,28 @@ impl TryFrom<Data> for ShipParams {
             laser,
             cooling,
             hull,
+        })
+    }
+}
+
+impl TryFrom<Data> for Bounds {
+    type Error = String;
+
+    fn try_from(data: Data) -> Result<Self, Self::Error> {
+        if !data.is_list() {
+            Err("not a list")?
+        }
+        let parts = data.try_into_vec().ok_or("not a list")?;
+        if parts.len() != 3 {
+            Err(format!("{} elements instead of 3", parts.len()))?;
+        }
+        let max_cost = parts[0].try_as_number().ok_or("bounds.max_cost not a number")?;
+        let number1 = parts[1].try_as_number().ok_or("bounds.number1 not a number")?;
+        let number2 = parts[1].try_as_number().ok_or("bounds.number1 not a number")?;
+        Ok(Bounds {
+            max_cost,
+            number1,
+            number2,
         })
     }
 }
