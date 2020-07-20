@@ -9,6 +9,7 @@ use rand::Rng;
 #[derive(Default)]
 pub struct OrbitBot {
     expected_position: Vec2,
+    their_expected_position: Vec2,
 }
 
 impl Ai for OrbitBot {
@@ -33,22 +34,34 @@ impl Ai for OrbitBot {
             Role::Attacker
         };
 
-        let our_ship = ships_by_role(state, our_role).next().unwrap();
-        let _their_ship = ships_by_role(state, their_role).next().unwrap();
+        let our_ship_real = old_ships_by_role(state, our_role).next().unwrap();
+        let our_ship = &our_ship_real.ship_state;
+        let their_ship = ships_by_role(state, their_role).next().unwrap();
 
         let position = our_ship.position;
         let velocity = our_ship.velocity;
         let _field = spec.field.as_ref().unwrap();
         let gravity = get_gravity(our_ship.position);
+        let mut expected_heat = our_ship.heat;
 
         if position != self.expected_position && self.expected_position != Vec2::default() {
-            eprintln!("!!!! Wrong physics, expected {:?} got {:?}", self.expected_position, position);
+            eprintln!("!!! Wrong physics, expected {:?} got {:?}", self.expected_position, position);
+        }
+
+        for cmd in &our_ship_real.commands_list.0 {
+            if let AppliedCommand::Shoot {target, power, number2, number3} = cmd {
+                if *target != self.their_expected_position {
+                    eprintln!("!!! missed! Shot {:?}, got {:?}", self.their_expected_position, target);
+                    continue
+                }
+                eprintln!("!!! hit {:?} for {:?}", *target - position, number2);
+            }
         }
 
         self.expected_position = position + velocity + gravity;
 
         if our_ship.ship_params.fuel != 0 {
-            let mut thrust = compute_thrust(spec, our_ship);
+            let mut thrust = compute_thrust(spec, &our_ship);
 
             if false && thrust == Vec2::default() && state.steps % 5 == 0  {
                 thrust = Vec2 {
@@ -58,6 +71,7 @@ impl Ai for OrbitBot {
             }
 
             if thrust != Vec2::default() {
+                expected_heat += 8;
                 self.expected_position -= thrust;
                 let thrust = Command::Accelerate {
                     ship_id: our_ship.ship_id,
@@ -65,6 +79,19 @@ impl Ai for OrbitBot {
                 };
                 commands.push(thrust)
             }
+        }
+
+        self.their_expected_position = Vec2::default();
+        if our_ship.heat_capacity - expected_heat >= 10 {
+            self.their_expected_position =
+                their_ship.position +
+                their_ship.velocity +
+                get_gravity(their_ship.position);
+            commands.push(Command::Shoot {
+                ship_id: our_ship.ship_id,
+                target: self.their_expected_position,
+                power: 10
+            })
         }
         Commands(commands)
     }

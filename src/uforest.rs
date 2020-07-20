@@ -145,6 +145,15 @@ pub enum AppliedCommand {
 #[derive(Debug, Clone, PartialEq)]
 pub struct AppliedCommands(pub Vec<AppliedCommand>);
 
+impl IntoIterator for AppliedCommands {
+    type Item = AppliedCommand;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
 pub struct Client {
     pub endpoint: Endpoint,
     pub player_key: i128,
