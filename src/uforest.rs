@@ -35,7 +35,7 @@ pub struct ShipState {
     pub ship_params: ShipParams,
     pub heat: i128,
     pub heat_capacity: i128,
-    pub number5: i128,
+    pub max_thrust: i128,
 
 }
 
@@ -57,8 +57,8 @@ pub struct Field {
 #[derive(Debug)]
 pub struct Bounds {
     pub max_cost: i128,
-    pub number1: i128,
-    pub number2: i128,
+    pub max_thrust: i128,
+    pub heat_capacity: i128,
 }
 
 #[derive(Debug)]
@@ -80,7 +80,7 @@ pub struct GameResponse {
 
 #[derive(Debug)]
 pub struct JoinRequest {
-    pub mystery: Data,
+    pub upgrades: Data,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -152,7 +152,7 @@ pub struct Client {
 
 impl Client {
     pub fn join(&self, j: JoinRequest) -> GameResponse {
-        let req = Data::make_list3(2, self.player_key, j.mystery);
+        let req = Data::make_list3(2, self.player_key, j.upgrades);
         self.endpoint.aliens_send(req).try_into().unwrap()
     }
 
@@ -193,7 +193,6 @@ impl Client {
 
 impl From<Command> for Data {
     fn from(c: Command) -> Self {
-        // c.mystery
         match c {
             Command::Accelerate { ship_id, vector } => Data::make_list3(0, ship_id, vector),
             Command::Detonate { ship_id } => Data::make_list2(1, ship_id),
@@ -266,7 +265,6 @@ impl TryFrom<Data> for Command {
 
 impl From<AppliedCommand> for Data {
     fn from(c: AppliedCommand) -> Self {
-        // c.mystery
         match c {
             AppliedCommand::Accelerate { vector } => Data::make_list2(0, vector),
             AppliedCommand::Detonate { number1, blast_radius } => Data::make_list3(1, number1, blast_radius),
@@ -521,12 +519,12 @@ impl TryFrom<Data> for Bounds {
             Err(format!("{} elements instead of 3", parts.len()))?;
         }
         let max_cost = parts[0].try_as_number().ok_or("bounds.max_cost not a number")?;
-        let number1 = parts[1].try_as_number().ok_or("bounds.number1 not a number")?;
-        let number2 = parts[1].try_as_number().ok_or("bounds.number1 not a number")?;
+        let max_thrust = parts[1].try_as_number().ok_or("bounds.max_thrust not a number")?;
+        let heat_capacity = parts[2].try_as_number().ok_or("bounds.heat_capacity not a number")?;
         Ok(Bounds {
             max_cost,
-            number1,
-            number2,
+            max_thrust,
+            heat_capacity,
         })
     }
 }
@@ -589,7 +587,7 @@ impl TryFrom<Data> for ShipState {
         let ship_params = parts[4].clone().try_into()?;
         let heat = parts[5].try_as_number().ok_or("shipstate.heat not a number")?;
         let heat_capacity = parts[6].try_as_number().ok_or("shipstate.heat_capacity not a number")?;
-        let number5 = parts[7].try_as_number().ok_or("shipstate.number5 not a number")?;
+        let max_thrust = parts[7].try_as_number().ok_or("shipstate.max_thrust not a number")?;
         Ok(ShipState {
             role,
             ship_id,
@@ -598,7 +596,7 @@ impl TryFrom<Data> for ShipState {
             ship_params,
             heat,
             heat_capacity,
-            number5,
+            max_thrust,
         })
     }
 }

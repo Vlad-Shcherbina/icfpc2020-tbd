@@ -10,7 +10,8 @@ pub struct ExampleAi {}
 
 impl Ai for ExampleAi {
     fn choose_join_request(&mut self) -> JoinRequest {
-        JoinRequest { mystery: Data::Nil }
+        let upgrades = Data::make_list2( 103652820, 192496425430);
+        JoinRequest { upgrades }
     }
 
     fn initial_ship_params(&mut self, _spec: &GameSpec) -> ShipParams {
