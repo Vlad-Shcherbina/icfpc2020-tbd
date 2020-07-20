@@ -1,4 +1,5 @@
 use tbd::runners::run_bots_local;
+use tbd::runners::run_in_submission;
 use tbd::ai_interface::Ai;
 use tbd::uforest::*;
 use tbd::bot_util::*;
@@ -81,5 +82,9 @@ fn good_to_shoot(our_ship: &ShipState, their_ship: &ShipState) -> bool {
 }
 
 fn main() {
-    run_bots_local(OrbitBot::default(), OrbitBot::default());
+    if tbd::is_running_in_submission() {
+        run_in_submission(OrbitBot::default());
+    } else {
+        run_bots_local(OrbitBot::default(), OrbitBot::default());
+    }
 }
