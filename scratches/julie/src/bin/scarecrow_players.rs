@@ -63,11 +63,6 @@ fn scarecrow_params(max_cost : i128, t: &ScarecrowType) -> ShipParams {
 
 
 impl Ai for ScarecrowBot {
-    fn choose_join_request(&mut self) -> JoinRequest {
-        let upgrades = Data::make_list2( 103652820, 192496425430);
-        JoinRequest { upgrades }
-    }
-
     fn initial_ship_params(&mut self, spec: &GameSpec) -> ShipParams {
         let p = scarecrow_params(spec.bounds.max_cost, &self.t);
         println!("{:?}", p);

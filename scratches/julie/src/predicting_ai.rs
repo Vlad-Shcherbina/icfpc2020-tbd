@@ -28,8 +28,6 @@ impl Ai for PredictingAi {
     }
 }
 
-// See example_player.rs
-
 
 // gives best acceleration, in the right direction and ready to be used in Command,
 // None if no action is possible or profitable
