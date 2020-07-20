@@ -1,6 +1,7 @@
 // Misc stuff that could be useful in various bots.
 
 use crate::uforest::*;
+use std::cmp::min;
 
 pub const LASER_COST: i128 = 4;
 pub const COOLING_COST: i128 = 12;
@@ -124,5 +125,97 @@ pub fn predict_collisions(mut pos: Vec2, mut vel: Vec2, field: &Field) -> TimePr
         if count >= turn_limit {
             break TimePrediction { collision: None, fly_off: None };
         };
+    }
+}
+
+/* Some painstakingly collected data:
+
+32
+0-8   full
+9-12  half
+13-13 quarter
+14-18 zero
+19-19 quarter
+20-23 half
+24-32 full
+64
+0-10   full
+11-18  half
+19-20  quarter
+21-43  zero
+44-45  quarter
+46-53  half
+54-64  full
+Full damage width:
+100 0-10
+120 0-7
+128 0-5
+160 Doesn't exist.
+At 104 half-damage extends to 20.
+At 144 half-damage extends to 12.
+*/
+pub fn shot_quality(dist: Vec2) -> f64 {
+    fn lerp(left: f64, left_y : f64, right: f64, right_y: f64, x: f64, y: f64) -> f64 {
+        let pos = (x - left) / (right - left);
+        let cutoffy = left_y * (1.0 - pos) + right_y * pos;
+
+        if cutoffy < 1.0 || y > cutoffy {
+            0.0
+        } else {
+            1.0 - y / cutoffy
+        }
+    }
+
+    let mut x = dist.x.abs() as f64;
+    let mut y = dist.y.abs() as f64;
+    if y > x {
+        let tmp = x;
+        x = y;
+        y = tmp;
+    }
+
+    if y > x / 2.0 {
+        y = x - y;
+    }
+
+    if x <= 3.0 {
+        1.0
+    }
+    else if x <= 32.0 {
+        lerp(0.0, 0.0, 32.0, 8.0, x, y)
+    }
+    else if x <= 64.0 {
+        lerp(32.0, 8.0, 64.0, 16.0, x, y)
+    }
+    else {
+        lerp(64.0, 16.0, 120.0, 0.0, x, y)
+    }
+}
+
+pub fn best_shot(me: &ShipState, ships: &Vec<ShipState>) -> Option<Command> {
+    let mut best_chance = -1.0;
+    let mut target: Vec2 = Vec2::default();
+
+    let my_expected_position = me.position +
+        me.velocity +
+        get_gravity(me.position);
+
+    for ship in ships {
+        let expected_position =
+            ship.position +
+            ship.velocity +
+            get_gravity(ship.position);
+        let chance = shot_quality(my_expected_position - expected_position);
+        if chance > best_chance {
+            best_chance = chance;
+            target = expected_position;
+        }
+    }
+    if best_chance > 0.01 {
+        Some(Command::Shoot {ship_id: me.ship_id, target: target,
+            power: min(me.heat_capacity - me.heat, me.ship_params.laser)})
+    }
+    else {
+        None
     }
 }

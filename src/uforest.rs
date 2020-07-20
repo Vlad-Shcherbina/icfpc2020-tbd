@@ -26,7 +26,7 @@ pub struct Ship {
     pub commands_list: AppliedCommands,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ShipState {
     pub role: Role,
     pub ship_id: i128,

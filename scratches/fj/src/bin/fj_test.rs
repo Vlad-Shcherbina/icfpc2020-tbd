@@ -16,8 +16,8 @@ impl Ai for OrbitBot {
     fn initial_ship_params(&mut self, spec: &GameSpec) -> ShipParams {
         let mut params = ShipParams {
             fuel: 0,
-            laser: 10,
-            cooling: 11,
+            laser: 40,
+            cooling: 10,
             hull: 1,
         };
         compute_fuel_from_params(&mut params, &spec).unwrap();
@@ -50,10 +50,6 @@ impl Ai for OrbitBot {
 
         for cmd in &our_ship_real.commands_list.0 {
             if let AppliedCommand::Shoot {target, power, number2, number3} = cmd {
-                if *target != self.their_expected_position {
-                    eprintln!("!!! missed! Shot {:?}, got {:?}", self.their_expected_position, target);
-                    continue
-                }
                 eprintln!("!!! hit {:?} for {:?}", *target - position, number2);
             }
         }
@@ -81,18 +77,29 @@ impl Ai for OrbitBot {
             }
         }
 
+
+        let zzzz: Vec<ShipState> = ships_by_role(state, their_role).cloned().collect();
+        let command = best_shot(our_ship, &zzzz);
+        if let Some(cmd) = command {
+            commands.push(cmd);
+        }
+
+        /*
         self.their_expected_position = Vec2::default();
         if our_ship.heat_capacity - expected_heat >= 10 {
             self.their_expected_position =
                 their_ship.position +
                 their_ship.velocity +
                 get_gravity(their_ship.position);
-            commands.push(Command::Shoot {
-                ship_id: our_ship.ship_id,
-                target: self.their_expected_position,
-                power: 10
-            })
+            if shot_quality(self.their_expected_position - self.expected_position) > 0.01 {
+                commands.push(Command::Shoot {
+                    ship_id: our_ship.ship_id,
+                    target: self.their_expected_position,
+                    power: 40
+                })
+            }
         }
+        */
         Commands(commands)
     }
 }
