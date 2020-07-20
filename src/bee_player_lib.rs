@@ -38,7 +38,7 @@ pub fn predict(mut pos: Vec2, mut vel: Vec2, mut control: i128) -> Vec<Vec2> {
     result
 }
 
-fn def_score(trajectory: &[Vec2], field: &Field) -> i128 {
+pub fn def_score(trajectory: &[Vec2], field: &Field) -> i128 {
     let mut min = 1000000;
     let mut max = -1000000;
     for (i, &p) in trajectory.iter().enumerate() {
@@ -62,7 +62,7 @@ fn def_score(trajectory: &[Vec2], field: &Field) -> i128 {
     return min
 }
 
-fn atk_score(trajectory: &[Vec2], field: &Field) -> i128 {
+pub fn atk_score(trajectory: &[Vec2], field: &Field) -> i128 {
     let mut min = 1000000;
     let mut max = -1000000;
     for (i, &p) in trajectory.iter().enumerate() {
