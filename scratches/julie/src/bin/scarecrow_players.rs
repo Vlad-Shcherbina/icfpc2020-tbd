@@ -1,6 +1,7 @@
 use tbd::runners::{run_in_submission, run_bots_local};
 use tbd::ai_interface::Ai;
-use tbd::uforest::{JoinRequest, ShipParams, GameSpec, Data, GameState, Commands };
+use tbd::bot_util::{ships_by_role };
+use tbd::uforest::{JoinRequest, ShipParams, GameSpec, Data, GameState, Commands, Command };
 
 // fuel x1, laser x4, cooling x12, hull x2
 
@@ -68,21 +69,24 @@ impl Ai for ScarecrowBot {
     }
 
     fn initial_ship_params(&mut self, spec: &GameSpec) -> ShipParams {
-        scarecrow_params(spec.bounds.max_cost, &self.t)
+        let p = scarecrow_params(spec.bounds.max_cost, &self.t);
+        println!("{:?}", p);
+        p
     }
 
     fn choose_commands(&mut self, spec: &GameSpec, _state: &GameState) -> Commands {
-        Commands(vec![])
+        let me = ships_by_role(_state, spec.role).next().unwrap();
+        Commands(vec![Command::Detonate{ ship_id: me.ship_state.ship_id}])
     }
 }
 
 
 fn main() {
     if tbd::is_running_in_submission() {
-        run_in_submission(ScarecrowBot {t: ScarecrowType::Sniper});
+        // run_in_submission(ScarecrowBot {t: ScarecrowType::Sniper});
         run_in_submission(ScarecrowBot {t: ScarecrowType::Carrier});
-        run_in_submission(ScarecrowBot {t: ScarecrowType::Kamikaze});
-        run_in_submission(ScarecrowBot {t: ScarecrowType::KamikazeCrew});
+        // run_in_submission(ScarecrowBot {t: ScarecrowType::Kamikaze});
+        // run_in_submission(ScarecrowBot {t: ScarecrowType::KamikazeCrew});
     } else {
         run_bots_local(
             ScarecrowBot {t: ScarecrowType::Sniper},
