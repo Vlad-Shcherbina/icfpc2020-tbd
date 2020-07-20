@@ -2,8 +2,8 @@ use crate::uforest::*;
 
 pub trait Ai: Send {
     fn choose_join_request(&mut self) -> JoinRequest {
-        let join = Data::make_list2(103652820, 192496425430);
-        JoinRequest { upgrades: join }
+        let upgrades = Data::make_list2(103652820, 192496425430);
+        JoinRequest { upgrades: upgrades }
     }
 
     fn initial_ship_params(&mut self, spec: &GameSpec) -> ShipParams;
