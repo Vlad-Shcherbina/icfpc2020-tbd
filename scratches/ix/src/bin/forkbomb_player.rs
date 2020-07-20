@@ -25,8 +25,8 @@ impl Ai for BeeFork {
             Role::Defender => ShipParams {
                 fuel: 0,
                 laser: 0,
-                cooling: 30,
-                hull: 1,
+                cooling: 20,
+                hull: 65,
             },
             Role::Attacker => ShipParams {
                 fuel: 0,
