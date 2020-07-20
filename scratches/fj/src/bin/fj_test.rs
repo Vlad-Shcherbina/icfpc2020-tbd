@@ -15,8 +15,8 @@ impl Ai for OrbitBot {
     fn initial_ship_params(&mut self, spec: &GameSpec) -> ShipParams {
         let mut params = ShipParams {
             fuel: 0,
-            laser: 0,
-            cooling: 8,
+            laser: 10,
+            cooling: 11,
             hull: 1,
         };
         compute_fuel_from_params(&mut params, &spec).unwrap();
@@ -25,6 +25,7 @@ impl Ai for OrbitBot {
 
 
     fn choose_commands(&mut self, spec: &GameSpec, state: &GameState) -> Commands {
+        let mut commands = Vec::new();
         let our_role = spec.role;
         let their_role = if our_role == Role::Attacker {
             Role::Defender
@@ -46,30 +47,26 @@ impl Ai for OrbitBot {
 
         self.expected_position = position + velocity + gravity;
 
-        if our_ship.ship_state.ship_params.fuel == 0 {
-            return Commands(vec![])
-        }
+        if our_ship.ship_state.ship_params.fuel != 0 {
+            let mut thrust = compute_thrust(spec, our_ship);
 
-        let mut acceleration = compute_acceleration(spec, our_ship);
+            if false && thrust == Vec2::default() && state.steps % 5 == 0  {
+                thrust = Vec2 {
+                    x: rand::thread_rng().gen_range(-1, 1),
+                    y: rand::thread_rng().gen_range(-1, 1)
+                }
+            }
 
-        if acceleration == Vec2::default() && state.steps % 5 == 0  {
-            acceleration = Vec2 {
-                x: rand::thread_rng().gen_range(-1, 1),
-                y: rand::thread_rng().gen_range(-1, 1)
+            if thrust != Vec2::default() {
+                self.expected_position -= thrust;
+                let thrust = Command::Accelerate {
+                    ship_id: our_ship.ship_state.ship_id,
+                    vector: thrust,
+                };
+                commands.push(thrust)
             }
         }
-
-        if acceleration != Vec2::default() {
-            self.expected_position -= acceleration; // it's thrust!
-            let thrust = Command::Accelerate {
-                ship_id: our_ship.ship_state.ship_id,
-                vector: acceleration,
-            };
-            Commands(vec![thrust])
-        }
-        else {
-            Commands(vec![])
-        }
+        Commands(commands)
     }
 }
 

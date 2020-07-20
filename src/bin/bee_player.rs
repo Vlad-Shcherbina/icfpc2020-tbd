@@ -2,7 +2,7 @@ use tbd::runners::{run_bots_local, run_in_submission};
 use tbd::ai_interface::Ai;
 use tbd::uforest::*;
 use tbd::bot_util::*;
-use tbd::bee_player_lib::compute_acceleration;
+use tbd::bee_player_lib::compute_thrust;
 
 pub struct Bee {}
 
@@ -29,7 +29,7 @@ impl Ai for Bee {
     fn choose_commands(&mut self, spec: &GameSpec, state: &GameState) -> Commands {
         let mut commands = Vec::new();
         for ship in ships_by_role(state, spec.role) {
-            let acc = compute_acceleration(spec, ship);
+            let acc = compute_thrust(spec, ship);
             if acc != Vec2::default() {
                 commands.push(Command::Accelerate {
                     ship_id: ship.ship_state.ship_id,

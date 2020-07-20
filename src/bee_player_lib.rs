@@ -87,7 +87,7 @@ fn atk_score(trajectory: &[Vec2], field: &Field) -> i128 {
     return (max - min) / 2
 }
 
-pub fn compute_acceleration(spec: &GameSpec, ship: &Ship) -> Vec2 {
+pub fn compute_thrust(spec: &GameSpec, ship: &Ship) -> Vec2 {
     let field = spec.field.as_ref().unwrap();
     let s = &ship.ship_state;
     let pos = s.position;
