@@ -54,10 +54,6 @@ pub fn orbit_tank(max_cost : i128) -> ShipParams {
 }
 
 impl Ai for OrbitBot {
-    fn choose_join_request(&mut self) -> JoinRequest {
-        JoinRequest { mystery: Data::Nil }
-    }
-
     // Plan is to fork as much as we can, giving a couple afterburners to each fork
     // after we stand on orbit
     fn initial_ship_params(&mut self, spec: &GameSpec) -> ShipParams {

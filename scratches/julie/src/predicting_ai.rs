@@ -7,10 +7,6 @@ pub struct PredictingAi {
 }
 
 impl Ai for PredictingAi {
-    fn choose_join_request(&mut self) -> JoinRequest {
-        JoinRequest { mystery: Data::Nil }
-    }
-
     fn initial_ship_params(&mut self, _spec: &GameSpec) -> ShipParams {
         ShipParams {
             fuel: 30,

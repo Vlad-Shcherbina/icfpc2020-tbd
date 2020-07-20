@@ -86,11 +86,6 @@ fn atk_score(trajectory: &[Vec2], field: &Field) -> i128 {
 }
 
 impl Ai for Bee {
-    fn choose_join_request(&mut self) -> JoinRequest {
-        let upgrades = Data::make_list2( 103652820, 192496425430);
-        JoinRequest { upgrades }
-    }
-
     fn initial_ship_params(&mut self, spec: &GameSpec) -> ShipParams {
         let max_cost = spec.bounds.max_cost;
         let laser = 0;

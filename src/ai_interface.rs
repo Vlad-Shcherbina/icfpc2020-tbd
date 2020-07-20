@@ -1,7 +1,11 @@
 use crate::uforest::*;
 
 pub trait Ai: Send {
-    fn choose_join_request(&mut self) -> JoinRequest;
+    fn choose_join_request(&mut self) -> JoinRequest {
+        let join = Data::make_list2(103652820, 192496425430);
+        JoinRequest { upgrades: join }
+    }
+
     fn initial_ship_params(&mut self, spec: &GameSpec) -> ShipParams;
     fn choose_commands(&mut self, spec: &GameSpec, state: &GameState) -> Commands;
 }
@@ -9,11 +13,6 @@ pub trait Ai: Send {
 pub struct ExampleAi {}
 
 impl Ai for ExampleAi {
-    fn choose_join_request(&mut self) -> JoinRequest {
-        let upgrades = Data::make_list2( 103652820, 192496425430);
-        JoinRequest { upgrades }
-    }
-
     fn initial_ship_params(&mut self, _spec: &GameSpec) -> ShipParams {
         ShipParams {
             fuel: 1,

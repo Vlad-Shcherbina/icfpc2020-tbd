@@ -4,10 +4,6 @@ use tbd::{bot_util::*, uforest::*};
 pub struct SimpleAi {}
 
 impl Ai for SimpleAi {
-    fn choose_join_request(&mut self) -> JoinRequest {
-        JoinRequest { mystery: Data::Nil }
-    }
-
     fn initial_ship_params(&mut self, _spec: &GameSpec) -> ShipParams {
         ShipParams {
             fuel: 254,

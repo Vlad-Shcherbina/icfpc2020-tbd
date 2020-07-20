@@ -23,10 +23,6 @@ pub fn acc(pos: Vec2) -> Vec2 {
 }
 
 impl Ai for OrbitBot {
-    fn choose_join_request(&mut self) -> JoinRequest {
-        JoinRequest { mystery: Data::Nil }
-    }
-
     fn initial_ship_params(&mut self, _spec: &GameSpec) -> ShipParams {
         ShipParams {
             fuel: 254,
