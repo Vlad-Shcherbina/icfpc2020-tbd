@@ -39,6 +39,14 @@ pub fn ships_by_role(state: &GameState, role: Role) -> impl Iterator<Item = &Shi
         .map(|ship| &ship.ship_state)
 }
 
+pub fn get_expected_position(ship: &ShipState) -> Vec2 {
+    ship.position + ship.velocity - get_gravity(ship.position)
+}
+
+// How much heat can we take without taking damage?
+pub fn get_available_heat_sink(ship: &ShipState) -> i128 {
+    ship.heat_capacity - ship.heat + ship.ship_params.cooling
+}
 
 pub struct TimePrediction {
     pub collision: Option<i128>,

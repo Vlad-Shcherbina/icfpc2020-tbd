@@ -1,5 +1,6 @@
 use crate::uforest::*;
 use crate::bot_util::*;
+use rand::Rng;
 
 
 pub fn ccw(Vec2 { x, y }: Vec2) -> Vec2 {
@@ -105,4 +106,15 @@ pub fn compute_thrust(spec: &GameSpec, ship: &ShipState) -> Vec2 {
     if control < 0 { a }
     else if control > 0 { -a }
     else { Vec2::default() }
+}
+
+pub fn perturb(thrust: Vec2) -> Vec2 {
+    if thrust == Vec2::default()  {
+        Vec2 {
+            x: rand::thread_rng().gen_range(-1, 1),
+            y: rand::thread_rng().gen_range(-1, 1)
+        }
+    } else {
+        thrust
+    }
 }
