@@ -52,7 +52,7 @@ impl Ai for OrbitBot {
         let field = spec.field.as_ref().unwrap();
         let gravity = get_gravity(our_ship.ship_state.position);
 
-        let colision = predict_collisions(position, velocity, field.planet_radius, field.field_radius);
+        let colision = predict_collisions(position, velocity, field);
         if colision.collision.is_some() {
             let thrust = Command::Accelerate {
                 ship_id: our_ship.ship_state.ship_id,

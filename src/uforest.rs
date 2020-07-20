@@ -44,7 +44,7 @@ pub struct GameSpec {
     pub timer: i128, // number of max possible steps until game over
     pub role: Role,
     pub bounds: Bounds,
-    pub field: Option<Field>,
+    pub field: Option<Field>,  // None in tutorials without a star?
     pub defender_params: Option<ShipParams>, // a field which only the attacker gets
 }
 

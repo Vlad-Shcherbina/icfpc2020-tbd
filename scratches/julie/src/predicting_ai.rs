@@ -40,8 +40,6 @@ impl Ai for PredictingAi {
 pub fn choose_acceleration(me: &Ship, spec: &GameSpec) -> Option<Vec2> {
     let pos = me.ship_state.position;
     let vel = me.ship_state.velocity;
-    let r_planet = spec.field.as_ref().unwrap().planet_radius;
-    let r_field = spec.field.as_ref().unwrap().field_radius;
     let mut acc: Vec2 = Vec2 {x: 0, y: 0 };
     let mut max = 0;
     // println!("\nTurn: {}", state.steps);
@@ -57,7 +55,7 @@ pub fn choose_acceleration(me: &Ship, spec: &GameSpec) -> Option<Vec2> {
     for x in -1..2 {
         for y in -1..2 {
             let delta = Vec2{x, y};
-            let m = utils::predict_collisions(pos, vel + delta, r_planet, r_field).time();
+            let m = utils::predict_collisions(pos, vel + delta, spec.field.as_ref().unwrap()).time();
             if m == -1 || m > max {
                 acc = delta.negate();
                 max = m;

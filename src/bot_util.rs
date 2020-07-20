@@ -2,6 +2,10 @@
 
 use crate::uforest::*;
 
+pub const LASER_COST: i128 = 4;
+pub const COOLING_COST: i128 = 12;
+pub const HULL_COST: i128 = 2;
+
 /// takes ship position relative to star
 pub fn get_gravity(pos: Vec2) -> Vec2 {
     // TODO: what happens at abs(x) == abs(y)??
@@ -47,17 +51,17 @@ impl TimePrediction {
 }
 
 // predicts time to collide to the star or to leave the frame without thrust
-pub fn predict_collisions(mut pos: Vec2, mut vel: Vec2, planet_radius: i128, field_radius: i128) -> TimePrediction {
+pub fn predict_collisions(mut pos: Vec2, mut vel: Vec2, field: &Field) -> TimePrediction {
     let turn_limit = 256;
     let mut count = 1;
     loop {
         let g = get_gravity(pos);
         vel = vel + g;
         pos = pos + vel;
-        if pos.x.abs() <= planet_radius && pos.y.abs() <= planet_radius {
+        if pos.x.abs() <= field.planet_radius && pos.y.abs() <= field.planet_radius {
             break TimePrediction { collision: Some(count), fly_off: None };
         }
-        if pos.x.abs() >= field_radius || pos.y.abs() >= field_radius {
+        if pos.x.abs() >= field.field_radius || pos.y.abs() >= field.field_radius {
             break TimePrediction { collision: None, fly_off: Some(count) };
         }
         count += 1;
