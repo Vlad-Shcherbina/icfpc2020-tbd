@@ -352,7 +352,7 @@ impl Protocol {
     }
 
     pub fn load_galaxy() -> Self {
-        let src = std::fs::read_to_string(project_path("data/messages/galaxy.txt")).unwrap();
+        let src = std::fs::read_to_string(project_path("data/messages/galaxy.v2.txt")).unwrap();
         let src = parse(&src);
         let ctx = Context::new(&src);
         Protocol {
