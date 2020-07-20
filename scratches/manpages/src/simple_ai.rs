@@ -22,17 +22,34 @@ pub fn acc(pos: Vec2) -> Vec2 {
     }
 }
 
-//                                  laser x4, cooling x12, hull x2
+const FUEL : usize = 0;
+const LASER : usize = 1;
+const COOLING : usize = 2;
+const HULL : usize = 3;
+
+//                    fuel x1, laser x4, cooling x12, hull x2
 const POINT_BUY : &[i128 ; 4] = &[ 1, 4, 12, 2 ];
+
+pub fn scare_them_ship(max_cost : i128) -> ShipParams {
+    // now let's split point buy so that we have at least 10
+    let fuel = 20;
+    let hull = 1;
+    let cooling = 8;
+    let rem_cost = max_cost - fuel - hull * POINT_BUY[HULL] - 0 - cooling * POINT_BUY[COOLING];
+    let laser = rem_cost / POINT_BUY[LASER];
+    let fuel_surplus = rem_cost % POINT_BUY[LASER];
+    ShipParams { fuel, laser, cooling, hull }
+}
 
 pub fn orbit_tank(max_cost : i128) -> ShipParams {
     // now let's split point buy so that we have at least 10
-    let fuel = 10;
+    let fuel0 = 10;
     let hull = 1;
     let laser = 0;
-    let rem_cost = max_cost - fuel - hull * POINT_BUY[3] - 0;
+    let rem_cost = max_cost - fuel0 - hull * POINT_BUY[3] - 0;
     let cooling = rem_cost / POINT_BUY[2];
     let fuel_surplus = rem_cost % POINT_BUY[2];
+    let fuel = fuel0 + fuel_surplus;
     ShipParams { fuel, laser, cooling, hull }
 }
 
@@ -63,7 +80,7 @@ impl Ai for OrbitBot {
         let field = spec.field.as_ref().unwrap();
         let gravity = get_gravity(our_ship.ship_state.position);
 
-        let colision = predict_collisions(position, velocity, field.planet_radius, field.field_radius);
+        let colision = predict_collisions(position, velocity, field);
         if colision.collision.is_some() {
             let thrust = Command::Accelerate {
                 ship_id: our_ship.ship_state.ship_id,
