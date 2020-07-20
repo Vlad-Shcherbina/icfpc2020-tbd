@@ -1,7 +1,7 @@
 use crate::squiggle::Data;
 use std::convert::TryFrom;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Default)]
 pub struct Vec2 {
     pub x: i128,
     pub y: i128,
@@ -52,6 +52,20 @@ impl std::ops::Neg for Vec2 {
             x: -self.x,
             y: -self.y,
         }
+    }
+}
+
+impl std::ops::AddAssign for Vec2 {
+    fn add_assign(&mut self, rhs: Vec2) {
+        self.x += rhs.x;
+        self.y += rhs.y;
+    }
+}
+
+impl std::ops::SubAssign for Vec2 {
+    fn sub_assign(&mut self, rhs: Vec2) {
+        self.x -= rhs.x;
+        self.y -= rhs.y;
     }
 }
 
