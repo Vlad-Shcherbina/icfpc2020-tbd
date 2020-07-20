@@ -48,9 +48,17 @@ pub fn get_available_heat_sink(ship: &ShipState) -> i128 {
     ship.heat_capacity - ship.heat + ship.ship_params.cooling
 }
 
-
 pub fn get_hp (ship: &ShipState) -> i128 {
     ship.ship_params.fuel + ship.ship_params.laser + ship.ship_params.cooling + ship.ship_params.hull
+}
+
+pub fn maybe_push_thrust_command(cmd_vector: &mut Vec<Command>, thrust: Vec2, ship_id: i128) {
+    if thrust != Vec2::default() {
+        cmd_vector.push(Command::Accelerate {
+            ship_id,
+            vector: thrust,
+        })
+    }
 }
 
 pub struct TimePrediction {

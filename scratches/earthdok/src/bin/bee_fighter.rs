@@ -34,35 +34,31 @@ impl Ai for OrbitBot {
         let our_ship = ships_by_role(state, our_role).next().unwrap();
         let their_ship = ships_by_role(state, their_role).next().unwrap();
 
-        let position = our_ship.position;
-        let velocity = our_ship.velocity;
-        let _field = spec.field.as_ref().unwrap();
-        let gravity = get_gravity(our_ship.position);
-
-        if our_ship.ship_params.fuel == 0 {
-            return Commands(vec![])
-        }
-
-        let thrust = compute_thrust(spec, our_ship);
-        let thrust = if state.steps % 5 == 0 { perturb(thrust) } else { thrust };
-
+        let thrust = compute_actual_thrust(spec, state, our_ship);
         let expected_position = get_expected_position(our_ship) - thrust;
 
 
         // Pew pew
         //if our_role == Role::Attacker {
-            //
+            
         //}
 
-        if thrust != Vec2::default() {
-            let thrust_cmd = Command::Accelerate {
-                ship_id: our_ship.ship_id,
-                vector: thrust,
-            };
-            Commands(vec![thrust_cmd])
-        }
-        else {
-            Commands(vec![])
+        let mut cmd_vec = vec![];
+        maybe_push_thrust_command(&mut cmd_vec, thrust, our_ship.ship_id);
+
+        Commands(cmd_vec)
+    }
+}
+
+fn compute_actual_thrust(spec: &GameSpec, state: &GameState, ship: &ShipState) -> Vec2 {
+    if ship.ship_params.fuel == 0 {
+        Vec2::default()
+    } else {
+        let thrust = compute_thrust(spec, ship);
+        if state.steps % 5 == 0 {
+            perturb(thrust)
+        } else {
+            thrust
         }
     }
 }
