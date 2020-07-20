@@ -9,9 +9,10 @@ pub struct BeeFork {}
 // a simple function of dividing everything by 2
 // TODO: extend with logic for defender / attacker
 fn fork_params(old_params: &ShipParams) -> ShipParams {
+    let max_new_fuel = 63;
 
     ShipParams {
-        fuel: old_params.fuel - old_params.fuel / 2,
+        fuel: std::cmp::min(old_params.fuel - old_params.fuel / 2, max_new_fuel),
         laser: old_params.laser - old_params.laser / 2,
         cooling: old_params.cooling - old_params.cooling / 2,
         hull: old_params.hull - old_params.hull / 2,
@@ -25,7 +26,7 @@ impl Ai for BeeFork {
             Role::Defender => ShipParams {
                 fuel: 0,
                 laser: 0,
-                cooling: 20,
+                cooling: 5,
                 hull: 65,
             },
             Role::Attacker => ShipParams {
