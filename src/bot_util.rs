@@ -48,8 +48,10 @@ pub fn get_expected_position(ship: &ShipState) -> Vec2 {
 }
 
 // How much heat can we take without taking damage?
-pub fn get_available_heat_sink(ship: &ShipState) -> i128 {
-    ship.heat_capacity - ship.heat + ship.ship_params.cooling
+pub fn get_available_heat_sink(ship: &ShipState, thrust: Vec2) -> i128 {
+    // TODO: 2x thruster support
+    let thruster_heat = if thrust == Vec2::default() { 0 } else { 8 };
+    ship.heat_capacity - ship.heat + ship.ship_params.cooling - thruster_heat
 }
 
 pub fn get_hp (ship: &ShipState) -> i128 {

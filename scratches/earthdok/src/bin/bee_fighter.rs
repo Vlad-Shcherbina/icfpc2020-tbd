@@ -43,10 +43,10 @@ impl Ai for OrbitBot {
 
         // Pew pew
         if our_role == Role::Attacker {
-            let shot_power = cmp::min(our_ship.ship_params.laser, get_available_heat_sink(our_ship));
+            let shot_power = cmp::min(our_ship.ship_params.laser, get_available_heat_sink(our_ship, thrust));
             if shot_power > 0 {
                 for target_ship in ships_by_role(state, their_role) {
-                    if good_to_shoot(our_ship, their_ship) {
+                    if good_to_shoot(expected_position, their_ship) {
                         cmd_vec.push(Command::Shoot {
                             ship_id: our_ship.ship_id,
                             target: get_expected_position(their_ship),
@@ -77,9 +77,21 @@ fn compute_actual_thrust(spec: &GameSpec, state: &GameState, ship: &ShipState) -
     }
 }
 
-fn good_to_shoot(our_ship: &ShipState, their_ship: &ShipState) -> bool {
+fn good_to_shoot(position: Vec2, their_ship: &ShipState) -> bool {
     true
 }
+
+//fn good_to_shoot(position: Vec2, their_ship: &ShipState) -> bool {
+//     let their_expected_position = get_expected_position(their_ship);
+//     let v = their_expected_position - position;
+//     if v == Vec2::default() { return true; }
+//     let d = ((v.x.pow(2) + v.y.pow(2)) as f64).sqrt();
+//     let sin = v.y as f64 / d;
+    
+//     let sin_bound = 8.0 / ((8*8 + 32*32) as f64).sqrt();
+
+//     (sin.abs() < sin_bound) || ((1.0 - sin).abs() < sin_bound) || ((1.0 + sin).abs() < sin_bound)
+// }
 
 fn main() {
     if tbd::is_running_in_submission() {
