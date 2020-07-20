@@ -16,6 +16,7 @@ pub mod ai_interface;
 pub mod runners;
 pub mod vec2;
 pub mod bot_util;
+pub mod bee_player_lib;
 
 pub fn hello() {
     println!("hello");
