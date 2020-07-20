@@ -23,7 +23,7 @@ pub enum Role {
 #[derive(Debug)]
 pub struct Ship {
     pub ship_state: ShipState,
-    pub commands_list: Data,
+    pub commands_list: AppliedCommands,
 }
 
 #[derive(Debug)]
@@ -102,8 +102,34 @@ pub enum Command {
     Unknown(Data),
 }
 
+// the difference between Commands and AppliedCommands is that
+// AppliedCommands is used in Ship descriptions whereas Commands
+// are the ones directly executed.
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Commands(pub Vec<Command>);
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum AppliedCommand {
+    Accelerate {
+        vector: Vec2,
+    },
+    Detonate {
+        number1: i128,
+        blast_radius: i128,
+    },
+    Shoot {
+        target: Vec2,
+        power: i128,
+        number2: i128,
+        number3: i128
+    },
+    // TODO: add more commands, but keep Unknown around just in case
+    Unknown(Data),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct AppliedCommands(pub Vec<AppliedCommand>);
 
 pub struct Client {
     pub endpoint: Endpoint,
@@ -211,6 +237,67 @@ impl TryFrom<Data> for Command {
     }
 }
 
+impl From<AppliedCommand> for Data {
+    fn from(c: AppliedCommand) -> Self {
+        // c.mystery
+        match c {
+            AppliedCommand::Accelerate { vector } => Data::make_list2(0, vector),
+            AppliedCommand::Detonate { number1, blast_radius } => Data::make_list3(1, number1, blast_radius),
+            AppliedCommand::Shoot { target, power, number2, number3 } => Data::make_list5(2, target, power, number2, number3 ),
+            AppliedCommand::Unknown(data) => data,
+        }
+    }
+}
+
+impl TryFrom<Data> for AppliedCommand {
+    type Error = String;
+
+    // Never panic, handle all errors!
+    fn try_from(data: Data) -> Result<Self, Self::Error> {
+        let parts = data.clone().try_into_vec().ok_or("applied command is not a list")?;
+        let kind = parts.first().ok_or("applied command is empty list")?
+            .try_as_number().ok_or("applied command kind is not number")?;
+        Ok(match kind {
+            0 => {
+                if parts.len() != 2 {
+                    Err(format!("accelerate cmd {:?}", parts))?
+                }
+                let vector = Vec2::try_from(parts[1].clone())?;
+                AppliedCommand::Accelerate {
+                    vector,
+                }
+            }
+            1 => {
+                if parts.len() != 3 {
+                    Err(format!("detonate cmd {:?}", parts))?
+                }
+                let number1 = parts[1].try_as_number().ok_or("detonate number1 not number")?;
+                let blast_radius = parts[2].try_as_number().ok_or("detonate number2 not number")?;
+                AppliedCommand::Detonate {
+                    number1,
+                    blast_radius
+                }
+            }
+            2 => {
+                if parts.len() != 5 {
+                    Err(format!("shoot cmd {:?}", parts))?
+                }
+                let target = Vec2::try_from(parts[1].clone())?;
+                let power = parts[2].try_as_number().ok_or("shoot number1 not number")?;
+                let number2 = parts[3].try_as_number().ok_or("shoot number2 not number")?;
+                let number3 = parts[4].try_as_number().ok_or("shoot number3 not number")?;
+
+                AppliedCommand::Shoot {
+                    target,
+                    power,
+                    number2,
+                    number3,
+                }
+            }
+            _ => AppliedCommand::Unknown(data),
+        })
+    }
+}
 impl From<Commands> for Data {
     fn from(c: Commands) -> Self {
         c.0.into_iter().map(Data::from).collect()
@@ -228,6 +315,26 @@ impl TryFrom<Data> for Commands {
             .into_iter()
             .map(Command::try_from).collect();
         commands.map(Commands)
+    }
+}
+
+impl From<AppliedCommands> for Data {
+    fn from(c: AppliedCommands) -> Self {
+        c.0.into_iter().map(Data::from).collect()
+    }
+}
+
+impl TryFrom<Data> for AppliedCommands {
+    type Error = String;
+    // This function shouldn't panic because the web UI calls it
+    // on every request (not only on command requests).
+    // Handle all errors properly.
+    fn try_from(data: Data) -> Result<Self, Self::Error> {
+        let applied_commands: Result<Vec<_>, _> = data
+            .try_into_vec().ok_or("not a vec")?
+            .into_iter()
+            .map(AppliedCommand::try_from).collect();
+        applied_commands.map(AppliedCommands)
     }
 }
 
@@ -390,7 +497,7 @@ impl TryFrom<Data> for Ship {
             Err(format!("{} elements instead of 2", parts.len()))?;
         }
         let ship_state = parts[0].clone().try_into()?;
-        let commands_list = parts[1].clone();
+        let commands_list = parts[1].clone().try_into()?;
         Ok(Ship {
             ship_state,
             commands_list,
