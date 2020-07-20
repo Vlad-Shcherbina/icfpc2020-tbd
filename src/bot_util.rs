@@ -31,11 +31,12 @@ pub fn get_gravity(pos: Vec2) -> Vec2 {
     }
 }
 
-pub fn ships_by_role(state: &GameState, role: Role) -> impl Iterator<Item = &Ship> {
+pub fn ships_by_role(state: &GameState, role: Role) -> impl Iterator<Item = &ShipState> {
     state
         .ships_list
         .iter()
         .filter(move |&ship| ship.ship_state.role == role)
+        .map(|ship| &ship.ship_state)
 }
 
 

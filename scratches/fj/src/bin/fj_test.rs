@@ -36,10 +36,10 @@ impl Ai for OrbitBot {
         let our_ship = ships_by_role(state, our_role).next().unwrap();
         let _their_ship = ships_by_role(state, their_role).next().unwrap();
 
-        let position = our_ship.ship_state.position;
-        let velocity = our_ship.ship_state.velocity;
+        let position = our_ship.position;
+        let velocity = our_ship.velocity;
         let _field = spec.field.as_ref().unwrap();
-        let gravity = get_gravity(our_ship.ship_state.position);
+        let gravity = get_gravity(our_ship.position);
 
         if position != self.expected_position && self.expected_position != Vec2::default() {
             eprintln!("!!!! Wrong physics, expected {:?} got {:?}", self.expected_position, position);
@@ -47,7 +47,7 @@ impl Ai for OrbitBot {
 
         self.expected_position = position + velocity + gravity;
 
-        if our_ship.ship_state.ship_params.fuel != 0 {
+        if our_ship.ship_params.fuel != 0 {
             let mut thrust = compute_thrust(spec, our_ship);
 
             if false && thrust == Vec2::default() && state.steps % 5 == 0  {
@@ -60,7 +60,7 @@ impl Ai for OrbitBot {
             if thrust != Vec2::default() {
                 self.expected_position -= thrust;
                 let thrust = Command::Accelerate {
-                    ship_id: our_ship.ship_state.ship_id,
+                    ship_id: our_ship.ship_id,
                     vector: thrust,
                 };
                 commands.push(thrust)

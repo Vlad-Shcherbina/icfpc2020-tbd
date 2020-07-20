@@ -17,12 +17,12 @@ impl Ai for PredictingAi {
     }
 
     fn choose_commands(&mut self, spec: &GameSpec, state: &GameState) -> Commands {
-        let me: Vec<&Ship> = utils::ships_by_role(state, spec.role).collect();
+        let me: Vec<&ShipState> = utils::ships_by_role(state, spec.role).collect();
         assert!(me.len() == 1);
         let me = me[0];
 
         match choose_acceleration(me, spec) {
-            Some(a) => Commands(vec![Command::Accelerate { ship_id: me.ship_state.ship_id, vector: a }]),
+            Some(a) => Commands(vec![Command::Accelerate { ship_id: me.ship_id, vector: a }]),
             None    => Commands(vec![])
         }
     }
@@ -31,18 +31,18 @@ impl Ai for PredictingAi {
 
 // gives best acceleration, in the right direction and ready to be used in Command,
 // None if no action is possible or profitable
-pub fn choose_acceleration(me: &Ship, spec: &GameSpec) -> Option<Vec2> {
-    let pos = me.ship_state.position;
-    let vel = me.ship_state.velocity;
+pub fn choose_acceleration(me: &ShipState, spec: &GameSpec) -> Option<Vec2> {
+    let pos = me.position;
+    let vel = me.velocity;
     let mut acc: Vec2 = Vec2 {x: 0, y: 0 };
     let mut max = 0;
     // println!("\nTurn: {}", state.steps);
     // println!("Position: {:?}, velocity: {:?}", &pos, &vel);
-    // println!("Fuel: {}", me.ship_state.ship_params.fuel);
+    // println!("Fuel: {}", me.ship_params.fuel);
     // println!("Prediction: {}", utils::predict_collisions(pos, vel, r_planet, r_field).time());
 
-    if me.ship_state.ship_params.fuel == 0 { return None; }
-    if me.ship_state.heat + 8 - me.ship_state.ship_params.cooling > me.ship_state.heat_capacity {
+    if me.ship_params.fuel == 0 { return None; }
+    if me.heat + 8 - me.ship_params.cooling > me.heat_capacity {
         return None;
     }
 

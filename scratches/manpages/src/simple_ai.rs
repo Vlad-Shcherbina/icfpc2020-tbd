@@ -71,16 +71,16 @@ impl Ai for OrbitBot {
         let our_ship = ships_by_role(_state, our_role).next().unwrap();
         let their_ship = ships_by_role(_state, their_role).next().unwrap();
 
-        let position = our_ship.ship_state.position;
-        let velocity = our_ship.ship_state.velocity;
+        let position = our_ship.position;
+        let velocity = our_ship.velocity;
         let field = spec.field.as_ref().unwrap();
-        let gravity = get_gravity(our_ship.ship_state.position);
+        let gravity = get_gravity(our_ship.position);
 
         let colision = predict_collisions(position, velocity, field);
         if colision.collision.is_some() {
             let thrust = Command::Accelerate {
-                ship_id: our_ship.ship_state.ship_id,
-                vector: acc(our_ship.ship_state.position),
+                ship_id: our_ship.ship_id,
+                vector: acc(our_ship.position),
             };
             Commands(vec![thrust])
         } else {

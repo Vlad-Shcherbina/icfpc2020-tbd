@@ -26,8 +26,8 @@ impl Ai for SimpleAi {
 
         // Fight gravity.
         let thrust = Command::Accelerate {
-            ship_id: our_ship.ship_state.ship_id,
-            vector: get_gravity(our_ship.ship_state.position),
+            ship_id: our_ship.ship_id,
+            vector: get_gravity(our_ship.position),
         };
 
         Commands(vec![thrust])

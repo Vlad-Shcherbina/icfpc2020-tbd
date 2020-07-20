@@ -71,7 +71,7 @@ impl Ai for ScarecrowBot {
 
     fn choose_commands(&mut self, spec: &GameSpec, _state: &GameState) -> Commands {
         let me = ships_by_role(_state, spec.role).next().unwrap();
-        Commands(vec![Command::Detonate{ ship_id: me.ship_state.ship_id}])
+        Commands(vec![Command::Detonate{ ship_id: me.ship_id}])
     }
 }
 

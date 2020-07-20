@@ -32,7 +32,7 @@ impl Ai for Bee {
             let acc = compute_thrust(spec, ship);
             if acc != Vec2::default() {
                 commands.push(Command::Accelerate {
-                    ship_id: ship.ship_state.ship_id,
+                    ship_id: ship.ship_id,
                     vector: acc,
                 });
             }

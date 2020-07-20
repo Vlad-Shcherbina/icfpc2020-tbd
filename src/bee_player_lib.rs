@@ -87,11 +87,10 @@ fn atk_score(trajectory: &[Vec2], field: &Field) -> i128 {
     return (max - min) / 2
 }
 
-pub fn compute_thrust(spec: &GameSpec, ship: &Ship) -> Vec2 {
+pub fn compute_thrust(spec: &GameSpec, ship: &ShipState) -> Vec2 {
     let field = spec.field.as_ref().unwrap();
-    let s = &ship.ship_state;
-    let pos = s.position;
-    let vel = s.velocity;
+    let pos = ship.position;
+    let vel = ship.velocity;
 
     let score = match spec.role {
         Role::Attacker => atk_score,
