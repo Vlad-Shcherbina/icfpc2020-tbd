@@ -45,19 +45,29 @@ impl Ai for BeeFork {
         for ship in ships_by_role(state, spec.role) {
 
             // fork every turn until (arbitrary) minimum values are reached
-            let params = &ship.ship_params;
+            let params = &ship.ship_state.ship_params;
             if params.fuel > 8 && params.hull > 1 {
                 commands.push(Command::Fork {
-                    ship_id: ship.ship_id,
+                    ship_id: ship.ship_state.ship_id,
                     new_ship_params: fork_params(params),
                 });
             };
+
+
             let acc = compute_thrust(spec, ship);
             if acc != Vec2::default() {
-                commands.push(Command::Accelerate {
-                    ship_id: ship.ship_id,
-                    vector: acc,
-                });
+                // TODO: this isn't a good logic. I just want forked ships to
+                // fly apart for now, even at the cost of a couple of them.
+                if detect_exact_overlap(&state) {
+                    let id = ship.ship_state.ship_id;
+                    if id % 2 == 0 {
+                        commands.push(Command::Accelerate {
+                            ship_id: ship.ship_state.ship_id,
+                            vector: acc,
+                        });
+
+                    }
+                }
             }
         }
         Commands(commands)
