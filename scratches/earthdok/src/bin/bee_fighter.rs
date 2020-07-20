@@ -4,6 +4,7 @@ use tbd::uforest::*;
 use tbd::bot_util::*;
 use tbd::bee_player_lib::*;
 use tbd::vec2::Vec2;
+use std::cmp;
 
 #[derive(Default)]
 pub struct OrbitBot {
@@ -37,13 +38,25 @@ impl Ai for OrbitBot {
         let thrust = compute_actual_thrust(spec, state, our_ship);
         let expected_position = get_expected_position(our_ship) - thrust;
 
+        let mut cmd_vec = vec![];
 
         // Pew pew
-        //if our_role == Role::Attacker {
-            
-        //}
+        if our_role == Role::Attacker {
+            let shot_power = cmp::min(our_ship.ship_params.laser, get_available_heat_sink(our_ship));
+            if shot_power > 0 {
+                for target_ship in ships_by_role(state, their_role) {
+                    if good_to_shoot(our_ship, their_ship) {
+                        cmd_vec.push(Command::Shoot {
+                            ship_id: our_ship.ship_id,
+                            target: get_expected_position(their_ship),
+                            power: shot_power
+                        });
+                        break;
+                    }
+                }
+            }   
+        }
 
-        let mut cmd_vec = vec![];
         maybe_push_thrust_command(&mut cmd_vec, thrust, our_ship.ship_id);
 
         Commands(cmd_vec)
@@ -64,7 +77,7 @@ fn compute_actual_thrust(spec: &GameSpec, state: &GameState, ship: &ShipState) -
 }
 
 fn good_to_shoot(our_ship: &ShipState, their_ship: &ShipState) -> bool {
-    false
+    true
 }
 
 fn main() {
