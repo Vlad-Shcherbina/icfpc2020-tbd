@@ -48,6 +48,11 @@ pub fn get_available_heat_sink(ship: &ShipState) -> i128 {
     ship.heat_capacity - ship.heat + ship.ship_params.cooling
 }
 
+
+pub fn get_hp (ship: &ShipState) -> i128 {
+    ship.ship_params.fuel + ship.ship_params.laser + ship.ship_params.cooling + ship.ship_params.hull
+}
+
 pub struct TimePrediction {
     pub collision: Option<i128>,
     pub fly_off: Option<i128>,
