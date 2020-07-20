@@ -78,36 +78,12 @@ fn atk_score(trajectory: &[Vec2], field: &Field) -> i128 {
         if p.norm() >= field.field_radius - 3 {
             return -500;
         }
-        // if p.norm() <= field.planet_radius {
 
-        // }
         min = min.min(p.norm());
         max = max.max(p.norm());
     }
     return (max - min) / 2
 }
-
-/*pub fn norm_range(mut pos: Vec2, mut vel: Vec2, time: i32) -> (i128, i128) {
-    let mut min = pos.norm();
-    let mut max = pos.norm();
-    for _ in 0..time {
-        vel = vel + get_gravity(pos);
-        pos = pos + vel;
-        min = min.min(pos.norm());
-        max = max.max(pos.norm());
-    }
-    (min, max)
-}
-
-pub fn defender_norm_score((min, max): (i128, i128), field: &Field) -> i128 {
-    if max >= field.field_radius {
-        return -1000;
-    }
-    if min <= field.planet_radius {
-        return -1000;
-    }
-    min
-}*/
 
 impl Ai for Bee {
     fn choose_join_request(&mut self) -> JoinRequest {
@@ -117,8 +93,11 @@ impl Ai for Bee {
     fn initial_ship_params(&mut self, spec: &GameSpec) -> ShipParams {
         let max_cost = spec.bounds.max_cost;
         let laser = 0;
-        let hull = 1;
-        let cooling = 5;
+        let hull = 4;
+        let cooling = match spec.role {
+            Role::Defender => 30,
+            Role::Attacker => 8,
+        };
         ShipParams {
             fuel: max_cost - hull * HULL_COST - cooling * COOLING_COST - laser * LASER_COST,
             laser,
