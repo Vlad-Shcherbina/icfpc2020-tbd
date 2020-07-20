@@ -38,8 +38,25 @@ impl std::ops::Add for Vec2 {
     }
 }
 
+impl std::ops::Sub for Vec2 {
+    type Output = Vec2;
+    fn sub(self, rhs: Self) -> Self::Output {
+        self + -rhs
+    }
+}
+
+impl std::ops::Neg for Vec2 {
+    type Output = Vec2;
+    fn neg(self) -> Self::Output {
+        Vec2 {
+            x: -self.x,
+            y: -self.y,
+        }
+    }
+}
+
 impl Vec2 {
-    pub fn negate(&self) -> Vec2 {
-        Vec2 { x: -self.x, y: -self.y }
+    pub fn norm(self) -> i128 {
+        self.x.abs().max(self.y.abs())
     }
 }

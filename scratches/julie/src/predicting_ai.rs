@@ -57,7 +57,7 @@ pub fn choose_acceleration(me: &Ship, spec: &GameSpec) -> Option<Vec2> {
             let delta = Vec2{x, y};
             let m = utils::predict_collisions(pos, vel + delta, spec.field.as_ref().unwrap()).time();
             if m == -1 || m > max {
-                acc = delta.negate();
+                acc = -delta;
                 max = m;
             }
             if max == -1 { break; }
