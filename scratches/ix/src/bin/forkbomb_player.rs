@@ -2,7 +2,7 @@ use tbd::runners::{run_bots_local, run_in_submission};
 use tbd::ai_interface::Ai;
 use tbd::uforest::*;
 use tbd::bot_util::*;
-use tbd::bee_player_lib::compute_acceleration;
+use tbd::bee_player_lib::compute_thrust;
 
 pub struct BeeFork {}
 
@@ -47,7 +47,7 @@ impl Ai for BeeFork {
             let params = &ship.ship_state.ship_params;
             if params.fuel > 8 && params.hull > 1 {
                 commands.push(Command::Fork {
-                    ship_id: s.ship_id,
+                    ship_id: ship.ship_state.ship_id,
                     new_ship_params: fork_params(params),
                 });
             };
