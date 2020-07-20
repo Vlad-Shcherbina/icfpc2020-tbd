@@ -77,21 +77,21 @@ fn compute_actual_thrust(spec: &GameSpec, state: &GameState, ship: &ShipState) -
     }
 }
 
-fn good_to_shoot(position: Vec2, their_ship: &ShipState) -> bool {
-    true
-}
-
 //fn good_to_shoot(position: Vec2, their_ship: &ShipState) -> bool {
-//     let their_expected_position = get_expected_position(their_ship);
-//     let v = their_expected_position - position;
-//     if v == Vec2::default() { return true; }
-//     let d = ((v.x.pow(2) + v.y.pow(2)) as f64).sqrt();
-//     let sin = v.y as f64 / d;
-    
-//     let sin_bound = 8.0 / ((8*8 + 32*32) as f64).sqrt();
+//    true
+//}
 
-//     (sin.abs() < sin_bound) || ((1.0 - sin).abs() < sin_bound) || ((1.0 + sin).abs() < sin_bound)
-// }
+fn good_to_shoot(position: Vec2, their_ship: &ShipState) -> bool {
+    let their_expected_position = get_expected_position(their_ship);
+    let v = their_expected_position - position;
+    if v == Vec2::default() { return true; }
+    let d = ((v.x.pow(2) + v.y.pow(2)) as f64).sqrt();
+    let sin_abs = (v.y as f64 / d).abs();
+    
+    let sin_bound = 8.0 / ((8*8 + 32*32) as f64).sqrt();
+
+    (sin_abs < sin_bound) || ((1.0 - sin_abs) < sin_bound)
+}
 
 fn main() {
     if tbd::is_running_in_submission() {
